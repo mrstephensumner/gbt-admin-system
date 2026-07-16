@@ -6,6 +6,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- Hosting decision input recorded in `docs/vision.md`: the admin will be served from
+  **greatbritishtalent.online**, already configured in Cloudflare (16 Jul 2026).
 - Spec 001 — Talent Management Module (`specs/001-talent-management/spec.md`): five
   prioritised user stories (add/maintain records, directory search at 5,000-record scale,
   fixed-vocabulary status tracking, per-brand publication with completeness gating,
