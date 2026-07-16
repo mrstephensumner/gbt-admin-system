@@ -368,8 +368,7 @@ export function TalentProfileScreen() {
           <Button
             onClick={() => {
               setConflict(null)
-              setValues(null) // re-hydrates from the fresh record
-              void refresh()
+              void refresh().then(() => setValues(null)) // re-hydrate only once the fresh record is in cache
             }}
           >
             Reload latest version

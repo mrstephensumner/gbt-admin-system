@@ -13,8 +13,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
   status, per-brand publication gating, archive/restore, photos via R2, topics
   rename/merge, append-only change history), all four screens (directory, add speaker,
   profile, topics) built on rebuilt design-system components with verbatim tokens and
-  self-hosted fonts. 44 unit tests + 42 integration tests green; typecheck and lint
-  clean; CI workflow added.
+  self-hosted fonts. 44 unit tests + 42 integration tests + 10 Playwright journeys green;
+  SC-003 perf check passes at 5,000 records (~0.7 s); screens visually verified against
+  the design system in the browser. Typecheck and lint clean.
+- `docs/deployment.md` — Cloudflare setup (D1/R2 creation, deploy, custom domain) and
+  Cloudflare Access configuration for interim authentication. Deploy itself pending
+  interactive `wrangler login` (tasks.md T046).
+- CI workflow parked at `docs/ci/github-workflow-ci.yml` — the git token lacks the
+  `workflow` scope needed to push `.github/workflows/`; activation steps in
+  `docs/ci/README.md`.
+- README updated with app run/test instructions; tasks.md marked 46/47 complete.
 - Task breakdown for spec 001 (`specs/001-talent-management/tasks.md`): 47 tasks across
   8 phases (setup, foundational shared-domain/schema/shell, one phase per user story,
   polish incl. topic management and deploy preview), with dependency graph, parallel

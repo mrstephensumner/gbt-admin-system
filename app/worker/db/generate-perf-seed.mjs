@@ -53,7 +53,7 @@ for (let i = 1; i <= COUNT; i++) {
   if (t2 !== t1) topicRows.push(`(${i}, ${t2})`)
 }
 
-const CHUNK = 500
+const CHUNK = 50 // SQLite SQLITE_TOOBIG guard: keep each INSERT statement small
 for (let i = 0; i < talentRows.length; i += CHUNK) {
   lines.push(
     `INSERT INTO talent (id, reference, name, headline, biography, day_rate_pence, location, email, phone, status, archived_at, version, created_at, created_by, updated_at, updated_by) VALUES ${talentRows.slice(i, i + CHUNK).join(', ')};`,
