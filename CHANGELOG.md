@@ -6,6 +6,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- Implementation plan for spec 001 (`specs/001-talent-management/plan.md`) with Phase 0
+  research (R1–R12), data model (8 tables incl. append-only change history and
+  publication join), JSON API contract, and quickstart validation guide. Constitution
+  Check passes all six gates, pre- and post-design.
+- ADR 0002 (`docs/decisions/0002-tech-stack.md`): Cloudflare-native TypeScript stack —
+  React 19 + Vite SPA and Hono API on one Worker, D1 + Drizzle, R2 photos, Cloudflare
+  Access as interim auth, Vitest + Playwright, GitHub Actions CI/CD. `docs/vision.md`
+  open questions updated accordingly.
 - Hosting decision input recorded in `docs/vision.md`: the admin will be served from
   **greatbritishtalent.online**, already configured in Cloudflare (16 Jul 2026).
 - Spec 001 — Talent Management Module (`specs/001-talent-management/spec.md`): five

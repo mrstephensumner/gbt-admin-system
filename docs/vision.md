@@ -41,7 +41,8 @@ otherwise.
 
 ## Open questions
 
-- Tech stack for the application shell (to be decided in the first `/speckit-plan`; the
-  design system components are React references and hosting is Cloudflare — see above).
-- Data model and how existing site data migrates in.
-- Authentication and team roles/permissions.
+- ~~Tech stack~~ — decided 16 Jul 2026: Cloudflare-native TypeScript (React SPA + Hono +
+  D1 + R2, one Worker). See [decisions/0002-tech-stack.md](decisions/0002-tech-stack.md).
+- How existing site data migrates in (future feature).
+- First-party authentication and team roles/permissions (interim: Cloudflare Access —
+  see ADR 0002).
