@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+### Added
+- Spec 002 — Admin Roles & Operator Management (`specs/002-admin-roles/spec.md`): three
+  prioritised user stories (registry gate for signed-in users, Owner-managed team screen,
+  per-operator permission grants enforced server-side), 12 functional requirements
+  (single Owner invariant, default-deny for future permission areas, permanent
+  attribution, team audit trail), measurable success criteria, and assumptions. Quality
+  checklist passes in full.
+
 ## 16 Jul 2026 — Talent Management Module (spec 001) · v0.1.0
 
 ### Added
