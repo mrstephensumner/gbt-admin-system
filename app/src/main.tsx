@@ -27,6 +27,7 @@ import { TeamScreen } from './routes/team'
 import { ImportScreen } from './routes/import'
 import { OperatorProvider } from './lib/operator'
 import { DashboardScreen } from './routes/dashboard'
+import { BookingsPlaceholder, ClientsPlaceholder, EnquiriesPlaceholder, InvoicesPlaceholder } from './routes/modules-upcoming'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 10_000 } },
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       { path: 'talent/:reference', Component: TalentProfileScreen },
       { path: 'topics', Component: TopicsScreen },
       { path: 'team', Component: TeamScreen },
+      { path: 'enquiries', Component: EnquiriesPlaceholder },
+      { path: 'bookings', Component: BookingsPlaceholder },
+      { path: 'clients', Component: ClientsPlaceholder },
+      { path: 'invoices', Component: InvoicesPlaceholder },
       { path: 'import', Component: ImportScreen },
     ],
   },

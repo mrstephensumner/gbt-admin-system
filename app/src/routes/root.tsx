@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard } from 'lucide-react'
+import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard, Inbox, CalendarCheck, Building2, Receipt } from 'lucide-react'
 import { NavItem } from '../components'
 import { useCan, useOperator } from '../lib/operator'
 import { NoAccessScreen } from './no-access'
@@ -37,6 +37,34 @@ export function Root() {
             label="Topics"
             active={pathname.startsWith('/topics')}
             onClick={() => navigate('/topics')}
+          />
+          <NavItem
+            icon={<Inbox size={18} />}
+            label="Enquiries"
+            badge="Soon"
+            active={pathname.startsWith('/enquiries')}
+            onClick={() => navigate('/enquiries')}
+          />
+          <NavItem
+            icon={<CalendarCheck size={18} />}
+            label="Bookings"
+            badge="Soon"
+            active={pathname.startsWith('/bookings')}
+            onClick={() => navigate('/bookings')}
+          />
+          <NavItem
+            icon={<Building2 size={18} />}
+            label="Clients"
+            badge="Soon"
+            active={pathname.startsWith('/clients')}
+            onClick={() => navigate('/clients')}
+          />
+          <NavItem
+            icon={<Receipt size={18} />}
+            label="Invoices"
+            badge="Soon"
+            active={pathname.startsWith('/invoices')}
+            onClick={() => navigate('/invoices')}
           />
           {canImport && (
             <NavItem

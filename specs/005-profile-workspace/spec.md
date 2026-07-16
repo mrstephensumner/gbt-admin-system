@@ -6,6 +6,18 @@
 
 **Status**: Draft
 
+## Clarifications
+
+### Session 2026-07-16 (late — owner decision before the client demo)
+
+- Q: Should unbuilt mockup features appear at all? → A: Yes — as clearly-marked,
+  designed "In development" placeholders (owner wants the client to see the platform's
+  intended breadth). This supersedes the original FR-005. Placeholders must be
+  unmistakably roadmap items (badge + factual description of what's coming), never
+  interactive dead-ends. Scope: profile tabs (Onboarding, Availability, Social & News,
+  Profile Enrichment) and sidebar modules (Enquiries, Bookings, Clients, Invoices,
+  marked "Soon").
+
 **Input**: User description: "Develop the talent tools shown in the profile mockup's tab
 bar. Scope agreed for this feature: restructure the talent profile into the mockup's
 tabbed workspace and deliver the two tabs backed by data the system already holds —
@@ -42,7 +54,9 @@ permission gating still hides/disables exactly as before.
 3. **Given** an operator without the publish grant, **Then** the Site selector tab still
    shows publication state read-only, with no action buttons — same rule as before.
 4. **Given** the History tab, **Then** the full attributed change history is there.
-5. **Given** future modules do not exist yet, **Then** no placeholder tabs are shown.
+5. **Given** future modules do not exist yet, **Then** their tabs and menu entries
+   render as designed "In development" placeholders that cannot be mistaken for broken
+   or working features (revised per clarification).
 
 ---
 
@@ -95,7 +109,10 @@ figure on the tab matches the sequence exactly.
   last-30-day activity counts by kind, created/updated facts, current status with
   duration, topics count, and published-brand count — every figure derived from existing
   records.
-- **FR-005**: Tabs for features that do not exist MUST NOT be rendered.
+- **FR-005** (revised per clarification): Unbuilt mockup features MUST appear as
+  clearly-marked placeholders — an "In development" badge, a factual one-line purpose,
+  and a short planned-capabilities list — with no interactive controls; sidebar entries
+  for future modules carry a "Soon" marker. Building any of them remains a future spec.
 
 ### Key Entities
 

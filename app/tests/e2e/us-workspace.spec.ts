@@ -8,14 +8,18 @@ test.describe('Talent profile workspace (spec 005)', () => {
     await apiUploadPhoto(request, talent.reference)
     await request.post(`/api/talent/${talent.reference}/status`, { data: { status: 'on_hold', version: 1 } })
 
-    // Default tab is Profile; exactly the five real tabs exist (FR-001/005)
+    // Default tab is Profile; five real tabs + four marked placeholders (FR-005 revised)
     await page.goto(`/talent/${talent.reference}`)
     const tabs = page.getByRole('tab')
-    await expect(tabs).toHaveCount(5)
+    await expect(tabs).toHaveCount(9)
     await expect(page.getByLabel('Full name')).toBeVisible()
-    for (const absent of ['Onboarding', 'Availability', 'Social & News', 'Profile Enrichment']) {
-      await expect(page.getByRole('tab', { name: absent })).toHaveCount(0)
-    }
+
+    // Placeholder tabs are unmistakably roadmap items, never dead controls
+    await page.getByRole('tab', { name: 'Availability' }).click()
+    const placeholder = page.getByTestId('coming-soon')
+    await expect(placeholder.getByText('In development')).toBeVisible()
+    await expect(placeholder.getByText('Planned')).toBeVisible()
+    await expect(placeholder.getByRole('button')).toHaveCount(0)
 
     // Statistics tab: real figures (created + photo + status change = 3 events)
     await page.getByRole('tab', { name: 'Statistics' }).click()
@@ -28,5 +32,16 @@ test.describe('Talent profile workspace (spec 005)', () => {
     await page.goto(`/talent/${talent.reference}?tab=site`)
     await expect(page.getByTestId('publication-panel')).toBeVisible()
     await expect(page.getByText('Not published').first()).toBeVisible()
+  })
+
+  test('roadmap modules appear in the sidebar as marked placeholders', async ({ page }) => {
+    await page.goto('/')
+    for (const label of ['Enquiries', 'Bookings', 'Clients', 'Invoices']) {
+      await expect(page.locator('.gb-sidebar').getByText(label)).toBeVisible()
+    }
+    await page.locator('.gb-sidebar').getByText('Enquiries').click()
+    await expect(page.getByRole('heading', { name: 'Enquiries' })).toBeVisible()
+    await expect(page.getByTestId('coming-soon').getByText('In development')).toBeVisible()
+    await expect(page.getByText('Pipeline stages: New · Quoted · Confirmed · Lost')).toBeVisible()
   })
 })

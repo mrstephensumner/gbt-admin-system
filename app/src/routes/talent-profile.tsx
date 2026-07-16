@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Trash2, Upload } from 'lucide-react'
+import { ArrowLeft, Trash2, Upload, ClipboardCheck, CalendarDays, Rss, Sparkles } from 'lucide-react'
 import { Avatar, Badge, Button, Card, Dialog, IconButton, Select, Tabs, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
@@ -12,6 +12,7 @@ import { TALENT_STATUSES, TALENT_STATUS_LABELS, TALENT_STATUS_TONES } from '@sha
 import type { TalentStatus } from '@shared/enums'
 import { formatDateTime, formatDayRate } from '@shared/format'
 import { TalentFields, validateTalentForm, type TalentFormValues } from './talent-form'
+import { ComingSoon } from './coming-soon'
 
 function toFormValues(t: Talent): TalentFormValues {
   return {
@@ -205,8 +206,12 @@ export function TalentProfileScreen() {
         tabs={[
           { value: 'profile', label: 'Profile' },
           { value: 'photos', label: 'Photos' },
-          { value: 'site', label: 'Site selector' },
+          { value: 'onboarding', label: 'Onboarding' },
+          { value: 'availability', label: 'Availability' },
+          { value: 'social', label: 'Social & News' },
+          { value: 'enrichment', label: 'Profile Enrichment' },
           { value: 'stats', label: 'Statistics' },
+          { value: 'site', label: 'Site selector' },
           { value: 'history', label: 'History' },
         ]}
         value={tab}
@@ -342,6 +347,54 @@ export function TalentProfileScreen() {
           </Card>
         )}
 
+        {tab === 'onboarding' && (
+          <ComingSoon
+            icon={<ClipboardCheck size={40} />}
+            title="Onboarding"
+            description="A guided checklist taking a new speaker from first contact to a demo-ready, publishable profile."
+            planned={[
+              'Step-by-step onboarding checklist per speaker',
+              'Document collection: agreements, biogs, riders',
+              'Progress visible on the dashboard',
+            ]}
+          />
+        )}
+        {tab === 'availability' && (
+          <ComingSoon
+            icon={<CalendarDays size={40} />}
+            title="Availability"
+            description="A live calendar of when this speaker can be offered — holds, engagements and blackout dates in one view."
+            planned={[
+              'Calendar of holds and confirmed engagements',
+              'Blackout dates the speaker sets in advance',
+              'Availability powering the bookings module',
+            ]}
+          />
+        )}
+        {tab === 'social' && (
+          <ComingSoon
+            icon={<Rss size={40} />}
+            title="Social & News"
+            description="The speaker's public presence — social profiles, follower reach and recent press — kept fresh automatically."
+            planned={[
+              'Linked social profiles with follower figures',
+              'Recent news and press mentions',
+              'Reach signals to support fee conversations',
+            ]}
+          />
+        )}
+        {tab === 'enrichment' && (
+          <ComingSoon
+            icon={<Sparkles size={40} />}
+            title="Profile Enrichment"
+            description="Assisted profile improvement — drafting sharper biographies and filling gaps from approved sources, always with operator review."
+            planned={[
+              'Suggested biography and headline improvements',
+              'Gap-filling suggestions with source references',
+              'One-click apply after human review',
+            ]}
+          />
+        )}
         {tab === 'stats' && <StatisticsTab stats={statsQuery.data} />}
 
         {tab === 'history' && (

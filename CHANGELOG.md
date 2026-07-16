@@ -6,6 +6,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Roadmap placeholders** (spec 005 clarification — owner decision for the client
+  demo): the four unbuilt profile tabs (Onboarding, Availability, Social & News,
+  Profile Enrichment) and four future modules (Enquiries, Bookings, Clients, Invoices —
+  sidebar entries marked "Soon") now render as designed "In development" panels with a
+  factual purpose and planned-capabilities list, no interactive controls. Each remains
+  a future spec. e2e asserts placeholders are marked and control-free. Deployed.
 - **Talent Profile Workspace (spec 005)** — the profile is now the mockup's tabbed
   workspace: Profile · Photos · Site selector (the per-brand publication engine,
   renamed per the mockup) · Statistics · History, deep-linkable via ?tab=. New
