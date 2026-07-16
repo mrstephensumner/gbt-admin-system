@@ -19,7 +19,8 @@
     "test:unit": "vitest run --config vitest.config.ts",
     "test:integration": "vitest run --config vitest.workers.config.ts",
     "test:e2e": "playwright test",
-    "test:e2e:perf": "PERF=1 playwright test tests/e2e/perf-directory.spec.ts"
+    "test:e2e:perf": "PERF=1 playwright test tests/e2e/perf-directory.spec.ts",
+    "cf-typegen": "wrangler types --strict-vars=false"
   },
   "dependencies": {
     "@fontsource/archivo": "^5.2.8",

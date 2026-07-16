@@ -6,6 +6,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- `/speckit-analyze` remediation: integration tests for the production Cloudflare Access
+  branch (`app/tests/integration/auth.test.ts` — missing/forged assertion rejected, dev
+  header cannot bypass configured Access, dev fallback intact); config guard rejecting
+  half-configured Access (domain without AUD → explicit `access_misconfigured` error);
+  `scripts/activate-ci.sh` one-command CI activation once the git token has `workflow`
+  scope; first-deploy smoke check added to `docs/deployment.md`; research.md R4 wording
+  aligned with the client-side rendition implementation. Integration suite now 48 tests.
 - **Application implementation (spec 001, phases 1–7 core)** under `app/`: Cloudflare
   Worker (Hono API + React 19 SPA), D1 schema with migration, shared domain package
   (status enums, `TAL-` references, GBP/date formatters, derived fee bands, Zod schemas),

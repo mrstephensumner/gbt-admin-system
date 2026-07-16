@@ -27,6 +27,16 @@ export async function withIdentity(c: Context<{ Bindings: Env; Variables: Variab
     return next()
   }
 
+  // Half-configured Access (domain without audience) would 401 every request
+  // with a misleading message — fail loudly as a config error instead (U1).
+  if (!c.env.ACCESS_AUD) {
+    throw new ApiError(
+      500,
+      'access_misconfigured',
+      'Cloudflare Access is misconfigured — set both ACCESS_TEAM_DOMAIN and ACCESS_AUD',
+    )
+  }
+
   const assertion = c.req.header('Cf-Access-Jwt-Assertion')
   if (!assertion) {
     throw new ApiError(401, 'unauthenticated', 'Sign in through Cloudflare Access to continue')

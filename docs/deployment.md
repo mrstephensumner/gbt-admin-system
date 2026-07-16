@@ -30,7 +30,14 @@ Before the domain goes live, protect it with Access:
 
 With those vars set, the Worker verifies the Access JWT on every API request and uses the
 authenticated email as the operator identity in change history. With them empty (local
-dev), a dev identity header is accepted instead.
+dev), a dev identity header is accepted instead. Setting only one of the two vars is
+rejected as a config error (`access_misconfigured`, HTTP 500) rather than silently
+locking everyone out.
+
+**First-deploy smoke check (FR-017 happy path)**: after enabling Access, sign in on
+`greatbritishtalent.online`, open the browser console, and confirm `fetch('/api/me')`
+returns your own email — that proves JWT verification and identity extraction work
+end-to-end (the rejection paths are covered by `tests/integration/auth.test.ts`).
 
 ## CI/CD
 

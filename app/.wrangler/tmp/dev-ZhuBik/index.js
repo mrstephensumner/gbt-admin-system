@@ -3666,6 +3666,13 @@ async function withIdentity(c, next) {
     c.set("operator", c.req.header("Cf-Access-Authenticated-User-Email") ?? DEV_OPERATOR);
     return next();
   }
+  if (!c.env.ACCESS_AUD) {
+    throw new ApiError(
+      500,
+      "access_misconfigured",
+      "Cloudflare Access is misconfigured \u2014 set both ACCESS_TEAM_DOMAIN and ACCESS_AUD"
+    );
+  }
   const assertion = c.req.header("Cf-Access-Jwt-Assertion");
   if (!assertion) {
     throw new ApiError(401, "unauthenticated", "Sign in through Cloudflare Access to continue");

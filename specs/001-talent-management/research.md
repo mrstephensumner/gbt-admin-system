@@ -48,7 +48,9 @@ The platform-level choices are also recorded as
 
 - **Decision**: Originals in R2, keyed `talent/{reference}/{photoId}`; served through a
   Worker route (`GET /api/photos/:id`) so auth applies; a display rendition (resized,
-  WebP) generated on upload.
+  WebP) is generated client-side before upload (canvas → WebP) and stored alongside the
+  original, with the original serving both sizes when no rendition is provided — the
+  Worker itself never does image processing.
 - **Rationale**: R2 has zero egress fees and binds directly to the Worker. Serving via
   the Worker keeps photos behind authentication (talent contact/PII discipline) instead
   of public-bucket URLs.
