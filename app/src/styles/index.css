@@ -1,0 +1,12 @@
+/* ============================================================
+   Great British Talent — Admin Design System
+   Global entry point, mirroring design-system/styles.css.
+   Consumers import THIS file only (fonts load via Fontsource
+   in src/main.tsx).
+   ============================================================ */
+@import url('./tokens/fonts.css');
+@import url('./tokens/colors.css');
+@import url('./tokens/typography.css');
+@import url('./tokens/spacing.css');
+@import url('./tokens/effects.css');
+@import url('./tokens/base.css');

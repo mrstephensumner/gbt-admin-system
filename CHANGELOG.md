@@ -6,6 +6,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Application implementation (spec 001, phases 1–7 core)** under `app/`: Cloudflare
+  Worker (Hono API + React 19 SPA), D1 schema with migration, shared domain package
+  (status enums, `TAL-` references, GBP/date formatters, derived fee bands, Zod schemas),
+  full talent API (create/edit with optimistic locking, directory search/filters,
+  status, per-brand publication gating, archive/restore, photos via R2, topics
+  rename/merge, append-only change history), all four screens (directory, add speaker,
+  profile, topics) built on rebuilt design-system components with verbatim tokens and
+  self-hosted fonts. 44 unit tests + 42 integration tests green; typecheck and lint
+  clean; CI workflow added.
 - Task breakdown for spec 001 (`specs/001-talent-management/tasks.md`): 47 tasks across
   8 phases (setup, foundational shared-domain/schema/shell, one phase per user story,
   polish incl. topic management and deploy preview), with dependency graph, parallel
