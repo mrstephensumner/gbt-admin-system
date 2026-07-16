@@ -65,6 +65,8 @@ function describeActivity(a: DashboardData['activity'][number]): string {
       return 'photo removed'
     case 'topic_merged':
       return `topic merged into ${a.new_value}`
+    case 'note_added':
+      return 'internal note added'
     default:
       return a.action
   }

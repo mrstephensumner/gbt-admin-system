@@ -200,6 +200,21 @@ export const importRun = sqliteTable('import_run', {
   dryRun: integer('dry_run', { mode: 'boolean' }).notNull().default(false),
 })
 
+/** Internal notes on a talent record (spec 006) — append-only, attributed. */
+export const talentNote = sqliteTable(
+  'talent_note',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    author: text('author').notNull(),
+    body: text('body').notNull(),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [index('talent_note_talent_idx').on(t.talentId, t.id)],
+)
+
 /** Append-only team audit trail (spec 002 FR-010) — no update/delete path exists. */
 export const operatorAudit = sqliteTable(
   'operator_audit',

@@ -5956,6 +5956,17 @@ var importRun = sqliteTable("import_run", {
   problemsJson: text("problems_json").notNull().default("[]"),
   dryRun: integer("dry_run", { mode: "boolean" }).notNull().default(false)
 });
+var talentNote = sqliteTable(
+  "talent_note",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    talentId: integer("talent_id").notNull().references(() => talent.id),
+    author: text("author").notNull(),
+    body: text("body").notNull(),
+    createdAt: text("created_at").notNull()
+  },
+  (t) => [index("talent_note_talent_idx").on(t.talentId, t.id)]
+);
 var operatorAudit = sqliteTable(
   "operator_audit",
   {
@@ -21653,7 +21664,37 @@ async function talentStats(d1, reference) {
 }
 __name(talentStats, "talentStats");
 
+// worker/services/notes.ts
+async function listNotes(d1, reference, page, perPage) {
+  const row = await getTalentRow(d1, reference);
+  if (!row) throw new ApiError(404, "not_found", "No such talent record");
+  const [items, count] = await Promise.all([
+    d1.prepare("SELECT id, author, body, created_at FROM talent_note WHERE talent_id = ? ORDER BY id DESC LIMIT ? OFFSET ?").bind(row.id, perPage, (page - 1) * perPage).all(),
+    d1.prepare("SELECT COUNT(*) AS n FROM talent_note WHERE talent_id = ?").bind(row.id).first()
+  ]);
+  return { items: items.results, total: count.n, page, per_page: perPage };
+}
+__name(listNotes, "listNotes");
+async function addNote(d1, reference, body3, actor) {
+  const row = await getTalentRow(d1, reference);
+  if (!row) throw new ApiError(404, "not_found", "No such talent record");
+  const now = nowIso();
+  await d1.batch([
+    d1.prepare("INSERT INTO talent_note (talent_id, author, body, created_at) VALUES (?, ?, ?, ?)").bind(row.id, actor, body3, now),
+    d1.prepare(
+      `INSERT INTO change_record (talent_id, actor, action, field, old_value, new_value, at)
+         VALUES (?, ?, 'note_added', 'notes', NULL, NULL, ?)`
+    ).bind(row.id, actor, now)
+  ]);
+  const created = await d1.prepare("SELECT id, author, body, created_at FROM talent_note WHERE talent_id = ? ORDER BY id DESC LIMIT 1").bind(row.id).first();
+  return created;
+}
+__name(addNote, "addNote");
+
 // worker/routes/talent.ts
+var noteSchema = external_exports.object({
+  body: external_exports.string({ error: "Write a note before saving" }).trim().min(1, "Write a note before saving").max(4e3, "Notes must be 4,000 characters or fewer")
+});
 var talentRoutes = new Hono2();
 async function body(c, schema) {
   const raw2 = await c.req.json().catch(() => {
@@ -21720,6 +21761,16 @@ talentRoutes.post("/talent/:reference/restore", requirePermission("archive"), as
 });
 talentRoutes.get("/talent/:reference/stats", async (c) => {
   return c.json(await talentStats(c.env.DB, c.req.param("reference")));
+});
+talentRoutes.get("/talent/:reference/notes", async (c) => {
+  const page = Math.max(1, Number(c.req.query("page") ?? 1));
+  const perPage = Math.min(100, Math.max(1, Number(c.req.query("per_page") ?? 25)));
+  return c.json(await listNotes(c.env.DB, c.req.param("reference"), page, perPage));
+});
+talentRoutes.post("/talent/:reference/notes", async (c) => {
+  const input = await body(c, noteSchema);
+  const note = await addNote(c.env.DB, c.req.param("reference"), input.body, c.get("operator"));
+  return c.json(note, 201);
 });
 talentRoutes.get("/talent/:reference/history", async (c) => {
   const page = Math.max(1, Number(c.req.query("page") ?? 1));

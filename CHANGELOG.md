@@ -6,6 +6,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Internal talent notes (spec 006)** — a Notes tab on every speaker workspace (live
+  count on the tab): plain-text notes with permanent author + day-month-year timestamp,
+  newest-first, paginated, append-only, allowed on archived records, internal-only.
+  Each note also writes a `note_added` change record, so History, the dashboard
+  activity feed, and Statistics count it. Migration 0003. Suites 79 unit +
+  100 integration + 18 e2e green; deployed to production.
 - **Roadmap placeholders** (spec 005 clarification — owner decision for the client
   demo): the four unbuilt profile tabs (Onboarding, Availability, Social & News,
   Profile Enrichment) and four future modules (Enquiries, Bookings, Clients, Invoices —

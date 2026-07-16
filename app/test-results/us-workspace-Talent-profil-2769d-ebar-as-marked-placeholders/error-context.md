@@ -7,7 +7,7 @@
 # Test info
 
 - Name: us-workspace.spec.ts >> Talent profile workspace (spec 005) >> roadmap modules appear in the sidebar as marked placeholders
-- Location: tests/e2e/us-workspace.spec.ts:37:3
+- Location: tests/e2e/us-workspace.spec.ts:47:3
 
 # Error details
 
@@ -100,43 +100,53 @@ Call log:
   8  |     await apiUploadPhoto(request, talent.reference)
   9  |     await request.post(`/api/talent/${talent.reference}/status`, { data: { status: 'on_hold', version: 1 } })
   10 | 
-  11 |     // Default tab is Profile; five real tabs + four marked placeholders (FR-005 revised)
+  11 |     // Default tab is Profile; six real tabs + four marked placeholders (FR-005 revised)
   12 |     await page.goto(`/talent/${talent.reference}`)
   13 |     const tabs = page.getByRole('tab')
-  14 |     await expect(tabs).toHaveCount(9)
+  14 |     await expect(tabs).toHaveCount(10)
   15 |     await expect(page.getByLabel('Full name')).toBeVisible()
   16 | 
-  17 |     // Placeholder tabs are unmistakably roadmap items, never dead controls
-  18 |     await page.getByRole('tab', { name: 'Availability' }).click()
-  19 |     const placeholder = page.getByTestId('coming-soon')
-  20 |     await expect(placeholder.getByText('In development')).toBeVisible()
-  21 |     await expect(placeholder.getByText('Planned')).toBeVisible()
-  22 |     await expect(placeholder.getByRole('button')).toHaveCount(0)
-  23 | 
-  24 |     // Statistics tab: real figures (created + photo + status change = 3 events)
-  25 |     await page.getByRole('tab', { name: 'Statistics' }).click()
-  26 |     const stats = page.getByTestId('stats-tab')
-  27 |     await expect(stats.getByText('3 changes all-time · 3 in the last 30 days')).toBeVisible()
-  28 |     await expect(stats.getByText('Ready to publish')).toBeVisible()
-  29 |     await expect(stats.locator('.gb-badge--warning', { hasText: 'On hold' })).toBeVisible()
-  30 | 
-  31 |     // Deep link straight to a tab
-  32 |     await page.goto(`/talent/${talent.reference}?tab=site`)
-  33 |     await expect(page.getByTestId('publication-panel')).toBeVisible()
-  34 |     await expect(page.getByText('Not published').first()).toBeVisible()
-  35 |   })
-  36 | 
-  37 |   test('roadmap modules appear in the sidebar as marked placeholders', async ({ page }) => {
-  38 |     await page.goto('/')
-  39 |     for (const label of ['Enquiries', 'Bookings', 'Clients', 'Invoices']) {
-  40 |       await expect(page.locator('.gb-sidebar').getByText(label)).toBeVisible()
-  41 |     }
-  42 |     await page.locator('.gb-sidebar').getByText('Enquiries').click()
-> 43 |     await expect(page.getByRole('heading', { name: 'Enquiries' })).toBeVisible()
+  17 |     // Notes: add one, see attribution + count on the tab (spec 006)
+  18 |     await page.getByRole('tab', { name: 'Notes' }).click()
+  19 |     await page.getByLabel('Add a note').fill('Prefers morning sessions')
+  20 |     await page.getByRole('button', { name: 'Add note' }).click()
+  21 |     await expect(page.getByText('Note added').first()).toBeVisible()
+  22 |     const notesList = page.getByTestId('notes-list')
+  23 |     await expect(notesList.getByText('Prefers morning sessions')).toBeVisible()
+  24 |     await expect(notesList.getByText('dev@greatbritishtalent.online')).toBeVisible()
+  25 |     await expect(page.getByRole('tab', { name: /Notes/ }).locator('.gb-tab__count')).toHaveText('1')
+  26 | 
+  27 |     // Placeholder tabs are unmistakably roadmap items, never dead controls
+  28 |     await page.getByRole('tab', { name: 'Availability' }).click()
+  29 |     const placeholder = page.getByTestId('coming-soon')
+  30 |     await expect(placeholder.getByText('In development')).toBeVisible()
+  31 |     await expect(placeholder.getByText('Planned')).toBeVisible()
+  32 |     await expect(placeholder.getByRole('button')).toHaveCount(0)
+  33 | 
+  34 |     // Statistics tab: real figures (created + photo + status change + note = 4 events)
+  35 |     await page.getByRole('tab', { name: 'Statistics' }).click()
+  36 |     const stats = page.getByTestId('stats-tab')
+  37 |     await expect(stats.getByText('4 changes all-time · 4 in the last 30 days')).toBeVisible()
+  38 |     await expect(stats.getByText('Ready to publish')).toBeVisible()
+  39 |     await expect(stats.locator('.gb-badge--warning', { hasText: 'On hold' })).toBeVisible()
+  40 | 
+  41 |     // Deep link straight to a tab
+  42 |     await page.goto(`/talent/${talent.reference}?tab=site`)
+  43 |     await expect(page.getByTestId('publication-panel')).toBeVisible()
+  44 |     await expect(page.getByText('Not published').first()).toBeVisible()
+  45 |   })
+  46 | 
+  47 |   test('roadmap modules appear in the sidebar as marked placeholders', async ({ page }) => {
+  48 |     await page.goto('/')
+  49 |     for (const label of ['Enquiries', 'Bookings', 'Clients', 'Invoices']) {
+  50 |       await expect(page.locator('.gb-sidebar').getByText(label)).toBeVisible()
+  51 |     }
+  52 |     await page.locator('.gb-sidebar').getByText('Enquiries').click()
+> 53 |     await expect(page.getByRole('heading', { name: 'Enquiries' })).toBeVisible()
      |                                                                    ^ Error: expect(locator).toBeVisible() failed
-  44 |     await expect(page.getByTestId('coming-soon').getByText('In development')).toBeVisible()
-  45 |     await expect(page.getByText('Pipeline stages: New · Quoted · Confirmed · Lost')).toBeVisible()
-  46 |   })
-  47 | })
-  48 | 
+  54 |     await expect(page.getByTestId('coming-soon').getByText('In development')).toBeVisible()
+  55 |     await expect(page.getByText('Pipeline stages: New · Quoted · Confirmed · Lost')).toBeVisible()
+  56 |   })
+  57 | })
+  58 | 
 ```

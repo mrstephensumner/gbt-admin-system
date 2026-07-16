@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Trash2, Upload, ClipboardCheck, CalendarDays, Rss, Sparkles } from 'lucide-react'
-import { Avatar, Badge, Button, Card, Dialog, IconButton, Select, Tabs, useToast } from '../components'
+import { Avatar, Badge, Button, Card, Dialog, IconButton, Select, Tabs, Textarea, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
 import { makeDisplayRendition } from '../lib/image'
@@ -58,6 +58,10 @@ export function TalentProfileScreen() {
     queryKey: ['stats', reference],
     queryFn: () => api.get<TalentStatsData>(`/talent/${reference}/stats`),
     enabled: tab === 'stats',
+  })
+  const notesQuery = useQuery({
+    queryKey: ['notes', reference],
+    queryFn: () => api.get<{ items: TalentNote[]; total: number }>(`/talent/${reference}/notes?per_page=50`),
   })
 
   const talent = talentQuery.data
@@ -206,6 +210,7 @@ export function TalentProfileScreen() {
         tabs={[
           { value: 'profile', label: 'Profile' },
           { value: 'photos', label: 'Photos' },
+          { value: 'notes', label: 'Notes', count: notesQuery.data?.total },
           { value: 'onboarding', label: 'Onboarding' },
           { value: 'availability', label: 'Availability' },
           { value: 'social', label: 'Social & News' },
@@ -345,6 +350,28 @@ export function TalentProfileScreen() {
               Day rate: <span className="gb-mono">{formatDayRate(talent.day_rate_pence)}</span>
             </p>
           </Card>
+        )}
+
+        {tab === 'notes' && (
+          <NotesTab
+            notes={notesQuery.data?.items ?? []}
+            onAdd={async (noteBody) => {
+              try {
+                await api.post(`/talent/${reference}/notes`, { body: noteBody })
+                await Promise.all([
+                  queryClient.invalidateQueries({ queryKey: ['notes', reference] }),
+                  queryClient.invalidateQueries({ queryKey: ['history', reference] }),
+                  queryClient.invalidateQueries({ queryKey: ['stats', reference] }),
+                ])
+                toast({ tone: 'success', title: 'Note added' })
+                return true
+              } catch (err) {
+                const message = err instanceof ApiClientError ? err.message : 'Something went wrong'
+                toast({ tone: 'danger', title: 'Could not add note', message })
+                return false
+              }
+            }}
+          />
         )}
 
         {tab === 'onboarding' && (
@@ -497,6 +524,8 @@ function describeChange(h: ChangeRecordItem): string {
       return 'Photo removed'
     case 'topic_merged':
       return `Topic merged: ${h.old_value} → ${h.new_value}`
+    case 'note_added':
+      return 'Note added'
     default:
       return h.action
   }
@@ -639,5 +668,65 @@ function StatisticsTab({ stats }: { stats: TalentStatsData | undefined }) {
         </div>
       </Card>
     </div>
+  )
+}
+
+
+interface TalentNote {
+  id: number
+  author: string
+  body: string
+  created_at: string
+}
+
+function NotesTab({ notes, onAdd }: { notes: TalentNote[]; onAdd: (body: string) => Promise<boolean> }) {
+  const [draft, setDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+  return (
+    <Card title="Internal notes" subtitle="Working notes for the team — never shown outside the admin">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          if (!draft.trim()) return
+          setSaving(true)
+          void onAdd(draft.trim()).then((ok) => {
+            if (ok) setDraft('')
+            setSaving(false)
+          })
+        }}
+      >
+        <Textarea
+          label="Add a note"
+          rows={3}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="e.g. Prefers morning sessions; agent handles all fee conversations"
+        />
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+          <Button type="submit" disabled={saving || !draft.trim()}>
+            Add note
+          </Button>
+        </div>
+      </form>
+      <div style={{ display: 'grid', gap: 12, marginTop: 16 }} data-testid="notes-list">
+        {notes.map((n) => (
+          <div
+            key={n.id}
+            style={{
+              borderLeft: '3px solid var(--gb-navy)',
+              background: 'var(--surface-raised)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '10px 14px',
+            }}
+          >
+            <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-body)' }}>{n.body}</div>
+            <div className="gb-meta-row gb-mono" style={{ marginTop: 6, fontSize: 'var(--fs-xs)' }}>
+              {n.author} · {formatDateTime(n.created_at)}
+            </div>
+          </div>
+        ))}
+        {notes.length === 0 && <p className="gb-meta-row">No notes yet — anything the team should know lives here.</p>}
+      </div>
+    </Card>
   )
 }

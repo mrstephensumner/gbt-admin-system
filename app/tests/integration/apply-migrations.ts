@@ -7,6 +7,7 @@ await applyD1Migrations(env.DB, env.TEST_MIGRATIONS ?? [])
 // Clean slate per test — the pool shares storage within a file.
 beforeEach(async () => {
   await env.DB.batch([
+    env.DB.prepare('DELETE FROM talent_note'),
     env.DB.prepare('DELETE FROM import_candidate'),
     env.DB.prepare('DELETE FROM import_run'),
     env.DB.prepare('DELETE FROM operator_grant'),
