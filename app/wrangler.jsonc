@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gbt-admin",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "gbt_admin",
+      "database_id": "003ddb66-2dd6-4d0a-b5a6-86cc19f7bfc0",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "gbt-photos"
+    }
+  ],
+  "vars": {
+    // Cloudflare Access JWT verification (production). For local dev,
+    // .dev.vars overrides these to empty so the dev identity header applies.
+    "ACCESS_TEAM_DOMAIN": "muddy-base-9f72.cloudflareaccess.com",
+    "ACCESS_AUD": "c79142a95dbc829fc2d98cb6c269db4c74dd07fce6a14d30bdd39e0ca87d073b"
+  }
+}

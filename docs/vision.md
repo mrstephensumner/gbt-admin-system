@@ -32,10 +32,17 @@ presentation layers over shared data.
 - **Multi-brand from the start.** Data and UI decisions should not hard-code a single brand.
 - **Spec-driven.** Every feature starts as a spec-kit specification in `specs/`.
 
+## Hosting
+
+The admin system will be served from **greatbritishtalent.online**, which is configured in
+**Cloudflare** (DNS/zone ready as of 16 Jul 2026; no deployment bound to it yet). Deployment
+targets should therefore assume the Cloudflare platform unless a decision record says
+otherwise.
+
 ## Open questions
 
-- Tech stack for the application shell (to be decided in the first `/speckit-plan`; the
-  design system components are React references).
-- Hosting/deployment target.
-- Data model and how existing site data migrates in.
-- Authentication and team roles/permissions.
+- ~~Tech stack~~ — decided 16 Jul 2026: Cloudflare-native TypeScript (React SPA + Hono +
+  D1 + R2, one Worker). See [decisions/0002-tech-stack.md](decisions/0002-tech-stack.md).
+- How existing site data migrates in (future feature).
+- First-party authentication and team roles/permissions (interim: Cloudflare Access —
+  see ADR 0002).

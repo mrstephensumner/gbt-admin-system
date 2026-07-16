@@ -1,0 +1,19 @@
+import { beforeEach } from 'vitest'
+import { applyD1Migrations, env } from 'cloudflare:test'
+
+// Runs once per test file: brings the isolated D1 instance to current schema.
+await applyD1Migrations(env.DB, env.TEST_MIGRATIONS ?? [])
+
+// Clean slate per test — the pool shares storage within a file.
+beforeEach(async () => {
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM publication'),
+    env.DB.prepare('DELETE FROM change_record'),
+    env.DB.prepare('DELETE FROM talent_topic'),
+    env.DB.prepare('DELETE FROM talent_photo'),
+    env.DB.prepare('DELETE FROM talent'),
+    env.DB.prepare('DELETE FROM topic'),
+    env.DB.prepare('DELETE FROM brand'),
+    env.DB.prepare('UPDATE ref_counter SET next_number = 1 WHERE id = 1'),
+  ])
+})

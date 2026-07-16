@@ -9,7 +9,9 @@ code: any change that makes a doc stale updates that doc in the same commit.
 |---|---|
 | [vision.md](vision.md) | What we're building and why — scope, brands, roadmap horizons. |
 | [design-system.md](design-system.md) | How to consume `design-system/` when building UI. |
+| [deployment.md](deployment.md) | Cloudflare deployment + Access setup for greatbritishtalent.online. |
 | [decisions/](decisions/) | Architecture decision records (ADRs), numbered and immutable. |
+| [ci/](ci/) | GitHub Actions workflow, parked until the git token gains `workflow` scope. |
 
 ## Related
 

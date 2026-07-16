@@ -13,8 +13,22 @@ administration hub for:
 
 ## Project status
 
-🏗️ **Foundation stage.** The design system has been produced (in Claude Design) and imported;
-specification work is underway using [GitHub spec-kit](https://github.com/github/spec-kit).
+🚧 **Talent Management Module built** (spec 001, branch `001-talent-management`): directory,
+profiles, statuses, per-brand publication, archive, topics — all five user stories with
+unit, integration and end-to-end tests green. Deployment to greatbritishtalent.online
+pending Cloudflare login (see [docs/deployment.md](docs/deployment.md)).
+
+## Running the app
+
+```bash
+cd app
+npm install
+npm run db:migrate:local && npm run seed:dev
+npm run dev        # SPA + API on http://localhost:8787
+```
+
+Tests: `npm run test:unit`, `npm run test:integration`, `npm run test:e2e` (and
+`npm run seed:perf && npm run test:e2e:perf` for the 5,000-record check).
 
 ## Repository layout
 
