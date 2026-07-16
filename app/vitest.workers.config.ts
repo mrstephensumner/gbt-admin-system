@@ -10,7 +10,7 @@ export default defineConfig(async () => {
         main: './worker/index.ts',
         wrangler: { configPath: './wrangler.jsonc' },
         miniflare: {
-          bindings: { TEST_MIGRATIONS: migrations },
+          bindings: { TEST_MIGRATIONS: migrations, OWNER_EMAIL: 'test@greatbritishtalent.online' },
         },
       }),
     ],

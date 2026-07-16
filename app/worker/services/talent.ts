@@ -1,4 +1,5 @@
 import { formatReference } from '../../shared/reference'
+import { PERMISSION_REFUSALS } from '../../shared/permissions'
 import { DEFAULT_TALENT_STATUS, type TalentStatus } from '../../shared/enums'
 import type { TalentCreateInput, TalentUpdateInput } from '../../shared/schemas'
 import { nowIso } from '../db'
@@ -66,10 +67,28 @@ export async function createTalent(d1: D1Database, input: TalentCreateInput, act
 
 const EDITABLE_FIELDS = ['name', 'headline', 'biography', 'day_rate_pence', 'location', 'email', 'phone'] as const
 
-export async function updateTalent(d1: D1Database, reference: string, input: TalentUpdateInput, actor: string) {
+export async function updateTalent(
+  d1: D1Database,
+  reference: string,
+  input: TalentUpdateInput,
+  actor: string,
+  opts: { canEditDayRates: boolean } = { canEditDayRates: true },
+) {
   const current = await getTalentRow(d1, reference)
   if (!current) throw new ApiError(404, 'not_found', 'No such talent record')
   if (input.version !== current.version) return conflict(d1, current)
+
+  // Field-level enforcement (spec 002 FR-006, research R5): a day-rate change
+  // without the grant refuses the whole request — nothing half-applies.
+  if (
+    !opts.canEditDayRates &&
+    input.day_rate_pence !== undefined &&
+    (input.day_rate_pence ?? null) !== current.day_rate_pence
+  ) {
+    throw new ApiError(403, 'forbidden', PERMISSION_REFUSALS.edit_day_rates, {
+      permission: 'edit_day_rates',
+    })
+  }
 
   const now = nowIso()
   const newVersion = current.version + 1

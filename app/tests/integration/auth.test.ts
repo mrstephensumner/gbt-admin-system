@@ -42,15 +42,20 @@ describe('operator identity (FR-017)', () => {
     expect(body.error.code).toBe('access_misconfigured')
   })
 
-  it('uses the dev header identity only when Access is not configured', async () => {
-    const res = await fetchWith(env, { 'Cf-Access-Authenticated-User-Email': 'stephen@greatbritishtalent.online' })
+  it('uses the dev header identity only when Access is not configured (registered → operator view)', async () => {
+    // test@… is the bootstrapped owner (OWNER_EMAIL test binding, spec 002)
+    const res = await fetchWith(env, { 'Cf-Access-Authenticated-User-Email': 'test@greatbritishtalent.online' })
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ email: 'stephen@greatbritishtalent.online' })
+    const body = (await res.json()) as { email: string; role: string; grants: string[] }
+    expect(body.email).toBe('test@greatbritishtalent.online')
+    expect(body.role).toBe('owner')
+    expect(body.grants.length).toBeGreaterThan(0)
   })
 
-  it('falls back to the fixed dev operator with no header at all', async () => {
-    const res = await fetchWith(env)
-    expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ email: 'dev@greatbritishtalent.online' })
+  it('dev identities that are not registered operators hit the registry gate (spec 002 FR-003)', async () => {
+    const res = await fetchWith(env) // no header → dev@…, unregistered in tests
+    expect(res.status).toBe(403)
+    const body = (await res.json()) as { error: { code: string } }
+    expect(body.error.code).toBe('not_registered')
   })
 })

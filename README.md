@@ -13,10 +13,11 @@ administration hub for:
 
 ## Project status
 
-🚧 **Talent Management Module built** (spec 001, branch `001-talent-management`): directory,
-profiles, statuses, per-brand publication, archive, topics — all five user stories with
-unit, integration and end-to-end tests green. Deployment to greatbritishtalent.online
-pending Cloudflare login (see [docs/deployment.md](docs/deployment.md)).
+✅ **Live at greatbritishtalent.online** behind Cloudflare Access — Talent Management
+Module (spec 001, merged, v0.1.0). 🚧 **Admin Roles & Operator Management** (spec 002,
+branch `002-admin-roles`): operator registry, Owner-managed Team screen, per-operator
+permission grants enforced server-side — built and fully tested, production rollout
+pending the owner-email confirmation (see [docs/deployment.md](docs/deployment.md)).
 
 ## Running the app
 

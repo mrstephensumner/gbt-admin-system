@@ -52,6 +52,15 @@ yet (see `docs/ci/README.md`). Once activated, it runs typecheck/lint/unit/integ
 every PR, Playwright e2e on PRs to main, and `wrangler deploy` on merge to main using the
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets.
 
+## Spec 002 rollout (operator registry)
+
+Before deploying the roles feature: set `OWNER_EMAIL` in `app/wrangler.jsonc` to the
+exact email Cloudflare Access reports for the owner (visible at `/api/me` on the live
+site while signed in). Then `npm run db:migrate:remote` (adds operator tables) and
+deploy. The first authenticated request bootstraps the owner (audited); register the
+rest of the team from the in-app Team screen. Note both lists: Cloudflare Access governs
+sign-in; the Team screen governs what each person may do inside.
+
 ## Local development
 
 See `specs/001-talent-management/quickstart.md` — `npm run dev` in `app/` serves the built

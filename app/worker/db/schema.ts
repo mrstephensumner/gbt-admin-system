@@ -125,3 +125,47 @@ export const refCounter = sqliteTable('ref_counter', {
   id: integer('id').primaryKey(),
   nextNumber: integer('next_number').notNull(),
 })
+
+/** Operator registry — authorization source of truth (spec 002 FR-001/002). */
+export const operator = sqliteTable(
+  'operator',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    email: text('email').notNull(),
+    role: text('role').notNull().default('operator'),
+    addedAt: text('added_at').notNull(),
+    addedBy: text('added_by').notNull(),
+  },
+  (t) => [
+    uniqueIndex('operator_email_idx').on(sql`${t.email} COLLATE NOCASE`),
+    check('operator_role_check', sql`role IN ('owner', 'operator')`),
+  ],
+)
+
+/** Row exists ⇔ permission granted; absence = denied (spec 002 FR-008). */
+export const operatorGrant = sqliteTable(
+  'operator_grant',
+  {
+    operatorId: integer('operator_id')
+      .notNull()
+      .references(() => operator.id),
+    permission: text('permission').notNull(),
+    grantedAt: text('granted_at').notNull(),
+    grantedBy: text('granted_by').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.operatorId, t.permission] })],
+)
+
+/** Append-only team audit trail (spec 002 FR-010) — no update/delete path exists. */
+export const operatorAudit = sqliteTable(
+  'operator_audit',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    actor: text('actor').notNull(),
+    subjectEmail: text('subject_email').notNull(),
+    action: text('action').notNull(),
+    detail: text('detail'),
+    at: text('at').notNull(),
+  },
+  (t) => [index('operator_audit_at_idx').on(t.id)],
+)

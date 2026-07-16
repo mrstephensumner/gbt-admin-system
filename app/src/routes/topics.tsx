@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button, Card, Dialog, Input, Select, Table, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
+import { useCan } from '../lib/operator'
 import type { TopicListItem } from '../lib/types'
 
 export function TopicsScreen() {
   const toast = useToast()
   const queryClient = useQueryClient()
   const topics = useQuery({ queryKey: ['topics'], queryFn: () => api.get<{ items: TopicListItem[] }>('/topics') })
+  const canManage = useCan('manage_topics')
 
   const [renaming, setRenaming] = useState<TopicListItem | null>(null)
   const [newName, setNewName] = useState('')
@@ -60,7 +62,8 @@ export function TopicsScreen() {
               key: 'actions',
               header: '',
               align: 'right',
-              render: (row) => (
+              render: (row) =>
+                !canManage ? null : (
                 <div style={{ display: 'inline-flex', gap: 8 }}>
                   <Button
                     variant="secondary"

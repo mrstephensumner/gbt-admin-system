@@ -1,9 +1,11 @@
 import { Hono } from 'hono'
 import type { Env } from '../env'
+import type { AuthzVariables } from '../middleware/authorize'
 
-type Variables = { operator: string }
+export const meta = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
-export const meta = new Hono<{ Bindings: Env; Variables: Variables }>()
-
-/** The Access-derived operator identity, for UI display (contracts/api.md). */
-meta.get('/me', (c) => c.json({ email: c.get('operator') }))
+/** The registered operator view: email, role, grants (contracts/api.md spec 002). */
+meta.get('/me', (c) => {
+  const record = c.get('operatorRecord')
+  return c.json({ email: record.email, role: record.role, grants: record.grants })
+})

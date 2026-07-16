@@ -3,10 +3,9 @@ import type { Env } from '../env'
 import { ApiError } from '../middleware/errors'
 import { nowIso } from '../db'
 import { topicCreateSchema, topicMergeSchema, topicRenameSchema } from '../../shared/schemas'
+import { requirePermission, type AuthzVariables } from '../middleware/authorize'
 
-type Variables = { operator: string }
-
-export const topicRoutes = new Hono<{ Bindings: Env; Variables: Variables }>()
+export const topicRoutes = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
 topicRoutes.get('/topics', async (c) => {
   const rows = await c.env.DB.prepare(
@@ -38,7 +37,7 @@ topicRoutes.post('/topics', async (c) => {
   return c.json(created, 201)
 })
 
-topicRoutes.post('/topics/:id/rename', async (c) => {
+topicRoutes.post('/topics/:id/rename', requirePermission('manage_topics'), async (c) => {
   const id = Number(c.req.param('id'))
   const raw = await c.req.json().catch(() => {
     throw new ApiError(400, 'invalid_json', 'Request body must be JSON')
@@ -59,7 +58,7 @@ topicRoutes.post('/topics/:id/rename', async (c) => {
 })
 
 /** Merge :id into `into` — rewrites links, records changes, deletes source (FR-018). */
-topicRoutes.post('/topics/:id/merge', async (c) => {
+topicRoutes.post('/topics/:id/merge', requirePermission('manage_topics'), async (c) => {
   const sourceId = Number(c.req.param('id'))
   const raw = await c.req.json().catch(() => {
     throw new ApiError(400, 'invalid_json', 'Request body must be JSON')

@@ -37,6 +37,7 @@ export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, payload: unknown) => request<T>(path, jsonInit('POST', payload)),
   patch: <T>(path: string, payload: unknown) => request<T>(path, jsonInit('PATCH', payload)),
+  put: <T>(path: string, payload: unknown) => request<T>(path, jsonInit('PUT', payload)),
   delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
   upload: <T>(path: string, form: FormData) => request<T>(path, { method: 'POST', body: form }),
 }
