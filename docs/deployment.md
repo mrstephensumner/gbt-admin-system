@@ -3,7 +3,12 @@
 Target: **greatbritishtalent.online** (Cloudflare — see ADR
 [0002](decisions/0002-tech-stack.md)). One Worker serves the SPA and the API.
 
-## One-time setup (pending — requires interactive Cloudflare login)
+> **Status: LIVE as of 16 Jul 2026.** greatbritishtalent.online serves the admin behind
+> Cloudflare Access (Bookings Team allow-list; one-time PIN and Cloudflare login methods).
+> D1 `gbt_admin` (003ddb66…) and R2 `gbt-photos` are in production. The steps below are
+> kept for rebuilding the environment from scratch.
+
+## One-time setup (completed 16 Jul 2026)
 
 ```bash
 cd app

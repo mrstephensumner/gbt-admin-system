@@ -6,11 +6,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
-- **Cloudflare Access enabled in production** (16 Jul 2026): Zero Trust application
-  covering greatbritishtalent.online with a Bookings Team allow-list policy; Worker
-  redeployed with `ACCESS_TEAM_DOMAIN`/`ACCESS_AUD` set and verified to 401
-  unauthenticated API requests. `.dev.vars` (gitignored) keeps local dev on the fake
-  identity. Custom-domain binding is the remaining step.
+- **greatbritishtalent.online is LIVE** (16 Jul 2026): custom domain bound to the
+  Worker; Cloudflare Access enforcing the Bookings Team allow-list at the edge (one-time
+  PIN + Cloudflare login methods) with the Worker independently verifying the Access JWT
+  (401 without it). Operator sign-in verified end-to-end. T046 complete — all 47 tasks
+  of spec 001 done. `.dev.vars` (gitignored) keeps local dev on the fake identity.
 - **First production deployment** (16 Jul 2026): D1 database `gbt_admin`
   (003ddb66…) and R2 bucket `gbt-photos` created; schema migrated; Great British
   Speakers brand seeded; Worker deployed to

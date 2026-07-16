@@ -146,7 +146,7 @@ history intact; restore → back with status Available.
 - [X] T043 Build Topics screen `app/src/routes/topics.tsx` — list with counts, rename and merge flows with confirmation Dialogs
 - [X] T044 [P] Visual acceptance pass: compare every screen against `design-system/ui_kits/admin/index.html` and `design-system/Talent Management Module.html` (constitution Principle III bar); fix drift; verify content rules (sentence case, no emoji, mono references, UK formats)
 - [X] T045 [P] Full quickstart.md run end-to-end locally (all suites + manual journeys); fix anything that fails; update quickstart.md if commands drifted
-- [ ] T046 Deploy preview: apply migrations remotely, `wrangler deploy` to workers.dev, smoke-test journeys; document Access setup steps (allow-list, JWT audience) in `docs/deployment.md` — **BLOCKED: needs interactive `wrangler login`; Access + deploy steps documented in docs/deployment.md, docs half done**
+- [X] T046 Deploy preview: apply migrations remotely, `wrangler deploy` to workers.dev, smoke-test journeys; document Access setup steps (allow-list, JWT audience) in `docs/deployment.md` — **DONE 16 Jul 2026: live on greatbritishtalent.online behind Cloudflare Access (one-time PIN + Cloudflare login), operator sign-in verified**
 - [X] T047 Documentation sync (constitution Principle II): update `README.md` (app section: how to run), `docs/README.md` index, `CHANGELOG.md`; verify docs/decisions still accurate
 
 ---
