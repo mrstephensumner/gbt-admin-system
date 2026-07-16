@@ -7,7 +7,7 @@ test.describe('US4 — per-brand publication', () => {
       name: uniqueName('Unpublishable'),
       day_rate_pence: null,
     })
-    await page.goto(`/talent/${talent.reference}`)
+    await page.goto(`/talent/${talent.reference}?tab=site`)
     await expect(page.getByTestId('publication-panel').getByText('Not published').first()).toBeVisible()
     await page.getByRole('button', { name: 'Publish', exact: true }).first().click()
     await expect(page.getByText('Add a day rate before publishing')).toBeVisible()
@@ -17,7 +17,7 @@ test.describe('US4 — per-brand publication', () => {
     const talent = await apiCreateTalent(request, { name: uniqueName('Publishable') })
     await apiUploadPhoto(request, talent.reference)
 
-    await page.goto(`/talent/${talent.reference}`)
+    await page.goto(`/talent/${talent.reference}?tab=site`)
     await page.getByRole('button', { name: 'Publish', exact: true }).first().click()
     await expect(page.getByText('Published', { exact: false }).first()).toBeVisible()
     await expect(

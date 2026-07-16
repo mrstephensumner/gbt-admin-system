@@ -13,6 +13,7 @@ import { listTalent } from '../services/directory'
 import { archiveTalent, changeStatus, createTalent, getHistory, restoreTalent, updateTalent } from '../services/talent'
 import { publish, unpublish } from '../services/publication'
 import { getTalentRow, serializeTalent } from '../services/serialize'
+import { talentStats } from '../services/stats'
 import { requirePermission, type AuthzVariables } from '../middleware/authorize'
 import { can } from '../../shared/permissions'
 
@@ -89,6 +90,10 @@ talentRoutes.post('/talent/:reference/archive', requirePermission('archive'), as
 talentRoutes.post('/talent/:reference/restore', requirePermission('archive'), async (c) => {
   const input = await body(c, versionOnlySchema)
   return c.json(await restoreTalent(c.env.DB, c.req.param('reference')!, input.version, c.get('operator')))
+})
+
+talentRoutes.get('/talent/:reference/stats', async (c) => {
+  return c.json(await talentStats(c.env.DB, c.req.param('reference')))
 })
 
 talentRoutes.get('/talent/:reference/history', async (c) => {

@@ -6,6 +6,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Talent Profile Workspace (spec 005)** — the profile is now the mockup's tabbed
+  workspace: Profile · Photos · Site selector (the per-brand publication engine,
+  renamed per the mockup) · Statistics · History, deep-linkable via ?tab=. New
+  Statistics tab computed entirely from existing records: publication + extended
+  completeness checklists (shared gate definition), exact activity counts (all-time /
+  last 30 days, by kind), and profile facts (created/updated/attribution, status with
+  since-date, topics/photos/brand counts). Mockup tabs without underlying features
+  (Onboarding, Availability, Social & News, Profile Enrichment) deliberately not
+  rendered — each awaits its own spec (vision backlog). Suites 79 unit + 95 integration
+  + 18 e2e green; deployed to production.
 - **Real-roster readiness** (evening before the client demo): WordPress WXR converter
   (`scripts/convert-wp-export.py`) turning the greatbritishtalent.com export (2,244
   published profiles under the `news` post type, with about_speaker bios, categories as

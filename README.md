@@ -15,7 +15,8 @@ administration hub for:
 
 ✅ **Live at greatbritishtalent.online** behind Cloudflare Access — Talent Management
 Module (spec 001, merged, v0.1.0). **Admin Roles & Operator Management** (spec 002, merged, v0.2.0) — operator registry,
-Owner-managed Team screen, per-operator permission grants. **Operations Dashboard** (spec 004) — KPI landing screen with attention lists and
+Owner-managed Team screen, per-operator permission grants. **Talent Profile Workspace** (spec 005) — tabbed profile with Site selector and live
+Statistics. **Operations Dashboard** (spec 004) — KPI landing screen with attention lists and
 activity feed. 🚧 **Roster Import** (spec
 003, branch `003-roster-import`): file-based import (CSV/XLSX/JSON) with
 validate-before-import, staged human review, and idempotent re-uploads — built and

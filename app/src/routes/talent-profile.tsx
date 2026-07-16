@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Trash2, Upload } from 'lucide-react'
-import { Avatar, Badge, Button, Card, Dialog, IconButton, Select, useToast } from '../components'
+import { Avatar, Badge, Button, Card, Dialog, IconButton, Select, Tabs, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
 import { makeDisplayRendition } from '../lib/image'
 import { useCan } from '../lib/operator'
 import type { ChangeRecordItem, PhotoRef, Talent } from '../lib/types'
 import { TALENT_STATUSES, TALENT_STATUS_LABELS, TALENT_STATUS_TONES } from '@shared/enums'
+import type { TalentStatus } from '@shared/enums'
 import { formatDateTime, formatDayRate } from '@shared/format'
 import { TalentFields, validateTalentForm, type TalentFormValues } from './talent-form'
 
@@ -42,6 +43,20 @@ export function TalentProfileScreen() {
   const historyQuery = useQuery({
     queryKey: ['history', reference],
     queryFn: () => api.get<{ items: ChangeRecordItem[]; total: number }>(`/talent/${reference}/history?per_page=50`),
+  })
+
+  const [params, setParams] = useSearchParams()
+  const tab = params.get('tab') ?? 'profile'
+  const setTab = (value: string) => {
+    const next = new URLSearchParams(params)
+    if (value === 'profile') next.delete('tab')
+    else next.set('tab', value)
+    setParams(next, { replace: true })
+  }
+  const statsQuery = useQuery({
+    queryKey: ['stats', reference],
+    queryFn: () => api.get<TalentStatsData>(`/talent/${reference}/stats`),
+    enabled: tab === 'stats',
   })
 
   const talent = talentQuery.data
@@ -185,8 +200,20 @@ export function TalentProfileScreen() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, alignItems: 'start' }}>
-        <div style={{ display: 'grid', gap: 20 }}>
+      {/* Workspace tabs (spec 005 FR-001) — deep-linkable via ?tab= */}
+      <Tabs
+        tabs={[
+          { value: 'profile', label: 'Profile' },
+          { value: 'photos', label: 'Photos' },
+          { value: 'site', label: 'Site selector' },
+          { value: 'stats', label: 'Statistics' },
+          { value: 'history', label: 'History' },
+        ]}
+        value={tab}
+        onChange={setTab}
+      />
+      <div style={{ marginTop: 20 }}>
+        {tab === 'profile' && (
           <Card title="Profile" subtitle={`Last updated ${formatDateTime(talent.updated_at)} by ${talent.updated_by}`}>
             <form
               onSubmit={(e) => {
@@ -205,25 +232,9 @@ export function TalentProfileScreen() {
               </div>
             </form>
           </Card>
+        )}
 
-          <Card title="History" subtitle="Every change, attributed">
-            <div style={{ display: 'grid', gap: 10 }} data-testid="history">
-              {historyQuery.data?.items.map((h) => (
-                <div key={h.id} className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
-                  <span>
-                    <strong style={{ color: 'var(--text-body)' }}>{describeChange(h)}</strong>
-                  </span>
-                  <span className="gb-mono">
-                    {h.actor} · {formatDateTime(h.at)}
-                  </span>
-                </div>
-              ))}
-              {historyQuery.data?.items.length === 0 && <p>No changes yet.</p>}
-            </div>
-          </Card>
-        </div>
-
-        <div style={{ display: 'grid', gap: 20 }}>
+        {tab === 'photos' && (
           <Card
             title="Photos"
             actions={
@@ -289,8 +300,10 @@ export function TalentProfileScreen() {
               </div>
             )}
           </Card>
+        )}
 
-          <Card title="Publication" subtitle="Per-brand website presence">
+        {tab === 'site' && (
+          <Card title="Site selector" subtitle="Where this speaker appears — per-brand website presence">
             <div style={{ display: 'grid', gap: 12 }} data-testid="publication-panel">
               {talent.publications.map((pub) => (
                 <div key={pub.brand} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
@@ -327,7 +340,27 @@ export function TalentProfileScreen() {
               Day rate: <span className="gb-mono">{formatDayRate(talent.day_rate_pence)}</span>
             </p>
           </Card>
-        </div>
+        )}
+
+        {tab === 'stats' && <StatisticsTab stats={statsQuery.data} />}
+
+        {tab === 'history' && (
+          <Card title="History" subtitle="Every change, attributed">
+            <div style={{ display: 'grid', gap: 10 }} data-testid="history">
+              {historyQuery.data?.items.map((h) => (
+                <div key={h.id} className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+                  <span>
+                    <strong style={{ color: 'var(--text-body)' }}>{describeChange(h)}</strong>
+                  </span>
+                  <span className="gb-mono">
+                    {h.actor} · {formatDateTime(h.at)}
+                  </span>
+                </div>
+              ))}
+              {historyQuery.data?.items.length === 0 && <p>No changes yet.</p>}
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* Archive confirmation names the talent and discloses auto-unpublish (FR-012) */}
@@ -433,4 +466,125 @@ function labelForField(field: string | null): string {
 function prettyStatus(value: string | null): string {
   const labels: Record<string, string> = TALENT_STATUS_LABELS
   return labels[value ?? ''] ?? value ?? ''
+}
+
+interface TalentStatsData {
+  completeness: { publishable: boolean; missing: string[]; extended_missing: string[] }
+  activity: { total: number; last_30_days: number; by_action: Record<string, number> }
+  facts: {
+    created_at: string
+    created_by: string
+    updated_at: string
+    updated_by: string
+    status: string
+    status_since: string
+    topics: number
+    photos: number
+    published_brands: number
+  }
+}
+
+const COMPLETENESS_LABELS: Record<string, string> = {
+  day_rate: 'Day rate',
+  biography: 'Biography',
+  photo: 'Photo',
+  headline: 'Headline',
+  location: 'Location',
+  contact: 'Contact details',
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  created: 'Created',
+  field_changed: 'Profile edits',
+  status_changed: 'Status changes',
+  published: 'Published',
+  unpublished: 'Unpublished',
+  archived: 'Archived',
+  restored: 'Restored',
+  photo_added: 'Photos added',
+  photo_removed: 'Photos removed',
+  topic_merged: 'Topic merges',
+}
+
+function StatisticsTab({ stats }: { stats: TalentStatsData | undefined }) {
+  if (!stats) return <p className="gb-meta-row">Loading…</p>
+  const allEssentials = ['day_rate', 'biography', 'photo']
+  const allExtended = ['headline', 'location', 'contact']
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }} data-testid="stats-tab">
+      <Card title="Completeness" subtitle={stats.completeness.publishable ? 'Ready to publish' : 'Missing publication essentials'}>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {allEssentials.map((item) => (
+            <div key={item} className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+              <span>{COMPLETENESS_LABELS[item]}</span>
+              {stats.completeness.missing.includes(item) ? (
+                <Badge tone="warning">Missing</Badge>
+              ) : (
+                <Badge tone="success">Complete</Badge>
+              )}
+            </div>
+          ))}
+          {allExtended.map((item) => (
+            <div key={item} className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+              <span>{COMPLETENESS_LABELS[item]}</span>
+              {stats.completeness.extended_missing.includes(item) ? (
+                <Badge tone="neutral">Not set</Badge>
+              ) : (
+                <Badge tone="success">Complete</Badge>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="Activity" subtitle={`${stats.activity.total} changes all-time · ${stats.activity.last_30_days} in the last 30 days`}>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {Object.entries(stats.activity.by_action).map(([action, n]) => (
+            <div key={action} className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+              <span>{ACTION_LABELS[action] ?? action}</span>
+              <span className="gb-mono">{n}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="Profile facts">
+        <div style={{ display: 'grid', gap: 8 }}>
+          <div className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+            <span>Created</span>
+            <span className="gb-mono">
+              {formatDateTime(stats.facts.created_at)} by {stats.facts.created_by}
+            </span>
+          </div>
+          <div className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+            <span>Last updated</span>
+            <span className="gb-mono">
+              {formatDateTime(stats.facts.updated_at)} by {stats.facts.updated_by}
+            </span>
+          </div>
+          <div className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+            <span>Current status</span>
+            <span>
+              <Badge tone={TALENT_STATUS_TONES[stats.facts.status as TalentStatus]} dot>
+                {TALENT_STATUS_LABELS[stats.facts.status as TalentStatus]}
+              </Badge>{' '}
+              <span className="gb-mono">since {formatDateTime(stats.facts.status_since)}</span>
+            </span>
+          </div>
+          <div className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+            <span>Topics</span>
+            <span className="gb-mono">{stats.facts.topics}</span>
+          </div>
+          <div className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+            <span>Photos</span>
+            <span className="gb-mono">{stats.facts.photos}</span>
+          </div>
+          <div className="gb-meta-row" style={{ justifyContent: 'space-between' }}>
+            <span>Published to</span>
+            <span className="gb-mono">{stats.facts.published_brands} brand(s)</span>
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
 }
