@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { Users, Tags, ShieldCheck, FileUp } from 'lucide-react'
+import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard } from 'lucide-react'
 import { NavItem } from '../components'
 import { useCan, useOperator } from '../lib/operator'
 import { NoAccessScreen } from './no-access'
@@ -21,10 +21,16 @@ export function Root() {
         </div>
         <nav className="gb-sidebar__nav">
           <NavItem
+            icon={<LayoutDashboard size={18} />}
+            label="Dashboard"
+            active={pathname === '/'}
+            onClick={() => navigate('/')}
+          />
+          <NavItem
             icon={<Users size={18} />}
             label="Speakers"
-            active={pathname === '/' || pathname.startsWith('/talent')}
-            onClick={() => navigate('/')}
+            active={pathname.startsWith('/speakers') || pathname.startsWith('/talent')}
+            onClick={() => navigate('/speakers')}
           />
           <NavItem
             icon={<Tags size={18} />}

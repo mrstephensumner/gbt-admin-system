@@ -23,7 +23,7 @@ test.describe('US5 — archive without losing history', () => {
     await expect(page.getByText('Speaker archived')).toBeVisible()
 
     // Gone from the active directory, present under Archived (US5-S2)
-    await page.goto('/')
+    await page.goto('/speakers')
     await page.getByLabel('Search speakers').fill(name)
     await expect(page.getByText('No speakers match your search.')).toBeVisible()
     await page.getByRole('tab', { name: 'Archived' }).click()

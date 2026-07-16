@@ -6,6 +6,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Operations Dashboard (spec 004)** — new landing screen: live KPI tiles (active
+  speakers, per-status, published per brand, topics) deep-linking to the filtered
+  directory; Ready-to-publish and Blocked-from-publishing attention lists sharing the
+  publication gate's completeness definition; attributed recent-activity feed over the
+  existing change history; purposeful empty state pointing to Add speaker / Import.
+  Directory moved to /speakers. 6 new integration tests (KPI ↔ directory count
+  equality) + 2 e2e journeys; suites now 79 unit + 91 integration + 17 e2e, all green.
+  Deployed to production 16 Jul 2026.
 - **Spec 003 implementation** under `app/`: browser-side file parsing (CSV via
   papaparse, XLSX via SheetJS official CDN build 0.20.3 — npm's stale xlsx package and
   its advisories avoided, JSON native); dry-run validation sharing the staging code

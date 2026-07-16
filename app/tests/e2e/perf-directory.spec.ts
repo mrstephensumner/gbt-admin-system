@@ -11,7 +11,7 @@ test.describe('SC-003 — directory responsiveness at 5,000 records', () => {
     const { total } = (await res.json()) as { total: number }
     expect(total).toBeGreaterThanOrEqual(4500) // ~3% seeded as archived
 
-    await page.goto('/')
+    await page.goto('/speakers')
     await expect(page.getByTestId('result-count')).toContainText('speakers')
 
     const started = Date.now()

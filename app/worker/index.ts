@@ -10,6 +10,7 @@ import { topicRoutes } from './routes/topics'
 import { brandRoutes } from './routes/brands'
 import { teamRoutes } from './routes/team'
 import { importRoutes } from './routes/importing'
+import { dashboardRoutes } from './routes/dashboard'
 
 const app = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
@@ -24,6 +25,7 @@ app.route('/api', topicRoutes)
 app.route('/api', brandRoutes)
 app.route('/api', teamRoutes)
 app.route('/api', importRoutes)
+app.route('/api', dashboardRoutes)
 
 app.notFound((c) =>
   c.req.path.startsWith('/api')

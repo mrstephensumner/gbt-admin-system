@@ -87,7 +87,7 @@ test.describe('US1–US3 — roster import end to end', () => {
     await expect(page.getByText('5 approved')).toBeVisible()
 
     // Roster populated with fidelity: Jane's £4,000 carried over, unpublished by default
-    await page.goto('/')
+    await page.goto('/speakers')
     await page.getByLabel('Search speakers').fill(`Dr Jane Smith ${prefix}`)
     await expect(page.getByText(`Dr Jane Smith ${prefix}`)).toBeVisible()
     await expect(page.getByText('£4,000').first()).toBeVisible()
@@ -112,7 +112,7 @@ test.describe('US1–US3 — roster import end to end', () => {
 
     const context = await browser.newContext({ extraHTTPHeaders: { [IDENTITY_HEADER]: email } })
     const page = await context.newPage()
-    await page.goto('/')
+    await page.goto('/speakers')
     await expect(page.locator('.gb-sidebar').getByText('Import')).toHaveCount(0)
 
     const denied = await context.request.post('/api/import/runs', {

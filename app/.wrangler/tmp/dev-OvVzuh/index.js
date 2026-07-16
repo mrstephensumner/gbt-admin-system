@@ -22291,6 +22291,87 @@ importRoutes.delete("/import/candidates", async (c) => {
   return c.json(await clearStaging(c.env.DB));
 });
 
+// worker/services/dashboard.ts
+var COMPLETE_SQL = `
+  t.day_rate_pence IS NOT NULL AND t.day_rate_pence > 0
+  AND t.biography IS NOT NULL AND TRIM(t.biography) != ''
+  AND EXISTS (SELECT 1 FROM talent_photo p WHERE p.talent_id = t.id)
+`;
+async function dashboardData(d1) {
+  const [statusRows, brandRows, topicCount, ready, readyCount, blocked, blockedCount, activity] = await Promise.all([
+    d1.prepare("SELECT status, COUNT(*) AS n FROM talent WHERE archived_at IS NULL GROUP BY status").all(),
+    d1.prepare(
+      `SELECT b.slug, b.name, COUNT(p.talent_id) AS n
+           FROM brand b
+           LEFT JOIN publication p ON p.brand_id = b.id
+           LEFT JOIN talent t ON t.id = p.talent_id AND t.archived_at IS NULL
+           GROUP BY b.id ORDER BY b.id`
+    ).all(),
+    d1.prepare("SELECT COUNT(DISTINCT topic_id) AS n FROM talent_topic tt JOIN talent t ON t.id = tt.talent_id WHERE t.archived_at IS NULL").first(),
+    d1.prepare(
+      `SELECT t.reference, t.name, t.updated_at FROM talent t
+           WHERE t.archived_at IS NULL AND ${COMPLETE_SQL}
+           AND NOT EXISTS (SELECT 1 FROM publication pub WHERE pub.talent_id = t.id)
+           ORDER BY t.updated_at DESC LIMIT 6`
+    ).all(),
+    d1.prepare(
+      `SELECT COUNT(*) AS n FROM talent t
+           WHERE t.archived_at IS NULL AND ${COMPLETE_SQL}
+           AND NOT EXISTS (SELECT 1 FROM publication pub WHERE pub.talent_id = t.id)`
+    ).first(),
+    d1.prepare(
+      `SELECT t.reference, t.name,
+             CASE WHEN t.day_rate_pence IS NULL OR t.day_rate_pence = 0 THEN 1 ELSE 0 END AS no_rate,
+             CASE WHEN t.biography IS NULL OR TRIM(t.biography) = '' THEN 1 ELSE 0 END AS no_bio,
+             CASE WHEN NOT EXISTS (SELECT 1 FROM talent_photo p WHERE p.talent_id = t.id) THEN 1 ELSE 0 END AS no_photo
+           FROM talent t
+           WHERE t.archived_at IS NULL AND NOT (${COMPLETE_SQL})
+           ORDER BY t.updated_at DESC LIMIT 6`
+    ).all(),
+    d1.prepare(`SELECT COUNT(*) AS n FROM talent t WHERE t.archived_at IS NULL AND NOT (${COMPLETE_SQL})`).first(),
+    d1.prepare(
+      `SELECT t.reference, t.name, c.actor, c.action, c.field, c.old_value, c.new_value, c.at
+           FROM change_record c JOIN talent t ON t.id = c.talent_id
+           ORDER BY c.id DESC LIMIT 12`
+    ).all()
+  ]);
+  const byStatus = Object.fromEntries(TALENT_STATUSES.map((s) => [s, 0]));
+  let active = 0;
+  for (const row of statusRows.results) {
+    byStatus[row.status] = row.n;
+    active += row.n;
+  }
+  return {
+    counts: {
+      active,
+      by_status: byStatus,
+      published: brandRows.results.map((b) => ({ brand: b.slug, brand_name: b.name, count: b.n })),
+      topics: topicCount?.n ?? 0
+    },
+    attention: {
+      ready_to_publish: { items: ready.results, total: readyCount?.n ?? 0 },
+      blocked: {
+        items: blocked.results.map((b) => ({
+          reference: b.reference,
+          name: b.name,
+          missing: [
+            ...b.no_rate ? ["day_rate"] : [],
+            ...b.no_bio ? ["biography"] : [],
+            ...b.no_photo ? ["photo"] : []
+          ]
+        })),
+        total: blockedCount?.n ?? 0
+      }
+    },
+    activity: activity.results
+  };
+}
+__name(dashboardData, "dashboardData");
+
+// worker/routes/dashboard.ts
+var dashboardRoutes = new Hono2();
+dashboardRoutes.get("/dashboard", async (c) => c.json(await dashboardData(c.env.DB)));
+
 // worker/index.ts
 var app = new Hono2();
 app.onError(errorEnvelope);
@@ -22303,6 +22384,7 @@ app.route("/api", topicRoutes);
 app.route("/api", brandRoutes);
 app.route("/api", teamRoutes);
 app.route("/api", importRoutes);
+app.route("/api", dashboardRoutes);
 app.notFound(
   (c) => c.req.path.startsWith("/api") ? c.json({ error: { code: "not_found", message: "No such resource" } }, 404) : c.notFound()
 );

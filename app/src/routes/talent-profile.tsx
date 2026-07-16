@@ -128,7 +128,7 @@ export function TalentProfileScreen() {
     <div>
       <div className="gb-page-head">
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <IconButton label="Back to speakers" onClick={() => navigate('/')}>
+          <IconButton label="Back to speakers" onClick={() => navigate('/speakers')}>
             <ArrowLeft size={18} />
           </IconButton>
           <Avatar src={primaryPhoto?.url} name={talent.name} size={48} />

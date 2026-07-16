@@ -22,7 +22,7 @@ test.describe('US1 — registry gate', () => {
       extraHTTPHeaders: { [IDENTITY_HEADER]: `stranger-${Date.now()}@example.com` },
     })
     const page = await context.newPage()
-    await page.goto('/')
+    await page.goto('/speakers')
     await expect(page.getByText("You don't have access yet")).toBeVisible()
     await expect(page.getByText('ask the owner', { exact: false }).first()).toBeVisible()
     // No sidebar, no roster
@@ -76,7 +76,7 @@ test.describe('US3 — permission limits in practice', () => {
     const limitedPage = await context.newPage()
 
     // Team nav hidden for non-owners
-    await limitedPage.goto('/')
+    await limitedPage.goto('/speakers')
     await expect(limitedPage.getByText('Speakers').first()).toBeVisible()
     await expect(limitedPage.locator('.gb-sidebar').getByText('Team')).toHaveCount(0)
 

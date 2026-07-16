@@ -6,7 +6,7 @@ test.describe('US2 — find talent quickly', () => {
     const needle = uniqueName('Zelda Quixote')
     await apiCreateTalent(request, { name: needle, topics: ['Search test'] })
 
-    await page.goto('/')
+    await page.goto('/speakers')
     await page.getByLabel('Search speakers').fill(needle)
     await expect(page.getByText(needle)).toBeVisible()
     await expect(page.getByTestId('result-count')).toContainText('Showing 1 of 1 speakers')
@@ -17,7 +17,7 @@ test.describe('US2 — find talent quickly', () => {
     for (let i = 1; i <= 27; i++) {
       await apiCreateTalent(request, { name: `${prefix} ${String(i).padStart(2, '0')}`, topics: ['Bulk topic'] })
     }
-    await page.goto('/')
+    await page.goto('/speakers')
     await page.getByLabel('Search speakers').fill(prefix)
     await expect(page.getByTestId('result-count')).toContainText('Showing 25 of 27 speakers')
 
@@ -32,7 +32,7 @@ test.describe('US2 — find talent quickly', () => {
   })
 
   test('empty state offers Clear filters (US2-S4)', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/speakers')
     await page.getByLabel('Search speakers').fill('zzz-nobody-has-this-name')
     await expect(page.getByText('No speakers match your search.')).toBeVisible()
     await page.getByRole('button', { name: 'Clear filters' }).click()
