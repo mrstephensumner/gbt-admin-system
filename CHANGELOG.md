@@ -9,9 +9,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 - Spec 001 — Talent Management Module (`specs/001-talent-management/spec.md`): five
   prioritised user stories (add/maintain records, directory search at 5,000-record scale,
   fixed-vocabulary status tracking, per-brand publication with completeness gating,
-  archive-not-delete), 17 functional requirements, key entities, measurable success
+  archive-not-delete), 19 functional requirements, key entities, measurable success
   criteria, and assumptions. Quality checklist passes in full
   (`specs/001-talent-management/checklists/requirements.md`).
+- Spec 001 clarifications (session 16 Jul 2026): neutral `TAL-NNNN` references for all
+  talent (supersedes the mockups' `SPK-`), hybrid topic governance (inline creation +
+  central rename/merge, FR-018), and fee bands derived from day rate via fixed thresholds
+  (FR-019).
 
 ## 16 Jul 2026 — Constitution v1.0.0 ratified
 

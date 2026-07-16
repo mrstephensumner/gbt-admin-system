@@ -13,6 +13,20 @@ track availability status, and control which talent appear on which brand websit
 design handoff (design-system/) already defines the screens: Speakers directory, Speaker
 profile, and the Talent Management Module view."
 
+## Clarifications
+
+### Session 2026-07-16
+
+- Q: Talent reference prefix scheme — brand/type-specific or neutral? → A: One neutral
+  prefix for all talent: `TAL-NNNN` (a person can serve multiple brands/types; the design
+  mockups' `SPK-` examples are superseded).
+- Q: Who controls the topic vocabulary? → A: Hybrid — operators can create a topic inline
+  while editing a profile; topics can be renamed or merged centrally, with merges updating
+  every talent record that carries them.
+- Q: Where do directory fee bands come from? → A: Derived from the day rate using fixed
+  GBP thresholds (Under £1k · £1k–£3k · £3k–£5k · £5k–£10k · £10k+); never assigned
+  manually. Records without a day rate fall outside all bands and show "No day rate".
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Add and maintain a talent record (Priority: P1)
@@ -20,7 +34,7 @@ profile, and the Talent Management Module view."
 A bookings team member adds a new speaker to the roster and keeps their record up to date.
 They capture the speaker's name, professional headline, biography, topics, day rate,
 location, and contact details, and upload a headshot. The system assigns a permanent
-reference (e.g. `SPK-0481`) that the team uses in every conversation about that speaker.
+reference (e.g. `TAL-0481`) that the team uses in every conversation about that speaker.
 Later, they return to the profile to update the day rate or biography.
 
 **Why this priority**: The talent record is the atom of the whole business — every enquiry,
@@ -36,7 +50,7 @@ reference — no other module needed.
 
 1. **Given** an operator on the talent directory, **When** they choose "Add speaker" and
    save a record with the required fields (name, at least one topic), **Then** the profile
-   is created with a unique auto-assigned reference in the format `SPK-NNNN` and appears in
+   is created with a unique auto-assigned reference in the format `TAL-NNNN` and appears in
    the directory.
 2. **Given** an existing talent profile, **When** the operator edits any field and saves,
    **Then** the change is persisted and visible immediately, and the record shows when it
@@ -165,7 +179,7 @@ publication, remains reachable via an "archived" filter, and can be restored int
 ### Edge Cases
 
 - Two speakers with identical names: records are always distinguished by their reference
-  (`SPK-NNNN`), which is shown alongside the name everywhere.
+  (`TAL-NNNN`), which is shown alongside the name everywhere.
 - Two operators edit the same profile at once: the second save must not silently overwrite
   the first — the later saver is told the record changed and shown what to do.
 - A published talent record is archived: it is automatically unpublished from all brands as
@@ -189,7 +203,7 @@ publication, remains reachable via an "archived" filter, and can be restored int
   (required), professional headline, biography, one or more topics (at least one required),
   day rate in GBP, location, contact details (email, phone), and one or more photos.
 - **FR-002**: The system MUST assign each talent record a unique, immutable reference in
-  the format `SPK-NNNN` on creation, never reuse a reference (including after archiving),
+  the format `TAL-NNNN` on creation, never reuse a reference (including after archiving),
   and display it near the talent name wherever the record appears.
 - **FR-003**: The system MUST let operators edit every operator-entered field of a talent
   record and persist changes immediately on save.
@@ -232,19 +246,31 @@ publication, remains reachable via an "archived" filter, and can be restored int
   record has changed.
 - **FR-017**: The system MUST restrict all module functionality to authenticated members
   of the bookings team; unauthenticated users can access nothing.
+- **FR-018**: The system MUST let operators create a new topic inline while editing a
+  talent record (reusing an existing topic when the name matches, case-insensitively), and
+  MUST provide a central place to rename a topic or merge two topics, with renames and
+  merges applied to every talent record carrying them.
+- **FR-019**: The system MUST derive each record's fee band from its day rate using the
+  fixed thresholds Under £1k, £1k–£3k, £3k–£5k, £5k–£10k, and £10k+; bands are never
+  assigned manually, a day-rate change refiles the record automatically, and records
+  without a day rate match no band.
 
 ### Key Entities
 
 - **Talent**: A person the business represents (speakers first). Attributes: reference
-  (`SPK-NNNN`), name, headline, biography, topics, day rate (GBP), location, contact
-  details, photos, status (fixed vocabulary), archived flag, change history. The central
-  entity of the whole system; future enquiries and bookings will reference it.
+  (`TAL-NNNN`), name, headline, biography, topics, day rate (GBP), location, contact
+  details, photos, status (fixed vocabulary), archived flag, change history. Fee band is
+  derived from the day rate (FR-019), never stored independently. The central entity of
+  the whole system; future enquiries and bookings will reference it.
 - **Brand**: A market-facing identity of Great British Talent Ltd (initially Great British
   Speakers). Owns publication state; more brands can be added without altering talent data.
 - **Publication**: The state of one talent record on one brand — published or not, plus
   who changed it and when. Exists only in combination (talent × brand).
 - **Topic**: A subject/category label used to classify and filter talent (e.g. Leadership,
   AI, Sport). Shared vocabulary across the roster; a talent record carries one or more.
+  Created inline by operators during profile editing (case-insensitive name matching
+  prevents duplicates); renamed or merged centrally, with changes propagating to every
+  record that carries the topic.
 - **Change record**: An entry in a talent record's history — what changed, who did it,
   when. Read-only once written.
 - **Operator**: An authenticated member of the bookings team using the admin. All
