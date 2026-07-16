@@ -5,6 +5,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+## 16 Jul 2026 — Talent Management Module (spec 001) · v0.1.0
+
 ### Added
 - **greatbritishtalent.online is LIVE** (16 Jul 2026): custom domain bound to the
   Worker; Cloudflare Access enforcing the Bookings Team allow-list at the edge (one-time
