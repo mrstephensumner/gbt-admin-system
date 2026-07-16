@@ -1,0 +1,30 @@
+import React from "react";
+
+/** Sidebar navigation item — icon + label, active state, optional badge. */
+export function NavItem({ icon, label, active = false, badge, collapsed = false, onClick, style = {} }) {
+  const [hover, setHover] = React.useState(false);
+  return (
+    <button onClick={onClick}
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      title={collapsed ? label : undefined}
+      style={{
+        display: "flex", alignItems: "center", gap: 12, width: "100%",
+        padding: collapsed ? "10px" : "9px 12px", justifyContent: collapsed ? "center" : "flex-start",
+        background: active ? "var(--surface-hover)" : hover ? "var(--surface-card)" : "transparent",
+        border: "none", borderLeft: `2px solid ${active ? "var(--gb-red)" : "transparent"}`,
+        color: active ? "var(--text-strong)" : "var(--text-muted)",
+        cursor: "pointer", borderRadius: "0 var(--radius-sm) var(--radius-sm) 0",
+        fontFamily: "var(--font-ui)", fontSize: "var(--fs-body)", fontWeight: active ? "var(--fw-semibold)" : "var(--fw-medium)",
+        transition: "background var(--dur-fast), color var(--dur-fast)", textAlign: "left", ...style,
+      }}>
+      <span style={{ display: "flex", flexShrink: 0, color: active ? "var(--gb-red)" : "inherit" }}>{icon}</span>
+      {!collapsed && <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>}
+      {!collapsed && badge != null && (
+        <span style={{
+          fontSize: "var(--fs-2xs)", fontWeight: 700, padding: "1px 7px", borderRadius: 999,
+          background: "var(--ink-500)", color: "var(--text-muted)",
+        }}>{badge}</span>
+      )}
+    </button>
+  );
+}

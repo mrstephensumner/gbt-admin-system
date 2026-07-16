@@ -1,0 +1,48 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Data table" subtitle="Selectable admin list with badges & avatars" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../../styles.css" />
+<style> body { margin: 0; padding: 22px; background: var(--bg-app); } </style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+  const { Table, Badge, Avatar, IconButton } = window.GreatBritishTalentAdminDesignSystem_7f945e;
+  const DATA = [
+    { id:1, name:"Dr Jane Smith", topic:"Leadership", fee:"£4,000", status:"Available", tone:"available" },
+    { id:2, name:"Raj Patel", topic:"AI & Futures", fee:"£6,500", status:"Booked", tone:"booked" },
+    { id:3, name:"Ola Nordström", topic:"Resilience", fee:"£3,200", status:"On hold", tone:"hold" },
+    { id:4, name:"Sam Lee", topic:"Broadcasting", fee:"£2,750", status:"Available", tone:"available" },
+  ];
+  function Demo() {
+    const [sel, setSel] = React.useState([2]);
+    const toggle = id => setSel(s => s.includes(id) ? s.filter(x=>x!==id) : [...s,id]);
+    const toggleAll = c => setSel(c ? DATA.map(d=>d.id) : []);
+    return (
+      <Table selectable rowKey="id" selected={sel} onToggle={toggle} onToggleAll={toggleAll}
+        columns={[
+          { key:"name", header:"Speaker", render:r => (
+            <span style={{display:"flex",alignItems:"center",gap:10}}>
+              <Avatar name={r.name} size={30} status={r.tone==="hold"?"hold":r.tone} />
+              <span style={{fontWeight:600,color:"var(--text-strong)"}}>{r.name}</span>
+            </span>) },
+          { key:"topic", header:"Topic" },
+          { key:"fee", header:"Day rate", align:"right" },
+          { key:"status", header:"Status", render:r => <Badge tone={r.tone} dot>{r.status}</Badge> },
+          { key:"act", header:"", align:"right", width:60, render:()=> <IconButton label="More"><i data-lucide="more-horizontal" style={{width:16,height:16}}/></IconButton> },
+        ]}
+        rows={DATA} />
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(<Demo />);
+  requestAnimationFrame(() => window.lucide && window.lucide.createIcons());
+</script>
+</body>
+</html>

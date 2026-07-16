@@ -1,0 +1,8 @@
+import React from "react";
+export interface TabItem { value: string; label: string; count?: number; }
+export interface TabsProps {
+  tabs: (string | TabItem)[];
+  value?: string;
+  onChange?: (value: string) => void;
+}
+export function Tabs(props: TabsProps): JSX.Element;

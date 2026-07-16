@@ -1,0 +1,69 @@
+/* ============================================================
+   COLORS — Great British Talent Admin
+   Brand: Union Jack (red / navy / white) over a dark admin chrome.
+   ============================================================ */
+:root {
+  /* --- Brand core ------------------------------------------- */
+  --gb-red: #C8102E;          /* Union Jack red — primary action */
+  --gb-red-600: #A50D26;      /* pressed / darker */
+  --gb-red-400: #E23A54;      /* hover / lighter */
+  --gb-navy: #012169;         /* Union Jack navy — deep brand */
+  --gb-navy-600: #001A54;
+  --gb-blue: #1E6FD9;         /* interactive blue — links / info */
+  --gb-blue-400: #4A8CE6;
+  --gb-white: #FFFFFF;
+
+  /* --- Ink / dark surfaces (admin chrome) ------------------- */
+  --ink-900: #0C0D10;         /* app background (deepest) */
+  --ink-800: #131519;         /* base surface */
+  --ink-700: #1A1D23;         /* card / panel */
+  --ink-600: #22262E;         /* raised card / input */
+  --ink-500: #2C313A;         /* hover surface */
+  --ink-400: #3A4049;         /* border strong */
+  --ink-300: #4B525C;         /* border / divider on dark */
+
+  /* --- Neutral greys (text on dark) ------------------------- */
+  --grey-000: #FFFFFF;
+  --grey-100: #E7E9EC;
+  --grey-200: #C4C8CF;
+  --grey-300: #9AA0AA;        /* muted text */
+  --grey-400: #6D7480;        /* faint text / placeholder */
+  --grey-500: #4B525C;
+
+  /* --- Semantic --------------------------------------------- */
+  --success: #2E9E5B;
+  --success-bg: #12271B;
+  --warning: #E0A200;
+  --warning-bg: #2A2110;
+  --danger: #E23A54;
+  --danger-bg: #2A1116;
+  --info: #1E6FD9;
+  --info-bg: #0F1E33;
+
+  /* ============================================================
+     SEMANTIC ALIASES — reference these in components
+     ============================================================ */
+  --bg-app: var(--ink-900);
+  --surface: var(--ink-800);
+  --surface-card: var(--ink-700);
+  --surface-raised: var(--ink-600);
+  --surface-hover: var(--ink-500);
+  --surface-input: var(--ink-600);
+
+  --border: var(--ink-400);
+  --border-subtle: var(--ink-300);
+  --border-strong: var(--grey-500);
+
+  --text-strong: var(--grey-000);
+  --text-body: var(--grey-100);
+  --text-muted: var(--grey-300);
+  --text-faint: var(--grey-400);
+
+  --accent: var(--gb-red);
+  --accent-hover: var(--gb-red-400);
+  --accent-press: var(--gb-red-600);
+  --accent-on: var(--gb-white);
+
+  --link: var(--gb-blue);
+  --focus-ring: var(--gb-blue);
+}

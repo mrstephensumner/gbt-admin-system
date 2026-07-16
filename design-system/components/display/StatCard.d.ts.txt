@@ -1,0 +1,13 @@
+import React from "react";
+/**
+ * @startingPoint section="Display" subtitle="Dashboard KPI tile" viewport="360x140"
+ */
+export interface StatCardProps {
+  label: string;
+  value: string | number;
+  delta?: string;
+  deltaTone?: "up" | "down" | "flat";
+  icon?: React.ReactNode;
+  accent?: "red" | "navy" | "blue" | "success";
+}
+export function StatCard(props: StatCardProps): JSX.Element;

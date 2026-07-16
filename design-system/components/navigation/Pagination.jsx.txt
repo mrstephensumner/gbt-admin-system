@@ -1,0 +1,33 @@
+import React from "react";
+
+/** Table pagination — page window with prev/next. */
+export function Pagination({ page = 1, pageCount = 1, onChange, style = {} }) {
+  const go = (p) => p >= 1 && p <= pageCount && onChange && onChange(p);
+  const pages = [];
+  const win = 1;
+  for (let i = 1; i <= pageCount; i++) {
+    if (i === 1 || i === pageCount || (i >= page - win && i <= page + win)) pages.push(i);
+    else if (pages[pages.length - 1] !== "…") pages.push("…");
+  }
+  const btn = (content, opts = {}) => (
+    <button key={opts.key} onClick={opts.onClick} disabled={opts.disabled}
+      style={{
+        minWidth: 32, height: 32, padding: "0 8px",
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        background: opts.active ? "var(--gb-red)" : "transparent",
+        color: opts.active ? "#fff" : opts.disabled ? "var(--text-faint)" : "var(--text-body)",
+        border: `1px solid ${opts.active ? "var(--gb-red)" : "var(--border)"}`,
+        borderRadius: "var(--radius-sm)", cursor: opts.disabled ? "not-allowed" : "pointer",
+        fontFamily: "var(--font-ui)", fontSize: "var(--fs-sm)", fontWeight: 600,
+      }}>{content}</button>
+  );
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, ...style }}>
+      {btn("‹", { key: "prev", onClick: () => go(page - 1), disabled: page <= 1 })}
+      {pages.map((p, i) => p === "…"
+        ? <span key={"e" + i} style={{ color: "var(--text-faint)", padding: "0 4px" }}>…</span>
+        : btn(p, { key: p, onClick: () => go(p), active: p === page }))}
+      {btn("›", { key: "next", onClick: () => go(page + 1), disabled: page >= pageCount })}
+    </div>
+  );
+}

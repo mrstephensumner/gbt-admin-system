@@ -1,0 +1,10 @@
+import React from "react";
+export interface NavItemProps {
+  icon?: React.ReactNode;
+  label: string;
+  active?: boolean;
+  badge?: string | number;
+  collapsed?: boolean;
+  onClick?: () => void;
+}
+export function NavItem(props: NavItemProps): JSX.Element;

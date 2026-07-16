@@ -1,0 +1,23 @@
+import React from "react";
+
+/** Removable keyword tag (topics, sectors, event types). */
+export function Tag({ children, onRemove, style = {} }) {
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 6, padding: "3px 4px 3px 10px",
+      background: "var(--surface-raised)", border: "1px solid var(--border)",
+      color: "var(--text-body)", borderRadius: "var(--radius-sm)",
+      fontFamily: "var(--font-ui)", fontSize: "var(--fs-xs)", fontWeight: "var(--fw-medium)",
+      whiteSpace: "nowrap", ...style,
+    }}>
+      {children}
+      {onRemove && (
+        <button onClick={onRemove} aria-label="Remove" style={{
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          width: 16, height: 16, border: "none", background: "transparent",
+          color: "var(--text-faint)", cursor: "pointer", borderRadius: 4, fontSize: 13, lineHeight: 1,
+        }}>×</button>
+      )}
+    </span>
+  );
+}

@@ -1,0 +1,27 @@
+import React from "react";
+
+/** Hover tooltip. Wraps its trigger children. */
+export function Tooltip({ label, placement = "top", children, style = {} }) {
+  const [show, setShow] = React.useState(false);
+  const pos = {
+    top: { bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)" },
+    bottom: { top: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)" },
+    left: { right: "calc(100% + 8px)", top: "50%", transform: "translateY(-50%)" },
+    right: { left: "calc(100% + 8px)", top: "50%", transform: "translateY(-50%)" },
+  }[placement];
+  return (
+    <span style={{ position: "relative", display: "inline-flex", ...style }}
+      onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      {children}
+      {show && (
+        <span role="tooltip" style={{
+          position: "absolute", ...pos, zIndex: 200, whiteSpace: "nowrap",
+          padding: "5px 9px", background: "var(--ink-600)", color: "var(--text-strong)",
+          border: "1px solid var(--border)", borderRadius: "var(--radius-sm)",
+          boxShadow: "var(--shadow-md)", fontFamily: "var(--font-ui)", fontSize: "var(--fs-xs)",
+          fontWeight: "var(--fw-medium)", pointerEvents: "none",
+        }}>{label}</span>
+      )}
+    </span>
+  );
+}

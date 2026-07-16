@@ -1,0 +1,50 @@
+import React from "react";
+
+/** Square icon-only button for toolbars and table rows. */
+export function IconButton({
+  variant = "ghost",
+  size = "md",
+  label,
+  disabled = false,
+  children,
+  style = {},
+  ...rest
+}) {
+  const dim = { sm: 30, md: 38, lg: 46 }[size] || 38;
+  const variants = {
+    ghost: { background: "transparent", color: "var(--text-muted)", border: "1px solid transparent" },
+    secondary: { background: "var(--surface-raised)", color: "var(--text-body)", border: "1px solid var(--border)" },
+    primary: { background: "var(--accent)", color: "#fff", border: "1px solid var(--accent)" },
+    danger: { background: "transparent", color: "var(--danger)", border: "1px solid transparent" },
+  };
+  const v = variants[variant] || variants.ghost;
+  const [hover, setHover] = React.useState(false);
+  const hoverBg = {
+    ghost: "var(--surface-hover)",
+    secondary: "var(--surface-hover)",
+    primary: "var(--accent-hover)",
+    danger: "var(--danger-bg)",
+  }[variant];
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        width: dim, height: dim, borderRadius: "var(--radius-sm)",
+        cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.4 : 1,
+        transition: "background var(--dur-fast) var(--ease-out), color var(--dur-fast)",
+        ...v, ...(hover && !disabled ? { background: hoverBg, color: variant === "ghost" ? "var(--text-strong)" : v.color } : {}),
+        ...style,
+      }}
+      {...rest}
+    >
+      {children}
+    </button>
+  );
+}

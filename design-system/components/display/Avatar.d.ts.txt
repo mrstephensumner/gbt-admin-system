@@ -1,0 +1,7 @@
+export interface AvatarProps {
+  src?: string;
+  name?: string;
+  size?: number;
+  status?: "available" | "booked" | "hold" | "offline";
+}
+export function Avatar(props: AvatarProps): JSX.Element;

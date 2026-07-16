@@ -1,0 +1,7 @@
+export interface CheckboxProps {
+  checked?: boolean;
+  label?: string;
+  disabled?: boolean;
+  onChange?: (e: any) => void;
+}
+export function Checkbox(props: CheckboxProps): JSX.Element;

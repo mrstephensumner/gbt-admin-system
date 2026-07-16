@@ -1,0 +1,28 @@
+import React from "react";
+
+/** KPI tile for dashboards: label, big value, delta and optional icon. */
+export function StatCard({ label, value, delta, deltaTone = "up", icon, accent = "red", style = {} }) {
+  const accents = {
+    red: "var(--gb-red)", navy: "var(--gb-navy)", blue: "var(--gb-blue)", success: "var(--success)",
+  };
+  const deltaColor = deltaTone === "up" ? "var(--success)" : deltaTone === "down" ? "var(--danger)" : "var(--text-faint)";
+  return (
+    <div style={{
+      display: "flex", flexDirection: "column", gap: 10, padding: 18,
+      background: "var(--surface-card)", border: "1px solid var(--border)",
+      borderRadius: "var(--radius-lg)", position: "relative", overflow: "hidden", ...style,
+    }}>
+      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: accents[accent] || accents.red }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span className="gb-eyebrow" style={{ fontFamily: "var(--font-ui)", fontSize: "var(--fs-2xs)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-faint)" }}>{label}</span>
+        {icon && <span style={{ color: "var(--text-faint)", display: "flex" }}>{icon}</span>}
+      </div>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: 30, fontWeight: "var(--fw-bold)", color: "var(--text-strong)", lineHeight: 1 }}>{value}</div>
+      {delta && (
+        <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: "var(--fs-xs)", color: deltaColor, fontWeight: "var(--fw-semibold)" }}>
+          <span>{deltaTone === "up" ? "▲" : deltaTone === "down" ? "▼" : "•"}</span>{delta}
+        </div>
+      )}
+    </div>
+  );
+}

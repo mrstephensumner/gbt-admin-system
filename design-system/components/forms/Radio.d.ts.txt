@@ -1,0 +1,9 @@
+export interface RadioProps {
+  checked?: boolean;
+  label?: string;
+  name?: string;
+  value?: string;
+  disabled?: boolean;
+  onChange?: (e: any) => void;
+}
+export function Radio(props: RadioProps): JSX.Element;

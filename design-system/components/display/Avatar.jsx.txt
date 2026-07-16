@@ -1,0 +1,27 @@
+import React from "react";
+
+/** Avatar with image or initials fallback and optional status ring. */
+export function Avatar({ src, name = "", size = 36, status, style = {} }) {
+  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+  const statusColor = { available: "var(--success)", booked: "var(--info)", hold: "var(--warning)", offline: "var(--grey-400)" }[status];
+  return (
+    <span style={{ position: "relative", display: "inline-flex", flexShrink: 0, ...style }}>
+      <span style={{
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        width: size, height: size, borderRadius: "50%", overflow: "hidden",
+        background: "var(--gb-navy)", color: "#fff",
+        fontFamily: "var(--font-ui)", fontWeight: "var(--fw-bold)", fontSize: size * 0.4,
+        border: "1px solid var(--border)",
+      }}>
+        {src ? <img src={src} alt={name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials}
+      </span>
+      {statusColor && (
+        <span style={{
+          position: "absolute", right: -1, bottom: -1, width: size * 0.28, height: size * 0.28,
+          minWidth: 8, minHeight: 8, borderRadius: "50%", background: statusColor,
+          border: "2px solid var(--surface-card)",
+        }} />
+      )}
+    </span>
+  );
+}

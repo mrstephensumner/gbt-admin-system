@@ -1,0 +1,28 @@
+import React from "react";
+import { FieldLabel, FieldMsg } from "./Input.jsx";
+
+/** Multi-line text field. */
+export function Textarea({ label, hint, error, rows = 4, disabled = false, id, style = {}, ...rest }) {
+  const [focus, setFocus] = React.useState(false);
+  const inputId = id || (label ? "ta-" + label.replace(/\s+/g, "-").toLowerCase() : undefined);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, width: "100%", ...style }}>
+      {label && <FieldLabel htmlFor={inputId}>{label}</FieldLabel>}
+      <textarea
+        id={inputId} rows={rows} disabled={disabled}
+        onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
+        style={{
+          resize: "vertical", padding: "10px 12px", background: "var(--surface-input)",
+          border: `1px solid ${error ? "var(--danger)" : focus ? "var(--gb-blue)" : "var(--border)"}`,
+          borderRadius: "var(--radius-sm)",
+          boxShadow: focus ? (error ? "var(--ring-danger)" : "var(--ring-focus)") : "none",
+          color: "var(--text-body)", fontFamily: "var(--font-ui)", fontSize: "var(--fs-body)",
+          lineHeight: "var(--lh-body)", outline: "none", opacity: disabled ? 0.5 : 1,
+          transition: "border-color var(--dur-fast), box-shadow var(--dur-fast)",
+        }}
+        {...rest}
+      />
+      {error ? <FieldMsg tone="danger">{error}</FieldMsg> : hint ? <FieldMsg>{hint}</FieldMsg> : null}
+    </div>
+  );
+}

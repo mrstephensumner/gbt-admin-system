@@ -1,0 +1,21 @@
+import React from "react";
+export interface Column {
+  key: string;
+  header: string;
+  width?: number | string;
+  align?: "left" | "center" | "right";
+  render?: (row: any) => React.ReactNode;
+}
+/**
+ * @startingPoint section="Data" subtitle="Admin list table with selection" viewport="900x360"
+ */
+export interface TableProps {
+  columns: Column[];
+  rows: any[];
+  selectable?: boolean;
+  selected?: (string | number)[];
+  onToggle?: (id: string | number) => void;
+  onToggleAll?: (checked: boolean) => void;
+  rowKey?: string;
+}
+export function Table(props: TableProps): JSX.Element;

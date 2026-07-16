@@ -1,0 +1,14 @@
+import React from "react";
+export interface ButtonProps {
+  /** Visual style. */
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "navy" | "link";
+  size?: "sm" | "md" | "lg";
+  iconLeft?: React.ReactNode;
+  iconRight?: React.ReactNode;
+  block?: boolean;
+  disabled?: boolean;
+  type?: "button" | "submit" | "reset";
+  children?: React.ReactNode;
+  onClick?: (e: React.MouseEvent) => void;
+}
+export function Button(props: ButtonProps): JSX.Element;

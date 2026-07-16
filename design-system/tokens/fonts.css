@@ -1,0 +1,8 @@
+/* ============================================================
+   FONTS — Great British Talent Admin
+   NOTE: No brand font files were provided. Loaded from Google
+   Fonts as the closest match to the wordmark's heavy grotesque.
+   Swap these @font-face URLs for licensed brand binaries when
+   available.
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');

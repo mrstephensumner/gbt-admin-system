@@ -1,0 +1,112 @@
+import React from "react";
+
+/**
+ * Great British Talent admin button.
+ * Union Jack red primary; neutral, ghost, danger and link variants.
+ */
+export function Button({
+  variant = "primary",
+  size = "md",
+  iconLeft = null,
+  iconRight = null,
+  block = false,
+  disabled = false,
+  type = "button",
+  children,
+  style = {},
+  ...rest
+}) {
+  const sizes = {
+    sm: { h: 30, px: 12, fs: "var(--fs-sm)", gap: 6 },
+    md: { h: 38, px: 16, fs: "var(--fs-body)", gap: 8 },
+    lg: { h: 46, px: 22, fs: "var(--fs-h3)", gap: 10 },
+  };
+  const s = sizes[size] || sizes.md;
+
+  const variants = {
+    primary: {
+      background: "var(--accent)",
+      color: "var(--accent-on)",
+      border: "1px solid var(--accent)",
+    },
+    secondary: {
+      background: "var(--surface-raised)",
+      color: "var(--text-strong)",
+      border: "1px solid var(--border)",
+    },
+    ghost: {
+      background: "transparent",
+      color: "var(--text-body)",
+      border: "1px solid transparent",
+    },
+    danger: {
+      background: "var(--danger)",
+      color: "#fff",
+      border: "1px solid var(--danger)",
+    },
+    navy: {
+      background: "var(--gb-navy)",
+      color: "#fff",
+      border: "1px solid var(--gb-navy)",
+    },
+    link: {
+      background: "transparent",
+      color: "var(--link)",
+      border: "1px solid transparent",
+      padding: 0,
+    },
+  };
+  const v = variants[variant] || variants.primary;
+
+  const base = {
+    display: block ? "flex" : "inline-flex",
+    width: block ? "100%" : undefined,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: s.gap,
+    height: variant === "link" ? "auto" : s.h,
+    padding: variant === "link" ? 0 : `0 ${s.px}px`,
+    fontFamily: "var(--font-ui)",
+    fontSize: s.fs,
+    fontWeight: "var(--fw-semibold)",
+    lineHeight: 1,
+    letterSpacing: "0.01em",
+    borderRadius: "var(--radius-sm)",
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.45 : 1,
+    transition: "background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out)",
+    whiteSpace: "nowrap",
+    userSelect: "none",
+    ...v,
+    ...style,
+  };
+
+  const [hover, setHover] = React.useState(false);
+  const [press, setPress] = React.useState(false);
+  const hoverStyle = !disabled && hover ? {
+    primary: { background: "var(--accent-hover)" },
+    danger: { background: "#ec5068" },
+    navy: { background: "#012a86" },
+    secondary: { background: "var(--surface-hover)", borderColor: "var(--border-strong)" },
+    ghost: { background: "var(--surface-hover)" },
+    link: { textDecoration: "underline" },
+  }[variant] : {};
+  const pressStyle = !disabled && press ? { transform: "translateY(1px)" } : {};
+
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      style={{ ...base, ...hoverStyle, ...pressStyle }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => { setHover(false); setPress(false); }}
+      onMouseDown={() => setPress(true)}
+      onMouseUp={() => setPress(false)}
+      {...rest}
+    >
+      {iconLeft}
+      {children}
+      {iconRight}
+    </button>
+  );
+}

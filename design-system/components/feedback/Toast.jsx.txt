@@ -1,0 +1,38 @@
+import React from "react";
+
+/** Toast notification. Colored left rail by tone. */
+export function Toast({ tone = "info", title, message, onClose, style = {} }) {
+  const tones = {
+    info: { rail: "var(--gb-blue)", icon: "ℹ" },
+    success: { rail: "var(--success)", icon: "✓" },
+    warning: { rail: "var(--warning)", icon: "!" },
+    danger: { rail: "var(--danger)", icon: "✕" },
+  };
+  const t = tones[tone] || tones.info;
+  return (
+    <div style={{
+      display: "flex", alignItems: "stretch", gap: 0, width: 340,
+      background: "var(--surface-raised)", border: "1px solid var(--border)",
+      borderRadius: "var(--radius-md)", boxShadow: "var(--shadow-pop)", overflow: "hidden", ...style,
+    }}>
+      <div style={{ width: 4, background: t.rail, flexShrink: 0 }} />
+      <div style={{ display: "flex", gap: 10, padding: "12px 14px", flex: 1 }}>
+        <span style={{
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          width: 20, height: 20, borderRadius: "50%", background: t.rail, color: "#fff",
+          fontSize: 12, fontWeight: 700, flexShrink: 0, marginTop: 1,
+        }}>{t.icon}</span>
+        <div style={{ flex: 1 }}>
+          {title && <div style={{ fontWeight: "var(--fw-semibold)", color: "var(--text-strong)", fontSize: "var(--fs-body)" }}>{title}</div>}
+          {message && <div style={{ color: "var(--text-muted)", fontSize: "var(--fs-sm)", marginTop: 2 }}>{message}</div>}
+        </div>
+        {onClose && (
+          <button onClick={onClose} aria-label="Dismiss" style={{
+            border: "none", background: "transparent", color: "var(--text-faint)", cursor: "pointer",
+            fontSize: 16, lineHeight: 1, height: 18,
+          }}>×</button>
+        )}
+      </div>
+    </div>
+  );
+}

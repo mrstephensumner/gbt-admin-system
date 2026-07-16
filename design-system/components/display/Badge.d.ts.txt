@@ -1,0 +1,11 @@
+import React from "react";
+/**
+ * @startingPoint section="Display" subtitle="Status pills & KPI tiles" viewport="700x150"
+ */
+export interface BadgeProps {
+  tone?: "neutral" | "available" | "booked" | "hold" | "danger" | "red" | "navy";
+  size?: "sm" | "md";
+  dot?: boolean;
+  children?: React.ReactNode;
+}
+export function Badge(props: BadgeProps): JSX.Element;

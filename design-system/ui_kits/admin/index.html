@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Great British Talent — Admin</title>
+<link rel="stylesheet" href="../../styles.css" />
+<style>
+  html, body { height: 100%; margin: 0; }
+  #root { height: 100vh; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="data.js"></script>
+<script type="text/babel" src="AppShell.jsx" data-presets="react"></script>
+<script type="text/babel" src="Dashboard.jsx" data-presets="react"></script>
+<script type="text/babel" src="Speakers.jsx" data-presets="react"></script>
+<script type="text/babel" src="SpeakerProfile.jsx" data-presets="react"></script>
+<script type="text/babel" src="Enquiries.jsx" data-presets="react"></script>
+<script type="text/babel" data-presets="react">
+  const { useState, useEffect } = React;
+  const TITLES = { dashboard: "Dashboard", speakers: "Speakers", enquiries: "Enquiries", bookings: "Bookings", clients: "Clients", invoices: "Invoices", reports: "Reports", settings: "Settings" };
+
+  function App() {
+    const [nav, setNav] = useState("dashboard");
+    const [speaker, setSpeaker] = useState(null);
+    useEffect(() => { window.lucide && window.lucide.createIcons(); });
+
+    const openSpeaker = (s) => { setSpeaker(s); };
+    const go = (k) => { setSpeaker(null); setNav(k); };
+
+    let body, title;
+    if (speaker) {
+      title = "Speaker profile";
+      body = <window.GBT_SpeakerProfile speaker={speaker} onBack={() => setSpeaker(null)} />;
+    } else if (nav === "dashboard") {
+      title = TITLES.dashboard;
+      body = <window.GBT_Dashboard onOpenSpeaker={openSpeaker} />;
+    } else if (nav === "speakers") {
+      title = TITLES.speakers;
+      body = <window.GBT_Speakers onOpenSpeaker={openSpeaker} />;
+    } else if (nav === "enquiries") {
+      title = TITLES.enquiries;
+      body = <window.GBT_Enquiries />;
+    } else {
+      title = TITLES[nav];
+      body = <Empty label={title} />;
+    }
+
+    return (
+      <window.GBT_AppShell active={speaker ? "speakers" : nav} onNavigate={go} title={title}>
+        {body}
+      </window.GBT_AppShell>
+    );
+  }
+
+  function Empty({ label }) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60vh", color: "var(--text-faint)", gap: 12 }}>
+        <i data-lucide="construction" style={{ width: 40, height: 40 }} />
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-muted)" }}>{label}</div>
+        <div style={{ fontSize: 13 }}>This section is part of the kit scaffold.</div>
+      </div>
+    );
+  }
+
+  function mount() {
+    if (!window.GBT_AppShell || !window.GBT_Dashboard || !window.GBT_Speakers) { setTimeout(mount, 40); return; }
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    requestAnimationFrame(() => window.lucide && window.lucide.createIcons());
+  }
+  mount();
+</script>
+</body>
+</html>

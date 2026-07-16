@@ -1,0 +1,12 @@
+import React from "react";
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  hint?: string;
+  error?: string;
+  iconLeft?: React.ReactNode;
+  iconRight?: React.ReactNode;
+  size?: "sm" | "md" | "lg";
+}
+export function Input(props: InputProps): JSX.Element;
+export function FieldLabel(props: { children?: React.ReactNode; htmlFor?: string }): JSX.Element;
+export function FieldMsg(props: { children?: React.ReactNode; tone?: "danger" }): JSX.Element;
