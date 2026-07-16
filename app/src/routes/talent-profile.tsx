@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Trash2, Upload, ClipboardCheck, CalendarDays, Rss, Sparkles } from 'lucide-react'
-import { Avatar, Badge, Button, Card, Dialog, IconButton, Select, Tabs, Textarea, useToast } from '../components'
+import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Tabs, Textarea, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
 import { makeDisplayRendition } from '../lib/image'
@@ -10,7 +10,8 @@ import { useCan } from '../lib/operator'
 import type { ChangeRecordItem, PhotoRef, Talent } from '../lib/types'
 import { TALENT_STATUSES, TALENT_STATUS_LABELS, TALENT_STATUS_TONES } from '@shared/enums'
 import type { TalentStatus } from '@shared/enums'
-import { formatDateTime, formatDayRate } from '@shared/format'
+import { formatDate, formatDateTime, formatDayRate } from '@shared/format'
+import { SOCIAL_PLATFORMS, SOCIAL_PLATFORM_LABELS, formatFollowers, type SocialPlatform } from '@shared/social'
 import { TalentFields, validateTalentForm, type TalentFormValues } from './talent-form'
 import { ComingSoon } from './coming-soon'
 
@@ -58,6 +59,11 @@ export function TalentProfileScreen() {
     queryKey: ['stats', reference],
     queryFn: () => api.get<TalentStatsData>(`/talent/${reference}/stats`),
     enabled: tab === 'stats',
+  })
+  const socialQuery = useQuery({
+    queryKey: ['social', reference],
+    queryFn: () => api.get<SocialData>(`/talent/${reference}/social`),
+    enabled: tab === 'social',
   })
   const notesQuery = useQuery({
     queryKey: ['notes', reference],
@@ -399,15 +405,17 @@ export function TalentProfileScreen() {
           />
         )}
         {tab === 'social' && (
-          <ComingSoon
-            icon={<Rss size={40} />}
-            title="Social & News"
-            description="The speaker's public presence — social profiles, follower reach and recent press — kept fresh automatically."
-            planned={[
-              'Linked social profiles with follower figures',
-              'Recent news and press mentions',
-              'Reach signals to support fee conversations',
-            ]}
+          <SocialTab
+            data={socialQuery.data}
+            onChanged={async () => {
+              await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['social', reference] }),
+                queryClient.invalidateQueries({ queryKey: ['history', reference] }),
+                queryClient.invalidateQueries({ queryKey: ['stats', reference] }),
+              ])
+            }}
+            reference={reference}
+            toast={toast}
           />
         )}
         {tab === 'enrichment' && (
@@ -526,6 +534,14 @@ function describeChange(h: ChangeRecordItem): string {
       return `Topic merged: ${h.old_value} → ${h.new_value}`
     case 'note_added':
       return 'Note added'
+    case 'social_link_added':
+      return `Social profile added (${h.new_value})`
+    case 'social_link_removed':
+      return `Social profile removed (${h.old_value})`
+    case 'press_mention_added':
+      return `Press mention added (${h.new_value})`
+    case 'press_mention_removed':
+      return `Press mention removed (${h.old_value})`
     default:
       return h.action
   }
@@ -728,5 +744,195 @@ function NotesTab({ notes, onAdd }: { notes: TalentNote[]; onAdd: (body: string)
         {notes.length === 0 && <p className="gb-meta-row">No notes yet — anything the team should know lives here.</p>}
       </div>
     </Card>
+  )
+}
+
+interface SocialLink {
+  id: number
+  platform: SocialPlatform
+  url: string
+  handle: string | null
+  followers: number | null
+  followers_set_at: string | null
+  followers_set_by: string | null
+}
+interface PressMention {
+  id: number
+  title: string
+  outlet: string
+  url: string
+  published_on: string
+}
+interface SocialData {
+  links: SocialLink[]
+  mentions: PressMention[]
+  total_followers: number
+}
+
+function SocialTab({
+  data,
+  reference,
+  onChanged,
+  toast,
+}: {
+  data: SocialData | undefined
+  reference: string
+  onChanged: () => Promise<void>
+  toast: ReturnType<typeof useToast>
+}) {
+  const [addLink, setAddLink] = useState(false)
+  const [linkForm, setLinkForm] = useState({ platform: 'linkedin', url: '', handle: '', followers: '' })
+  const [addMention, setAddMention] = useState(false)
+  const [mentionForm, setMentionForm] = useState({ title: '', outlet: '', url: '', published_on: '' })
+  const [editingFollowers, setEditingFollowers] = useState<{ id: number; value: string } | null>(null)
+
+  const run = async (fn: () => Promise<unknown>, ok: string) => {
+    try {
+      await fn()
+      await onChanged()
+      toast({ tone: 'success', title: ok })
+      return true
+    } catch (err) {
+      toast({ tone: 'danger', title: 'Could not save', message: err instanceof ApiClientError ? err.message : 'Something went wrong' })
+      return false
+    }
+  }
+
+  if (!data) return <p className="gb-meta-row">Loading…</p>
+
+  return (
+    <div style={{ display: 'grid', gap: 20 }} data-testid="social-tab">
+      <Card
+        title="Social profiles"
+        subtitle={`Total recorded reach: ${formatFollowers(data.total_followers)}`}
+        actions={
+          <Button size="sm" onClick={() => { setLinkForm({ platform: 'linkedin', url: '', handle: '', followers: '' }); setAddLink(true) }}>
+            Add profile
+          </Button>
+        }
+      >
+        <div style={{ display: 'grid', gap: 10 }} data-testid="social-links">
+          {data.links.map((l) => (
+            <div key={l.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid var(--border)', paddingBottom: 10 }}>
+              <div>
+                <div style={{ color: 'var(--text-strong)' }}>
+                  {SOCIAL_PLATFORM_LABELS[l.platform]}
+                  {l.handle ? <span className="gb-meta-row"> · {l.handle}</span> : null}
+                </div>
+                <a href={l.url} target="_blank" rel="noreferrer" className="gb-meta-row">{l.url}</a>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                {editingFollowers?.id === l.id ? (
+                  <span style={{ display: 'inline-flex', gap: 6 }}>
+                    <input
+                      className="gb-input gb-input--sm"
+                      style={{ width: 110 }}
+                      inputMode="numeric"
+                      value={editingFollowers.value}
+                      onChange={(e) => setEditingFollowers({ id: l.id, value: e.target.value })}
+                      aria-label="Follower count"
+                    />
+                    <Button size="sm" onClick={() =>
+                      void run(() => api.patch(`/social/links/${l.id}`, { followers: editingFollowers.value === '' ? null : Number(editingFollowers.value.replace(/[,\s]/g, '')) }), 'Reach updated').then((ok) => ok && setEditingFollowers(null))
+                    }>Save</Button>
+                  </span>
+                ) : (
+                  <button type="button" className="gb-btn gb-btn--ghost gb-btn--sm" onClick={() => setEditingFollowers({ id: l.id, value: l.followers == null ? '' : String(l.followers) })}>
+                    <span className="gb-mono" style={{ color: 'var(--text-strong)' }}>{formatFollowers(l.followers)}</span>
+                  </button>
+                )}
+                {l.followers_set_at && (
+                  <div className="gb-meta-row" style={{ fontSize: 'var(--fs-2xs)' }}>
+                    as of {formatDateTime(l.followers_set_at)} · {l.followers_set_by}
+                  </div>
+                )}
+              </div>
+              <IconButton label="Remove profile" size="sm" variant="ghost" onClick={() => void run(() => api.delete(`/social/links/${l.id}`), 'Profile removed')}>
+                <Trash2 size={14} />
+              </IconButton>
+            </div>
+          ))}
+          {data.links.length === 0 && <p className="gb-meta-row">No social profiles recorded yet.</p>}
+        </div>
+      </Card>
+
+      <Card
+        title="Press & news"
+        subtitle="Recent coverage, newest first"
+        actions={
+          <Button size="sm" onClick={() => { setMentionForm({ title: '', outlet: '', url: '', published_on: '' }); setAddMention(true) }}>
+            Add mention
+          </Button>
+        }
+      >
+        <div style={{ display: 'grid', gap: 12 }} data-testid="press-mentions">
+          {data.mentions.map((m) => (
+            <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+              <div>
+                <a href={m.url} target="_blank" rel="noreferrer" style={{ color: 'var(--text-strong)', fontWeight: 500 }}>{m.title}</a>
+                <div className="gb-meta-row">{m.outlet} · {formatDate(m.published_on)}</div>
+              </div>
+              <IconButton label="Remove mention" size="sm" variant="ghost" onClick={() => void run(() => api.delete(`/social/mentions/${m.id}`), 'Mention removed')}>
+                <Trash2 size={14} />
+              </IconButton>
+            </div>
+          ))}
+          {data.mentions.length === 0 && <p className="gb-meta-row">No press mentions logged yet.</p>}
+        </div>
+      </Card>
+
+      <Dialog
+        open={addLink}
+        title="Add social profile"
+        onClose={() => setAddLink(false)}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setAddLink(false)}>Cancel</Button>
+            <Button onClick={() =>
+              void run(() => api.post(`/talent/${reference}/social/links`, {
+                platform: linkForm.platform,
+                url: linkForm.url.trim(),
+                handle: linkForm.handle.trim() || null,
+                followers: linkForm.followers.trim() === '' ? null : Number(linkForm.followers.replace(/[,\s]/g, '')),
+              }), 'Profile added').then((ok) => ok && setAddLink(false))
+            }>Add profile</Button>
+          </>
+        }
+      >
+        <div style={{ display: 'grid', gap: 12 }}>
+          <Select label="Platform" value={linkForm.platform} onChange={(e) => setLinkForm({ ...linkForm, platform: e.target.value })}
+            options={SOCIAL_PLATFORMS.map((p) => ({ value: p, label: SOCIAL_PLATFORM_LABELS[p] }))} />
+          <Input label="Link (https)" value={linkForm.url} onChange={(e) => setLinkForm({ ...linkForm, url: e.target.value })} placeholder="https://…" />
+          <Input label="Handle (optional)" value={linkForm.handle} onChange={(e) => setLinkForm({ ...linkForm, handle: e.target.value })} placeholder="@name" />
+          <Input label="Followers (optional)" inputMode="numeric" value={linkForm.followers} onChange={(e) => setLinkForm({ ...linkForm, followers: e.target.value })} placeholder="e.g. 12500" />
+        </div>
+      </Dialog>
+
+      <Dialog
+        open={addMention}
+        title="Add press mention"
+        onClose={() => setAddMention(false)}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setAddMention(false)}>Cancel</Button>
+            <Button onClick={() =>
+              void run(() => api.post(`/talent/${reference}/social/mentions`, {
+                title: mentionForm.title.trim(),
+                outlet: mentionForm.outlet.trim(),
+                url: mentionForm.url.trim(),
+                published_on: mentionForm.published_on,
+              }), 'Mention added').then((ok) => ok && setAddMention(false))
+            }>Add mention</Button>
+          </>
+        }
+      >
+        <div style={{ display: 'grid', gap: 12 }}>
+          <Input label="Headline" value={mentionForm.title} onChange={(e) => setMentionForm({ ...mentionForm, title: e.target.value })} />
+          <Input label="Outlet" value={mentionForm.outlet} onChange={(e) => setMentionForm({ ...mentionForm, outlet: e.target.value })} placeholder="e.g. BBC News" />
+          <Input label="Link (https)" value={mentionForm.url} onChange={(e) => setMentionForm({ ...mentionForm, url: e.target.value })} placeholder="https://…" />
+          <Input label="Published on" type="date" value={mentionForm.published_on} onChange={(e) => setMentionForm({ ...mentionForm, published_on: e.target.value })} />
+        </div>
+      </Dialog>
+    </div>
   )
 }

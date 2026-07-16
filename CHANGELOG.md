@@ -6,6 +6,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Social & News (spec 007)** — the placeholder tab is now real: social profiles
+  (fixed platform vocabulary, https-validated links, optional handle, follower counts
+  with attributed "as of" stamps that restamp on update) with total recorded reach, and
+  a press/news mentions log ordered newest-first by publication date. Add/remove of
+  links and mentions flow into History, the dashboard feed, and Statistics; follower
+  updates are attributed on the row. Migration 0004; new shared `social` module.
+  Automated follower sync and news discovery deliberately deferred (FR-007 — need
+  platform API integrations; these structures are their landing place). Suites 107 unit
+  + 107 integration + 18 e2e green; deployed to production. Three of the four
+  profile-tab placeholders now built (Onboarding remains).
 - **Internal talent notes (spec 006)** — a Notes tab on every speaker workspace (live
   count on the tab): plain-text notes with permanent author + day-month-year timestamp,
   newest-first, paginated, append-only, allowed on archived records, internal-only.

@@ -215,6 +215,44 @@ export const talentNote = sqliteTable(
   (t) => [index('talent_note_talent_idx').on(t.talentId, t.id)],
 )
 
+/** Social profile links with manually-tracked reach (spec 007). */
+export const talentSocialLink = sqliteTable(
+  'talent_social_link',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    platform: text('platform').notNull(),
+    url: text('url').notNull(),
+    handle: text('handle'),
+    followers: integer('followers'),
+    followersSetAt: text('followers_set_at'),
+    followersSetBy: text('followers_set_by'),
+    createdAt: text('created_at').notNull(),
+    createdBy: text('created_by').notNull(),
+  },
+  (t) => [index('social_link_talent_idx').on(t.talentId)],
+)
+
+/** Press & news mentions (spec 007) — listed newest-first by published_on. */
+export const talentPressMention = sqliteTable(
+  'talent_press_mention',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    title: text('title').notNull(),
+    outlet: text('outlet').notNull(),
+    url: text('url').notNull(),
+    publishedOn: text('published_on').notNull(),
+    addedAt: text('added_at').notNull(),
+    addedBy: text('added_by').notNull(),
+  },
+  (t) => [index('press_mention_talent_idx').on(t.talentId, t.publishedOn)],
+)
+
 /** Append-only team audit trail (spec 002 FR-010) — no update/delete path exists. */
 export const operatorAudit = sqliteTable(
   'operator_audit',
