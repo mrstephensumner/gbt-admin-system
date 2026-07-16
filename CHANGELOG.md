@@ -5,6 +5,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+## 16 Jul 2026 — Constitution v1.0.0 ratified
+
+### Added
+- Project constitution (`.specify/memory/constitution.md`) v1.0.0 with six core principles:
+  spec-driven development, repository as documentation of record, design-system conformance,
+  one source of truth / multi-brand from the start, operational-not-promotional, and
+  verified-before-merged — plus Brand & Content Standards, Development Workflow & Quality
+  Gates, and Governance (semantic versioning, amendment procedure, compliance review).
+
 ## 16 Jul 2026 — Project foundation
 
 ### Added
