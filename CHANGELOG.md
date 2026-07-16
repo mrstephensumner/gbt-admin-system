@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+### Added
+- Spec 003 — Roster Import from Great British Speakers
+  (`specs/003-roster-import/spec.md`): staged import of the old site's public speaker
+  profiles (candidates → human review/edit → approve into talent records), reconciling
+  run summaries, idempotent re-runs keyed by source page, duplicate flagging,
+  seed-not-sync guarantee, and a new import permission area. Quality checklist passes
+  in full.
+
 ## 16 Jul 2026 — Admin Roles & Operator Management (spec 002) · v0.2.0
 
 ### Added
