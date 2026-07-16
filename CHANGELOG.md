@@ -5,6 +5,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+### Added
+- Spec 001 — Talent Management Module (`specs/001-talent-management/spec.md`): five
+  prioritised user stories (add/maintain records, directory search at 5,000-record scale,
+  fixed-vocabulary status tracking, per-brand publication with completeness gating,
+  archive-not-delete), 17 functional requirements, key entities, measurable success
+  criteria, and assumptions. Quality checklist passes in full
+  (`specs/001-talent-management/checklists/requirements.md`).
+
 ## 16 Jul 2026 — Constitution v1.0.0 ratified
 
 ### Added
