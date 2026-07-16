@@ -6,6 +6,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **First production deployment** (16 Jul 2026): D1 database `gbt_admin`
+  (003ddb66…) and R2 bucket `gbt-photos` created; schema migrated; Great British
+  Speakers brand seeded; Worker deployed to
+  https://gbt-admin.stephen-a8b.workers.dev and smoke-tested (T046 in progress —
+  custom domain + Cloudflare Access still to be configured).
 - `/speckit-analyze` remediation: integration tests for the production Cloudflare Access
   branch (`app/tests/integration/auth.test.ts` — missing/forged assertion rejected, dev
   header cannot bypass configured Access, dev fallback intact); config guard rejecting

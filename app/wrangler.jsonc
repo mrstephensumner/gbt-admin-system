@@ -14,8 +14,7 @@
     {
       "binding": "DB",
       "database_name": "gbt_admin",
-      // Placeholder until the production D1 database is created (wrangler d1 create gbt_admin)
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "003ddb66-2dd6-4d0a-b5a6-86cc19f7bfc0",
       "migrations_dir": "drizzle"
     }
   ],
