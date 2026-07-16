@@ -113,11 +113,23 @@ export async function runImport(
 
   // Existing candidates by source_id (case-insensitive), for upsert decisions
   const existing = new Map<string, { id: number; status: string }>()
+  // Active roster names for duplicate flagging (FR-012) — one query, not one
+  // per row: a full roster would otherwise exceed per-request query limits.
+  const nameToRef = new Map<string, string>()
   if (clean.length > 0) {
-    const all = await d1
-      .prepare('SELECT id, source_id, status FROM import_candidate')
-      .all<{ id: number; source_id: string; status: string }>()
+    const [all, talents] = await Promise.all([
+      d1
+        .prepare('SELECT id, source_id, status FROM import_candidate')
+        .all<{ id: number; source_id: string; status: string }>(),
+      d1
+        .prepare('SELECT name, reference FROM talent WHERE archived_at IS NULL')
+        .all<{ name: string; reference: string }>(),
+    ])
     for (const c of all.results) existing.set(c.source_id.toLowerCase(), { id: c.id, status: c.status })
+    for (const t of talents.results) {
+      const key = t.name.toLowerCase()
+      if (!nameToRef.has(key)) nameToRef.set(key, t.reference)
+    }
   }
 
   const statements: D1PreparedStatement[] = []
@@ -133,10 +145,7 @@ export async function runImport(
     }
 
     // Possible-duplicate flag: name matches an existing active talent (FR-012)
-    const dupe = await d1
-      .prepare('SELECT reference FROM talent WHERE name = ? COLLATE NOCASE AND archived_at IS NULL LIMIT 1')
-      .bind(row.name)
-      .first<{ reference: string }>()
+    const dupe = nameToRef.get(row.name.toLowerCase())
 
     const email = row.email && EMAIL_SHAPE.test(row.email) ? row.email : null
     if (prior) {
@@ -159,7 +168,7 @@ export async function runImport(
             row.phone ?? null,
             row.photo_url ?? null,
             JSON.stringify(gaps),
-            dupe?.reference ?? null,
+            dupe ?? null,
             now,
             prior.id,
           ),
@@ -185,7 +194,7 @@ export async function runImport(
             row.phone ?? null,
             row.photo_url ?? null,
             JSON.stringify(gaps),
-            dupe?.reference ?? null,
+            dupe ?? null,
             now,
             now,
           ),

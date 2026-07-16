@@ -21989,9 +21989,17 @@ async function runImport(d1, fileName, rows, dryRun, actor) {
   let untouchedSkipped = 0;
   const now = nowIso();
   const existing = /* @__PURE__ */ new Map();
+  const nameToRef = /* @__PURE__ */ new Map();
   if (clean.length > 0) {
-    const all = await d1.prepare("SELECT id, source_id, status FROM import_candidate").all();
+    const [all, talents] = await Promise.all([
+      d1.prepare("SELECT id, source_id, status FROM import_candidate").all(),
+      d1.prepare("SELECT name, reference FROM talent WHERE archived_at IS NULL").all()
+    ]);
     for (const c of all.results) existing.set(c.source_id.toLowerCase(), { id: c.id, status: c.status });
+    for (const t of talents.results) {
+      const key = t.name.toLowerCase();
+      if (!nameToRef.has(key)) nameToRef.set(key, t.reference);
+    }
   }
   const statements = [];
   for (const { row, gaps, dayRate } of clean) {
@@ -22004,7 +22012,7 @@ async function runImport(d1, fileName, rows, dryRun, actor) {
       untouchedSkipped++;
       continue;
     }
-    const dupe = await d1.prepare("SELECT reference FROM talent WHERE name = ? COLLATE NOCASE AND archived_at IS NULL LIMIT 1").bind(row.name).first();
+    const dupe = nameToRef.get(row.name.toLowerCase());
     const email4 = row.email && EMAIL_SHAPE.test(row.email) ? row.email : null;
     if (prior) {
       refreshed++;
@@ -22024,7 +22032,7 @@ async function runImport(d1, fileName, rows, dryRun, actor) {
           row.phone ?? null,
           row.photo_url ?? null,
           JSON.stringify(gaps),
-          dupe?.reference ?? null,
+          dupe ?? null,
           now,
           prior.id
         )
@@ -22048,7 +22056,7 @@ async function runImport(d1, fileName, rows, dryRun, actor) {
           row.phone ?? null,
           row.photo_url ?? null,
           JSON.stringify(gaps),
-          dupe?.reference ?? null,
+          dupe ?? null,
           now,
           now
         )

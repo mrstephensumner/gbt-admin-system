@@ -64,13 +64,6 @@ test.describe('US1–US3 — roster import end to end', () => {
     // Fidelity: accents survive
     await expect(page.getByText(`Renée Dubois-O'Connor ${prefix}`)).toBeVisible()
 
-    // Edit the topic-less candidate so it can be approved
-    const noTopics = page.locator('.gb-table tr', { hasText: `No Topics Provided ${prefix}` })
-    await noTopics.getByRole('button', { name: 'Edit' }).click()
-    await page.getByRole('textbox', { name: 'Topics' }).fill('Testing')
-    await page.locator('.gb-dialog').getByRole('button', { name: 'Save candidate' }).click()
-    await expect(page.getByText('Candidate updated')).toBeVisible()
-
     // Skip one
     await page
       .locator('.gb-table tr', { hasText: `Marcus Webb ${prefix}` })
@@ -79,12 +72,20 @@ test.describe('US1–US3 — roster import end to end', () => {
     await expect(page.getByText('Candidate skipped')).toBeVisible()
     await expect(page.getByTestId('candidate-count')).toContainText('Showing 5 of 5 candidates')
 
-    // Select all remaining and bulk approve
-    for (const name of [`Dr Jane Smith ${prefix}`, `Renée Dubois-O'Connor ${prefix}`, `Tom Okafor ${prefix}`, `Amelia Clarke ${prefix}`, `No Topics Provided ${prefix}`]) {
-      await page.locator('.gb-table tr', { hasText: name }).locator('.gb-check').click()
-    }
-    await page.getByRole('button', { name: /Approve selected \(5\)/ }).click()
-    await expect(page.getByText('5 approved')).toBeVisible()
+    // Approve all new: the topic-less row fails and is left behind — the loop terminates
+    await page.getByRole('button', { name: 'Approve all new' }).click()
+    await expect(page.getByText('4 approved')).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByText(/1 left in the queue to review/)).toBeVisible()
+
+    // Fix the leftover and approve it via selection
+    const noTopics = page.locator('.gb-table tr', { hasText: `No Topics Provided ${prefix}` })
+    await noTopics.getByRole('button', { name: 'Edit' }).click()
+    await page.getByRole('textbox', { name: 'Topics' }).fill('Testing')
+    await page.locator('.gb-dialog').getByRole('button', { name: 'Save candidate' }).click()
+    await expect(page.getByText('Candidate updated')).toBeVisible()
+    await noTopics.locator('.gb-check').click()
+    await page.getByRole('button', { name: /Approve selected \(1\)/ }).click()
+    await expect(page.getByText('1 approved')).toBeVisible()
 
     // Roster populated with fidelity: Jane's £4,000 carried over, unpublished by default
     await page.goto('/speakers')

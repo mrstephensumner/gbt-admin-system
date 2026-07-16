@@ -6,6 +6,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Real-roster readiness** (evening before the client demo): WordPress WXR converter
+  (`scripts/convert-wp-export.py`) turning the greatbritishtalent.com export (2,244
+  published profiles under the `news` post type, with about_speaker bios, categories as
+  topics, and thumbnail photo URLs) into an Import-ready CSV — verified end-to-end
+  locally: 2,244/2,244 rows validate clean, staging in 0.3 s, sample approvals fetch
+  real photos from the live site. Fixed a scale bug found by the real data (duplicate-
+  name flagging ran one query per row — would exceed request limits at roster size; now
+  a single upfront query). Added an "Approve all new" button with a self-terminating
+  loop (failed candidates excluded and left for review) so a 2,244-record approval is
+  one click. Suites 79/91/17 green; deployed to production.
 - **Operations Dashboard (spec 004)** — new landing screen: live KPI tiles (active
   speakers, per-status, published per brand, topics) deep-linking to the filtered
   directory; Ready-to-publish and Blocked-from-publishing attention lists sharing the

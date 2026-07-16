@@ -153,6 +153,45 @@ export function ImportScreen() {
     })
   }
 
+  /** Approve every New candidate: loop pages, excluding ones that failed so the loop always terminates. */
+  const approveAll = async () => {
+    const failed = new Set<number>()
+    const failures: string[] = []
+    let ok = 0
+    for (;;) {
+      const pageData = await api.get<{ items: Candidate[]; total: number }>(
+        '/import/candidates?status=new&per_page=50&page=1',
+      )
+      const ids = pageData.items.map((c) => c.id).filter((id) => !failed.has(id)).slice(0, 25)
+      if (ids.length === 0) break
+      setApproveProgress(`Approved ${ok} — ${pageData.total} remaining…`)
+      try {
+        const res = await api.post<{ results: { id: number; ok: boolean; reason?: string }[] }>('/import/approve', {
+          ids,
+        })
+        for (const r of res.results) {
+          if (r.ok) ok++
+          else {
+            failed.add(r.id)
+            failures.push(r.reason ?? 'Unknown reason')
+          }
+        }
+      } catch (err) {
+        ids.forEach((id) => failed.add(id))
+        failures.push(err instanceof ApiClientError ? err.message : 'Something went wrong')
+      }
+    }
+    setApproveProgress(null)
+    await refresh()
+    toast({
+      tone: failures.length ? 'warning' : 'success',
+      title: `${ok} approved`,
+      message: failures.length
+        ? `${failures.length} left in the queue to review — first reason: ${failures[0]}`
+        : 'The whole queue is now in the roster',
+    })
+  }
+
   const openEdit = (c: Candidate) => {
     setEditing(c)
     setEditValues({ name: c.name, topics: c.topics.join('; '), dayRatePounds: penceToPounds(c.day_rate_pence) })
@@ -267,10 +306,18 @@ export function ImportScreen() {
               <div style={{ display: 'flex', gap: 8 }}>
                 <Button
                   size="sm"
+                  variant="navy"
+                  disabled={approveProgress !== null || (candidates.data?.total ?? 0) === 0}
+                  onClick={() => void approveAll()}
+                >
+                  {approveProgress ?? 'Approve all new'}
+                </Button>
+                <Button
+                  size="sm"
                   disabled={selected.size === 0 || approveProgress !== null}
                   onClick={() => void bulkApprove()}
                 >
-                  {approveProgress ?? `Approve selected (${selected.size})`}
+                  {`Approve selected (${selected.size})`}
                 </Button>
                 <Button
                   size="sm"
