@@ -48,6 +48,22 @@ Availability; Social & News feeds and follower stats; Profile Enrichment; Statis
 Site Selector / per-site profiles (multi-brand publication surfaces); fee schedules
 beyond a single day rate; talent data Export; import update-existing mode.
 
+## External data providers (candidate, not committed)
+
+- **DataForSEO** (https://dataforseo.com/) — likely provider for the automated data that
+  spec 007 (Social & News) deferred (FR-007), and possibly other enrichment. Fit
+  assessment to verify when we spec the integration:
+  - **Strong fit — news/press discovery**: their SERP (Google/Bing News) and Content
+    Analysis APIs can find recent coverage and web mentions of a speaker by name/brand,
+    to auto-populate the press-mentions log built in spec 007.
+  - **Weaker fit — social follower counts**: DataForSEO is SEO/SERP-centric, not a native
+    social-graph API; per-platform follower numbers (LinkedIn/Instagram/TikTok) may need
+    platform APIs or a specialist social-analytics provider. Confirm current endpoints
+    before assuming coverage.
+  - The spec-007 tables (`talent_social_link.followers` with attributed stamps,
+    `talent_press_mention`) are already the landing place for whatever provider is chosen;
+    a sync job would write to them, preserving the manual-entry path alongside.
+
 ## Open questions
 
 - ~~Tech stack~~ — decided 16 Jul 2026: Cloudflare-native TypeScript (React SPA + Hono +
