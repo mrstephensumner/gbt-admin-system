@@ -5,6 +5,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+## 16 Jul 2026 — Admin Roles & Operator Management (spec 002) · v0.2.0
+
 ### Added
 - **Spec 002 implementation** under `app/`: operator registry with single-Owner
   invariant and `OWNER_EMAIL` bootstrap; per-request authorization middleware (registry
@@ -14,7 +16,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
   Team screen (add/remove operators, grant toggles, append-only team audit trail);
   blocked-access screen for signed-in but unregistered identities. Migration
   0001_operators. Suites: 57 unit + 72 integration + 13 e2e, all green; screens
-  visually verified. Deployed to production 16 Jul 2026 with OWNER_EMAIL=hello@localseo.agency (owner bootstraps on first sign-in); edge and Worker gates verified post-deploy.
+  visually verified. Deployed to production 16 Jul 2026 with OWNER_EMAIL=hello@localseo.agency; owner sign-in confirmed live by Stephen (owner bootstrap + Team screen working).
 - Implementation plan for spec 002 (`specs/002-admin-roles/plan.md`) with authorization
   research R1–R8 (per-request middleware gate, grants-as-rows default-deny, shared
   permissions module, OWNER_EMAIL bootstrap, field-level day-rate enforcement, zero-
