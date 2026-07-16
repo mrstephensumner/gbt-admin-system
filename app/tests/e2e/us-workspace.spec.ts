@@ -74,4 +74,29 @@ test.describe('Talent profile workspace (spec 005)', () => {
     await expect(page.getByTestId('coming-soon').getByText('In development')).toBeVisible()
     await expect(page.getByText('Pipeline stages: New · Quoted · Confirmed · Lost')).toBeVisible()
   })
+
+  test('media manager: sections, showreel and SEO (spec 008)', async ({ page, request }) => {
+    const talent = await apiCreateTalent(request, { name: uniqueName('Media Subject') })
+    await page.goto(`/talent/${talent.reference}?tab=photos`)
+    const media = page.getByTestId('media-tab')
+    await expect(media.getByText('Headshots')).toBeVisible()
+    await expect(media.getByText('At events')).toBeVisible()
+    await expect(media.getByText('Showreels')).toBeVisible()
+
+    // Add a showreel via the UI — provider + thumbnail derived
+    await page.getByRole('button', { name: 'Add showreel' }).click()
+    await page.getByLabel('Video link (https)').fill('https://youtu.be/demo123')
+    await page.getByLabel('Title (optional)').fill('Keynote reel')
+    await page.locator('.gb-dialog').getByRole('button', { name: 'Add showreel' }).click()
+    await expect(page.getByText('Showreel added').first()).toBeVisible()
+    await expect(page.getByTestId('showreels').getByText('Keynote reel')).toBeVisible()
+    await expect(page.getByTestId('showreels').getByText('youtube')).toBeVisible()
+
+    // Save SEO metadata via the sidebar
+    await page.getByLabel('Meta title').fill('Media Subject | Keynote Speaker')
+    await page.getByLabel('Focus keyword').fill('keynote speaker')
+    await page.getByRole('button', { name: 'Save SEO' }).click()
+    await expect(page.getByText('SEO saved').first()).toBeVisible()
+    await expect(page.getByText(/Updated .* by dev@greatbritishtalent.online/)).toBeVisible()
+  })
 })

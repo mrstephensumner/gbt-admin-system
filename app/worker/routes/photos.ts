@@ -33,6 +33,7 @@ photoRoutes.post('/talent/:reference/photos', async (c) => {
 
   const display = form.get('display')
   const isPrimary = form.get('is_primary') === 'true'
+  const category = form.get('category') === 'event' ? 'event' : 'headshot'
   const id = nanoid(12)
   const keyOriginal = `talent/${row.reference}/${id}-original`
   const keyDisplay = display instanceof File ? `talent/${row.reference}/${id}-display` : keyOriginal
@@ -49,22 +50,29 @@ photoRoutes.post('/talent/:reference/photos', async (c) => {
   const existing = await c.env.DB.prepare('SELECT COUNT(*) AS n FROM talent_photo WHERE talent_id = ?')
     .bind(row.id)
     .first<{ n: number }>()
-  const makePrimary = isPrimary || (existing?.n ?? 0) === 0
+  // Primary/avatar is a headshot concept only (spec 008 FR-002): an event photo
+  // is never the avatar. First headshot becomes primary automatically.
+  const headshots = await c.env.DB.prepare(
+    "SELECT COUNT(*) AS n FROM talent_photo WHERE talent_id = ? AND category = 'headshot'",
+  )
+    .bind(row.id)
+    .first<{ n: number }>()
+  const makePrimary = category === 'headshot' && (isPrimary || (headshots?.n ?? 0) === 0)
   const now = nowIso()
 
   const statements = [
     c.env.DB.prepare(
-      `INSERT INTO talent_photo (id, talent_id, r2_key_original, r2_key_display, content_type, is_primary, sort_order, created_at, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).bind(id, row.id, keyOriginal, keyDisplay, file.type, makePrimary ? 1 : 0, existing?.n ?? 0, now, c.get('operator')),
+      `INSERT INTO talent_photo (id, talent_id, r2_key_original, r2_key_display, content_type, is_primary, sort_order, category, created_at, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(id, row.id, keyOriginal, keyDisplay, file.type, makePrimary ? 1 : 0, existing?.n ?? 0, category, now, c.get('operator')),
     c.env.DB.prepare(
       `INSERT INTO change_record (talent_id, actor, action, field, old_value, new_value, at)
        VALUES (?, ?, 'photo_added', 'photo', NULL, ?, ?)`,
     ).bind(row.id, c.get('operator'), id, now),
   ]
-  if (makePrimary && (existing?.n ?? 0) > 0) {
+  if (makePrimary && (headshots?.n ?? 0) > 0) {
     statements.unshift(
-      c.env.DB.prepare('UPDATE talent_photo SET is_primary = 0 WHERE talent_id = ?').bind(row.id),
+      c.env.DB.prepare("UPDATE talent_photo SET is_primary = 0 WHERE talent_id = ? AND category = 'headshot'").bind(row.id),
     )
   }
   await c.env.DB.batch(statements)
@@ -93,8 +101,9 @@ photoRoutes.delete('/photos/:photoId', async (c) => {
 
   // Primary auto-reassigns to the next photo by sort order
   if (photo.is_primary) {
+    // Reassign the avatar among remaining headshots only (FR-002)
     const next = await c.env.DB.prepare(
-      'SELECT id FROM talent_photo WHERE talent_id = ? ORDER BY sort_order, id LIMIT 1',
+      "SELECT id FROM talent_photo WHERE talent_id = ? AND category = 'headshot' ORDER BY sort_order, id LIMIT 1",
     )
       .bind(photo.talent_id)
       .first<{ id: string }>()

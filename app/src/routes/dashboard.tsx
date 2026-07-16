@@ -67,6 +67,12 @@ function describeActivity(a: DashboardData['activity'][number]): string {
       return `topic merged into ${a.new_value}`
     case 'note_added':
       return 'internal note added'
+    case 'showreel_added':
+      return 'showreel added'
+    case 'showreel_removed':
+      return 'showreel removed'
+    case 'seo_updated':
+      return 'SEO metadata updated'
     default:
       return a.action
   }

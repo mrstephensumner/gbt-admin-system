@@ -14,6 +14,7 @@ import { formatDate, formatDateTime, formatDayRate } from '@shared/format'
 import { SOCIAL_PLATFORMS, SOCIAL_PLATFORM_LABELS, formatFollowers, type SocialPlatform } from '@shared/social'
 import { TalentFields, validateTalentForm, type TalentFormValues } from './talent-form'
 import { ComingSoon } from './coming-soon'
+import { MediaTab } from './media-tab'
 
 function toFormValues(t: Talent): TalentFormValues {
   return {
@@ -251,111 +252,7 @@ export function TalentProfileScreen() {
         )}
 
         {tab === 'photos' && (
-          <Card
-            title="Photos"
-            actions={
-              !talent.archived && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  iconLeft={<Upload size={14} />}
-                  onClick={() => fileInput.current?.click()}
-                >
-                  Upload photo
-                </Button>
-              )
-            }
-          >
-            <input
-              ref={fileInput}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              style={{ display: 'none' }}
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) void uploadPhoto(file)
-                e.target.value = ''
-              }}
-            />
-            {talent.photos.length === 0 ? (
-              <p className="gb-meta-row">No photos yet — an initials avatar is shown instead.</p>
-            ) : (
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {talent.photos.map((p) => (
-                  <div key={p.id} style={{ position: 'relative' }}>
-                    <img
-                      src={p.url}
-                      alt={talent.name}
-                      style={{
-                        width: 96,
-                        height: 96,
-                        objectFit: 'cover',
-                        borderRadius: 'var(--radius-md)',
-                        border: p.is_primary ? '2px solid var(--gb-red)' : '1px solid var(--border)',
-                      }}
-                    />
-                    {!talent.archived && (
-                      <div style={{ position: 'absolute', top: 4, right: 4 }}>
-                        <IconButton
-                          label="Delete photo"
-                          size="sm"
-                          variant="secondary"
-                          onClick={() =>
-                            void api
-                              .delete(`/photos/${p.id}`)
-                              .then(refresh)
-                              .catch(() => toast({ tone: 'danger', title: 'Could not delete photo' }))
-                          }
-                        >
-                          <Trash2 size={14} />
-                        </IconButton>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        )}
-
-        {tab === 'site' && (
-          <Card title="Site selector" subtitle="Where this speaker appears — per-brand website presence">
-            <div style={{ display: 'grid', gap: 12 }} data-testid="publication-panel">
-              {talent.publications.map((pub) => (
-                <div key={pub.brand} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                  <div>
-                    <div style={{ color: 'var(--text-body)' }}>{pub.brand_name}</div>
-                    <div className="gb-meta-row">
-                      {pub.published
-                        ? `Published ${formatDateTime(pub.published_at!)} by ${pub.published_by}`
-                        : 'Not published'}
-                    </div>
-                  </div>
-                  {!talent.archived && canPublish && (
-                    <Button
-                      variant={pub.published ? 'secondary' : 'navy'}
-                      size="sm"
-                      onClick={() =>
-                        void mutate(
-                          () =>
-                            api.post<Talent>(
-                              `/talent/${reference}/${pub.published ? 'unpublish' : 'publish'}`,
-                              { brand: pub.brand, version: talent.version },
-                            ),
-                          pub.published ? 'Unpublished' : 'Published',
-                        )
-                      }
-                    >
-                      {pub.published ? 'Unpublish' : 'Publish'}
-                    </Button>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="gb-meta-row" style={{ marginTop: 12 }}>
-              Day rate: <span className="gb-mono">{formatDayRate(talent.day_rate_pence)}</span>
-            </p>
-          </Card>
+          <MediaTab talent={talent} reference={reference} onPhotosChanged={refresh} />
         )}
 
         {tab === 'notes' && (
@@ -542,6 +439,12 @@ function describeChange(h: ChangeRecordItem): string {
       return `Press mention added (${h.new_value})`
     case 'press_mention_removed':
       return `Press mention removed (${h.old_value})`
+    case 'showreel_added':
+      return `Showreel added (${h.new_value})`
+    case 'showreel_removed':
+      return `Showreel removed (${h.old_value})`
+    case 'seo_updated':
+      return 'SEO metadata updated'
     default:
       return h.action
   }

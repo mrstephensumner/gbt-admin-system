@@ -45,6 +45,7 @@ export const talentPhoto = sqliteTable(
     contentType: text('content_type').notNull(),
     isPrimary: integer('is_primary', { mode: 'boolean' }).notNull().default(false),
     sortOrder: integer('sort_order').notNull().default(0),
+    category: text('category').notNull().default('headshot'),
     createdAt: text('created_at').notNull(),
     createdBy: text('created_by').notNull(),
   },
@@ -252,6 +253,35 @@ export const talentPressMention = sqliteTable(
   },
   (t) => [index('press_mention_talent_idx').on(t.talentId, t.publishedOn)],
 )
+
+/** Showreel video links (spec 008) — externally hosted (FR-007). */
+export const talentShowreel = sqliteTable(
+  'talent_showreel',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    title: text('title'),
+    url: text('url').notNull(),
+    provider: text('provider').notNull(),
+    createdAt: text('created_at').notNull(),
+    createdBy: text('created_by').notNull(),
+  },
+  (t) => [index('showreel_talent_idx').on(t.talentId)],
+)
+
+/** Per-talent SEO metadata (spec 008) — one row per talent, upserted. */
+export const talentSeo = sqliteTable('talent_seo', {
+  talentId: integer('talent_id')
+    .primaryKey()
+    .references(() => talent.id),
+  metaTitle: text('meta_title'),
+  metaDescription: text('meta_description'),
+  focusKeyword: text('focus_keyword'),
+  updatedAt: text('updated_at').notNull(),
+  updatedBy: text('updated_by').notNull(),
+})
 
 /** Append-only team audit trail (spec 002 FR-010) — no update/delete path exists. */
 export const operatorAudit = sqliteTable(

@@ -22,6 +22,7 @@ export interface PhotoRef {
   url: string
   is_primary: boolean
   sort_order: number
+  category: 'headshot' | 'event'
 }
 
 export interface PublicationState {

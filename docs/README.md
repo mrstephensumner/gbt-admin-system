@@ -8,6 +8,7 @@ code: any change that makes a doc stale updates that doc in the same commit.
 | Doc | Purpose |
 |---|---|
 | [vision.md](vision.md) | What we're building and why — scope, brands, roadmap horizons. |
+| [case-study.md](case-study.md) | Living project log & case-study source material (for localseo.agency). |
 | [design-system.md](design-system.md) | How to consume `design-system/` when building UI. |
 | [deployment.md](deployment.md) | Cloudflare deployment + Access setup for greatbritishtalent.online. |
 | [decisions/](decisions/) | Architecture decision records (ADRs), numbered and immutable. |

@@ -24,6 +24,13 @@ presentation layers over shared data.
 3. **Horizon 3 — power new sites.** Rebuilt versions of the existing sites and entirely new
    sites for new markets, all administered from this system (multi-brand, multi-market).
 
+**The database is the backbone of 7+ external websites** (owner-confirmed 16 Jul 2026):
+every brand site is a presentation layer over this one system of record, consuming its
+brand's published talent through a read-only content interface. This is why publication
+is modelled per brand from day one, why imports "seed not sync", and why the
+Cloudflare-native stack (edge reads, R2 zero-egress media) was reaffirmed — see
+[decisions/0003-multi-site-content-delivery.md](decisions/0003-multi-site-content-delivery.md).
+
 ## Product principles (draft — to be formalised in the constitution)
 
 - **Operational, not promotional.** This is a working tool for the bookings team; calm,
