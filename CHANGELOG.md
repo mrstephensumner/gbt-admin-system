@@ -6,6 +6,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- Task breakdown for spec 001 (`specs/001-talent-management/tasks.md`): 47 tasks across
+  8 phases (setup, foundational shared-domain/schema/shell, one phase per user story,
+  polish incl. topic management and deploy preview), with dependency graph, parallel
+  tracks, and MVP cut at Phase 3 (US1).
 - Implementation plan for spec 001 (`specs/001-talent-management/plan.md`) with Phase 0
   research (R1–R12), data model (8 tables incl. append-only change history and
   publication join), JSON API contract, and quickstart validation guide. Constitution
