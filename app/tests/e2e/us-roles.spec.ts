@@ -64,7 +64,6 @@ test.describe('US2 — owner manages the team', () => {
 
 test.describe('US3 — permission limits in practice', () => {
   test('publish-only operator: UI hides ungranted controls, API enforces, revocation is immediate', async ({
-    page,
     browser,
     request,
   }) => {

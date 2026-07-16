@@ -14,10 +14,11 @@ administration hub for:
 ## Project status
 
 ✅ **Live at greatbritishtalent.online** behind Cloudflare Access — Talent Management
-Module (spec 001, merged, v0.1.0). 🚧 **Admin Roles & Operator Management** (spec 002,
-branch `002-admin-roles`): operator registry, Owner-managed Team screen, per-operator
-permission grants enforced server-side — built and fully tested, production rollout
-pending the owner-email confirmation (see [docs/deployment.md](docs/deployment.md)).
+Module (spec 001, merged, v0.1.0). **Admin Roles & Operator Management** (spec 002, merged, v0.2.0) — operator registry,
+Owner-managed Team screen, per-operator permission grants. 🚧 **Roster Import** (spec
+003, branch `003-roster-import`): file-based import (CSV/XLSX/JSON) with
+validate-before-import, staged human review, and idempotent re-uploads — built and
+tested, awaiting the real back-office export file for the live run.
 
 ## Running the app
 

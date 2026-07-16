@@ -444,11 +444,11 @@ var HonoRequest = class {
     }
     const anyCachedKey = Object.keys(bodyCache)[0];
     if (anyCachedKey) {
-      return bodyCache[anyCachedKey].then((body2) => {
+      return bodyCache[anyCachedKey].then((body3) => {
         if (anyCachedKey === "json") {
-          body2 = JSON.stringify(body2);
+          body3 = JSON.stringify(body3);
         }
-        return new Response(body2)[key]();
+        return new Response(body3)[key]();
       });
     }
     return bodyCache[key] = raw2[key]();
@@ -686,7 +686,7 @@ var setDefaultContentType = /* @__PURE__ */ __name((contentType, headers) => {
     ...headers
   };
 }, "setDefaultContentType");
-var createResponseInstance = /* @__PURE__ */ __name((body2, init) => new Response(body2, init), "createResponseInstance");
+var createResponseInstance = /* @__PURE__ */ __name((body3, init) => new Response(body3, init), "createResponseInstance");
 var Context = class {
   static {
     __name(this, "Context");
@@ -3698,12 +3698,13 @@ async function withIdentity(c, next) {
 __name(withIdentity, "withIdentity");
 
 // shared/permissions.ts
-var PERMISSIONS = ["edit_day_rates", "publish", "archive", "manage_topics"];
+var PERMISSIONS = ["edit_day_rates", "publish", "archive", "manage_topics", "import_roster"];
 var PERMISSION_REFUSALS = {
   edit_day_rates: "You don't have permission to edit day rates \u2014 ask the owner",
   publish: "You don't have permission to publish speakers \u2014 ask the owner",
   archive: "You don't have permission to archive speakers \u2014 ask the owner",
-  manage_topics: "You don't have permission to manage topics \u2014 ask the owner"
+  manage_topics: "You don't have permission to manage topics \u2014 ask the owner",
+  import_roster: "You don't have permission to import roster files \u2014 ask the owner"
 };
 var NOT_REGISTERED_MESSAGE = "You don't have access yet \u2014 ask the owner to add you";
 function can(operator2, permission) {
@@ -5915,6 +5916,46 @@ var operatorGrant = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.operatorId, t.permission] })]
 );
+var importCandidate = sqliteTable(
+  "import_candidate",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    sourceId: text("source_id").notNull(),
+    name: text("name").notNull(),
+    headline: text("headline"),
+    biography: text("biography"),
+    topicsJson: text("topics_json").notNull().default("[]"),
+    dayRatePence: integer("day_rate_pence"),
+    location: text("location"),
+    email: text("email"),
+    phone: text("phone"),
+    photoUrl: text("photo_url"),
+    gapsJson: text("gaps_json").notNull().default("[]"),
+    duplicateOf: text("duplicate_of"),
+    status: text("status").notNull().default("new"),
+    talentReference: text("talent_reference"),
+    firstSeenAt: text("first_seen_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+    decidedAt: text("decided_at"),
+    decidedBy: text("decided_by")
+  },
+  (t) => [
+    uniqueIndex("import_candidate_source_idx").on(sql`${t.sourceId} COLLATE NOCASE`),
+    index("import_candidate_status_idx").on(t.status),
+    check("import_candidate_status_check", sql`status IN ('new', 'imported', 'skipped')`)
+  ]
+);
+var importRun = sqliteTable("import_run", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  fileName: text("file_name").notNull(),
+  operator: text("operator").notNull(),
+  at: text("at").notNull(),
+  rowsFound: integer("rows_found").notNull(),
+  rowsStaged: integer("rows_staged").notNull(),
+  rowsProblem: integer("rows_problem").notNull(),
+  problemsJson: text("problems_json").notNull().default("[]"),
+  dryRun: integer("dry_run", { mode: "boolean" }).notNull().default(false)
+});
 var operatorAudit = sqliteTable(
   "operator_audit",
   {
@@ -21861,6 +21902,395 @@ teamRoutes.get("/team/audit", async (c) => {
   return c.json(await listAudit(c.env.DB, page, perPage));
 });
 
+// shared/importing.ts
+var normalisedRowSchema = external_exports.object({
+  source_id: external_exports.string().trim().min(1, "Row has no talent identifier"),
+  name: external_exports.string().trim().min(1, "Row has no name").max(200, "Name must be 200 characters or fewer"),
+  headline: external_exports.string().trim().max(200).nullish(),
+  biography: external_exports.string().trim().nullish(),
+  topics: external_exports.array(external_exports.string().trim().min(1).max(60)).default([]),
+  day_rate_raw: external_exports.string().trim().nullish(),
+  location: external_exports.string().trim().max(200).nullish(),
+  email: external_exports.string().trim().nullish(),
+  phone: external_exports.string().trim().max(50).nullish(),
+  photo_url: external_exports.string().trim().nullish()
+});
+function parseGbpToPence(raw2) {
+  if (raw2 == null) return null;
+  const trimmed = raw2.trim();
+  if (trimmed === "") return null;
+  const m = /^£?\s*(\d{1,3}(?:,\d{3})*|\d+)(?:\.(\d{2}))?$/.exec(trimmed);
+  if (!m) return null;
+  const pounds = Number.parseInt(m[1].replace(/,/g, ""), 10);
+  const pence = m[2] ? Number.parseInt(m[2], 10) : 0;
+  return pounds * 100 + pence;
+}
+__name(parseGbpToPence, "parseGbpToPence");
+var MAX_ROWS_PER_UPLOAD = 1e4;
+var MAX_APPROVE_PER_REQUEST = 25;
+
+// worker/services/importing.ts
+function serializeCandidate(row) {
+  return {
+    id: row.id,
+    source_id: row.source_id,
+    name: row.name,
+    headline: row.headline,
+    biography: row.biography,
+    topics: JSON.parse(row.topics_json),
+    day_rate_pence: row.day_rate_pence,
+    location: row.location,
+    email: row.email,
+    phone: row.phone,
+    photo_url: row.photo_url,
+    gaps: JSON.parse(row.gaps_json),
+    duplicate_of: row.duplicate_of,
+    status: row.status,
+    talent_reference: row.talent_reference,
+    first_seen_at: row.first_seen_at,
+    updated_at: row.updated_at
+  };
+}
+__name(serializeCandidate, "serializeCandidate");
+var EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+async function runImport(d1, fileName, rows, dryRun, actor) {
+  if (rows.length > MAX_ROWS_PER_UPLOAD)
+    throw new ApiError(400, "too_many_rows", `Files are limited to ${MAX_ROWS_PER_UPLOAD.toLocaleString("en-GB")} rows`);
+  const problems = [];
+  const clean = [];
+  const seenIds = /* @__PURE__ */ new Set();
+  rows.forEach((raw2, index2) => {
+    const rowNo = index2 + 1;
+    const parsed = normalisedRowSchema.safeParse(raw2);
+    if (!parsed.success) {
+      problems.push({ row: rowNo, reason: parsed.error.issues[0]?.message ?? "Row is unreadable" });
+      return;
+    }
+    const row = parsed.data;
+    const key = row.source_id.toLowerCase();
+    if (seenIds.has(key)) {
+      problems.push({ row: rowNo, reason: `Duplicate talent identifier in file: ${row.source_id}` });
+      return;
+    }
+    seenIds.add(key);
+    const gaps = [];
+    const dayRate = parseGbpToPence(row.day_rate_raw);
+    if (row.day_rate_raw && dayRate === null) gaps.push(`Day rate unreadable: "${row.day_rate_raw}"`);
+    if (!row.day_rate_raw) gaps.push("No day rate in file");
+    if (!row.biography) gaps.push("No biography in file");
+    if (!row.photo_url) gaps.push("No photo in file");
+    if (row.topics.length === 0) gaps.push("No topics in file \u2014 add one before approving");
+    if (row.email && !EMAIL_SHAPE.test(row.email)) gaps.push(`Email looks invalid: "${row.email}"`);
+    clean.push({ row, gaps, dayRate });
+  });
+  let stagedNew = 0;
+  let refreshed = 0;
+  let untouchedImported = 0;
+  let untouchedSkipped = 0;
+  const now = nowIso();
+  const existing = /* @__PURE__ */ new Map();
+  if (clean.length > 0) {
+    const all = await d1.prepare("SELECT id, source_id, status FROM import_candidate").all();
+    for (const c of all.results) existing.set(c.source_id.toLowerCase(), { id: c.id, status: c.status });
+  }
+  const statements = [];
+  for (const { row, gaps, dayRate } of clean) {
+    const prior = existing.get(row.source_id.toLowerCase());
+    if (prior && prior.status === "imported") {
+      untouchedImported++;
+      continue;
+    }
+    if (prior && prior.status === "skipped") {
+      untouchedSkipped++;
+      continue;
+    }
+    const dupe = await d1.prepare("SELECT reference FROM talent WHERE name = ? COLLATE NOCASE AND archived_at IS NULL LIMIT 1").bind(row.name).first();
+    const email4 = row.email && EMAIL_SHAPE.test(row.email) ? row.email : null;
+    if (prior) {
+      refreshed++;
+      statements.push(
+        d1.prepare(
+          `UPDATE import_candidate SET name = ?, headline = ?, biography = ?, topics_json = ?, day_rate_pence = ?,
+             location = ?, email = ?, phone = ?, photo_url = ?, gaps_json = ?, duplicate_of = ?, updated_at = ?
+             WHERE id = ? AND status = 'new'`
+        ).bind(
+          row.name,
+          row.headline ?? null,
+          row.biography ?? null,
+          JSON.stringify(row.topics),
+          dayRate,
+          row.location ?? null,
+          email4,
+          row.phone ?? null,
+          row.photo_url ?? null,
+          JSON.stringify(gaps),
+          dupe?.reference ?? null,
+          now,
+          prior.id
+        )
+      );
+    } else {
+      stagedNew++;
+      statements.push(
+        d1.prepare(
+          `INSERT INTO import_candidate (source_id, name, headline, biography, topics_json, day_rate_pence,
+             location, email, phone, photo_url, gaps_json, duplicate_of, status, first_seen_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)`
+        ).bind(
+          row.source_id,
+          row.name,
+          row.headline ?? null,
+          row.biography ?? null,
+          JSON.stringify(row.topics),
+          dayRate,
+          row.location ?? null,
+          email4,
+          row.phone ?? null,
+          row.photo_url ?? null,
+          JSON.stringify(gaps),
+          dupe?.reference ?? null,
+          now,
+          now
+        )
+      );
+    }
+  }
+  if (!dryRun && statements.length > 0) {
+    for (let i = 0; i < statements.length; i += 100) {
+      await d1.batch(statements.slice(i, i + 100));
+    }
+  }
+  const run = await d1.prepare(
+    `INSERT INTO import_run (file_name, operator, at, rows_found, rows_staged, rows_problem, problems_json, dry_run)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id`
+  ).bind(
+    fileName,
+    actor,
+    now,
+    rows.length,
+    dryRun ? 0 : stagedNew + refreshed,
+    problems.length,
+    JSON.stringify(problems.slice(0, 200)),
+    dryRun ? 1 : 0
+  ).first();
+  return {
+    run_id: run.id,
+    dry_run: dryRun,
+    rows_found: rows.length,
+    rows_clean: clean.length,
+    rows_problem: problems.length,
+    problems,
+    staged_new: dryRun ? 0 : stagedNew,
+    refreshed: dryRun ? 0 : refreshed,
+    untouched_imported: untouchedImported,
+    untouched_skipped: untouchedSkipped
+  };
+}
+__name(runImport, "runImport");
+async function listRuns(d1, page, perPage) {
+  const [rows, count] = await Promise.all([
+    d1.prepare(
+      "SELECT id, file_name, operator, at, rows_found, rows_staged, rows_problem, dry_run FROM import_run ORDER BY id DESC LIMIT ? OFFSET ?"
+    ).bind(perPage, (page - 1) * perPage).all(),
+    d1.prepare("SELECT COUNT(*) AS n FROM import_run").first()
+  ]);
+  return { items: rows.results, total: count.n, page, per_page: perPage };
+}
+__name(listRuns, "listRuns");
+async function listCandidates(d1, status, q, page, perPage) {
+  const where = ["status = ?"];
+  const params = [status];
+  if (q) {
+    where.push("name LIKE ? COLLATE NOCASE");
+    params.push(`%${q}%`);
+  }
+  const whereSql = `WHERE ${where.join(" AND ")}`;
+  const [rows, count] = await Promise.all([
+    d1.prepare(`SELECT * FROM import_candidate ${whereSql} ORDER BY name COLLATE NOCASE LIMIT ? OFFSET ?`).bind(...params, perPage, (page - 1) * perPage).all(),
+    d1.prepare(`SELECT COUNT(*) AS n FROM import_candidate ${whereSql}`).bind(...params).first()
+  ]);
+  return { items: rows.results.map(serializeCandidate), total: count.n, page, per_page: perPage };
+}
+__name(listCandidates, "listCandidates");
+async function getCandidate(d1, id) {
+  const row = await d1.prepare("SELECT * FROM import_candidate WHERE id = ?").bind(id).first();
+  if (!row) throw new ApiError(404, "not_found", "No such import candidate");
+  return row;
+}
+__name(getCandidate, "getCandidate");
+async function editCandidate(d1, id, fields) {
+  const row = await getCandidate(d1, id);
+  if (row.status !== "new") throw new ApiError(422, "not_reviewable", "Only new candidates can be edited");
+  const next = {
+    name: fields.name?.trim() || row.name,
+    headline: fields.headline !== void 0 ? fields.headline : row.headline,
+    biography: fields.biography !== void 0 ? fields.biography : row.biography,
+    topics_json: fields.topics !== void 0 ? JSON.stringify(fields.topics) : row.topics_json,
+    day_rate_pence: fields.day_rate_pence !== void 0 ? fields.day_rate_pence : row.day_rate_pence,
+    location: fields.location !== void 0 ? fields.location : row.location,
+    email: fields.email !== void 0 ? fields.email : row.email,
+    phone: fields.phone !== void 0 ? fields.phone : row.phone
+  };
+  await d1.prepare(
+    `UPDATE import_candidate SET name = ?, headline = ?, biography = ?, topics_json = ?, day_rate_pence = ?,
+       location = ?, email = ?, phone = ?, updated_at = ? WHERE id = ?`
+  ).bind(
+    next.name,
+    next.headline,
+    next.biography,
+    next.topics_json,
+    next.day_rate_pence,
+    next.location,
+    next.email,
+    next.phone,
+    nowIso(),
+    id
+  ).run();
+  return serializeCandidate(await getCandidate(d1, id));
+}
+__name(editCandidate, "editCandidate");
+async function skipCandidate(d1, id, actor) {
+  const row = await getCandidate(d1, id);
+  if (row.status !== "new") throw new ApiError(422, "not_reviewable", "Only new candidates can be skipped");
+  await d1.prepare("UPDATE import_candidate SET status = 'skipped', decided_at = ?, decided_by = ? WHERE id = ?").bind(nowIso(), actor, id).run();
+  return serializeCandidate(await getCandidate(d1, id));
+}
+__name(skipCandidate, "skipCandidate");
+async function approveOne(d1, photos, id, actor) {
+  const row = await getCandidate(d1, id);
+  if (row.status !== "new") throw new ApiError(422, "not_reviewable", "Candidate has already been decided");
+  const topics = JSON.parse(row.topics_json);
+  const input = talentCreateSchema.safeParse({
+    name: row.name,
+    headline: row.headline,
+    biography: row.biography,
+    day_rate_pence: row.day_rate_pence,
+    location: row.location,
+    email: row.email,
+    phone: row.phone,
+    topics
+  });
+  if (!input.success) {
+    throw new ApiError(400, "validation", input.error.issues[0]?.message ?? "Candidate is not valid yet");
+  }
+  const talent2 = await createTalent(d1, input.data, actor);
+  const talentRow = await getTalentRow(d1, talent2.reference);
+  await d1.prepare(
+    `INSERT INTO change_record (talent_id, actor, action, field, old_value, new_value, at)
+       VALUES (?, ?, 'field_changed', 'import', NULL, ?, ?)`
+  ).bind(talentRow.id, actor, `Imported from ${row.source_id}`, nowIso()).run();
+  let photoNote = null;
+  if (row.photo_url) {
+    try {
+      const res = await fetch(row.photo_url, { signal: AbortSignal.timeout(1e4) });
+      const type = res.headers.get("Content-Type") ?? "";
+      if (res.ok && ["image/jpeg", "image/png", "image/webp"].includes(type.split(";")[0].trim())) {
+        const bytes = await res.arrayBuffer();
+        if (bytes.byteLength <= 10 * 1024 * 1024) {
+          const photoId = crypto.randomUUID().slice(0, 12);
+          const key = `talent/${talent2.reference}/${photoId}-original`;
+          await photos.put(key, bytes, { httpMetadata: { contentType: type.split(";")[0].trim() } });
+          await d1.prepare(
+            `INSERT INTO talent_photo (id, talent_id, r2_key_original, r2_key_display, content_type, is_primary, sort_order, created_at, created_by)
+               VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?)`
+          ).bind(photoId, talentRow.id, key, key, type.split(";")[0].trim(), nowIso(), actor).run();
+        } else photoNote = "Photo too large to import";
+      } else photoNote = "Photo could not be fetched";
+    } catch {
+      photoNote = "Photo could not be fetched";
+    }
+  }
+  const gaps = JSON.parse(row.gaps_json);
+  if (photoNote) gaps.push(photoNote);
+  await d1.prepare(
+    "UPDATE import_candidate SET status = 'imported', talent_reference = ?, gaps_json = ?, decided_at = ?, decided_by = ? WHERE id = ?"
+  ).bind(talent2.reference, JSON.stringify(gaps), nowIso(), actor, id).run();
+  return talent2.reference;
+}
+__name(approveOne, "approveOne");
+async function approveCandidates(d1, photos, ids, actor) {
+  const results = [];
+  for (const id of ids) {
+    try {
+      const reference = await approveOne(d1, photos, id, actor);
+      results.push({ id, ok: true, talent_reference: reference });
+    } catch (err) {
+      results.push({ id, ok: false, reason: err instanceof ApiError ? err.message : "Something went wrong" });
+    }
+  }
+  return { results };
+}
+__name(approveCandidates, "approveCandidates");
+async function clearStaging(d1) {
+  const res = await d1.prepare("DELETE FROM import_candidate WHERE status = 'new'").run();
+  return { deleted: res.meta.changes ?? 0 };
+}
+__name(clearStaging, "clearStaging");
+
+// worker/routes/importing.ts
+var runSchema = external_exports.object({
+  file_name: external_exports.string().trim().min(1, "Name the file").max(200),
+  dry_run: external_exports.boolean().default(false),
+  rows: external_exports.array(external_exports.unknown())
+});
+var editSchema = external_exports.object({
+  name: external_exports.string().trim().min(1, "Add a name").max(200).optional(),
+  headline: external_exports.string().trim().max(200).nullish().optional(),
+  biography: external_exports.string().trim().nullish().optional(),
+  topics: external_exports.array(external_exports.string().trim().min(1).max(60)).optional(),
+  day_rate_pence: external_exports.number().int().min(0).nullish().optional(),
+  location: external_exports.string().trim().max(200).nullish().optional(),
+  email: external_exports.email("Enter a valid email address").nullish().or(external_exports.literal("").transform(() => null)).optional(),
+  phone: external_exports.string().trim().max(50).nullish().optional()
+});
+var approveSchema = external_exports.object({
+  ids: external_exports.array(external_exports.number().int().positive()).min(1, "Select at least one candidate").max(MAX_APPROVE_PER_REQUEST, `Approve at most ${MAX_APPROVE_PER_REQUEST} candidates per request`)
+});
+async function body2(c, schema) {
+  const raw2 = await c.req.json().catch(() => {
+    throw new ApiError(400, "invalid_json", "Request body must be JSON");
+  });
+  const parsed = schema.safeParse(raw2);
+  if (!parsed.success) throw new ApiError(400, "validation", parsed.error.issues[0]?.message ?? "Invalid request");
+  return parsed.data;
+}
+__name(body2, "body");
+var importRoutes = new Hono2();
+importRoutes.use("/import/*", requirePermission("import_roster"));
+importRoutes.post("/import/runs", async (c) => {
+  const input = await body2(c, runSchema);
+  return c.json(await runImport(c.env.DB, input.file_name, input.rows, input.dry_run, c.get("operator")));
+});
+importRoutes.get("/import/runs", async (c) => {
+  const page = Math.max(1, Number(c.req.query("page") ?? 1));
+  const perPage = Math.min(100, Math.max(1, Number(c.req.query("per_page") ?? 10)));
+  return c.json(await listRuns(c.env.DB, page, perPage));
+});
+importRoutes.get("/import/candidates", async (c) => {
+  const status = c.req.query("status") ?? "new";
+  if (!["new", "imported", "skipped"].includes(status))
+    throw new ApiError(400, "validation", "Unknown candidate status");
+  const page = Math.max(1, Number(c.req.query("page") ?? 1));
+  const perPage = Math.min(100, Math.max(1, Number(c.req.query("per_page") ?? 25)));
+  return c.json(
+    await listCandidates(c.env.DB, status, c.req.query("q"), page, perPage)
+  );
+});
+importRoutes.patch("/import/candidates/:id", async (c) => {
+  const input = await body2(c, editSchema);
+  return c.json(await editCandidate(c.env.DB, Number(c.req.param("id")), input));
+});
+importRoutes.post("/import/candidates/:id/skip", async (c) => {
+  return c.json(await skipCandidate(c.env.DB, Number(c.req.param("id")), c.get("operator")));
+});
+importRoutes.post("/import/approve", async (c) => {
+  const input = await body2(c, approveSchema);
+  return c.json(await approveCandidates(c.env.DB, c.env.PHOTOS, input.ids, c.get("operator")));
+});
+importRoutes.delete("/import/candidates", async (c) => {
+  return c.json(await clearStaging(c.env.DB));
+});
+
 // worker/index.ts
 var app = new Hono2();
 app.onError(errorEnvelope);
@@ -21872,6 +22302,7 @@ app.route("/api", photoRoutes);
 app.route("/api", topicRoutes);
 app.route("/api", brandRoutes);
 app.route("/api", teamRoutes);
+app.route("/api", importRoutes);
 app.notFound(
   (c) => c.req.path.startsWith("/api") ? c.json({ error: { code: "not_found", message: "No such resource" } }, 404) : c.notFound()
 );

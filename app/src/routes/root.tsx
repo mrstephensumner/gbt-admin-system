@@ -1,13 +1,14 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { Users, Tags, ShieldCheck } from 'lucide-react'
+import { Users, Tags, ShieldCheck, FileUp } from 'lucide-react'
 import { NavItem } from '../components'
-import { useOperator } from '../lib/operator'
+import { useCan, useOperator } from '../lib/operator'
 import { NoAccessScreen } from './no-access'
 
 export function Root() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { operator, notRegistered, loading } = useOperator()
+  const canImport = useCan('import_roster')
 
   if (notRegistered) return <NoAccessScreen />
   if (loading) return null
@@ -31,6 +32,14 @@ export function Root() {
             active={pathname.startsWith('/topics')}
             onClick={() => navigate('/topics')}
           />
+          {canImport && (
+            <NavItem
+              icon={<FileUp size={18} />}
+              label="Import"
+              active={pathname.startsWith('/import')}
+              onClick={() => navigate('/import')}
+            />
+          )}
           {operator?.role === 'owner' && (
             <NavItem
               icon={<ShieldCheck size={18} />}

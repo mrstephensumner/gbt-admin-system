@@ -24,6 +24,7 @@ import { TalentNewScreen } from './routes/talent-new'
 import { TalentProfileScreen } from './routes/talent-profile'
 import { TopicsScreen } from './routes/topics'
 import { TeamScreen } from './routes/team'
+import { ImportScreen } from './routes/import'
 import { OperatorProvider } from './lib/operator'
 
 const queryClient = new QueryClient({
@@ -40,6 +41,7 @@ const router = createBrowserRouter([
       { path: 'talent/:reference', Component: TalentProfileScreen },
       { path: 'topics', Component: TopicsScreen },
       { path: 'team', Component: TeamScreen },
+      { path: 'import', Component: ImportScreen },
     ],
   },
 ])

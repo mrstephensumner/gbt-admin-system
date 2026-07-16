@@ -8,8 +8,8 @@ import {
 } from '@shared/permissions'
 
 describe('permission areas (spec 002 FR-006/007/008)', () => {
-  it('defines exactly the four v1 areas in canonical order', () => {
-    expect(PERMISSIONS).toEqual(['edit_day_rates', 'publish', 'archive', 'manage_topics'])
+  it('defines exactly the five areas in canonical order (import_roster added by spec 003)', () => {
+    expect(PERMISSIONS).toEqual(['edit_day_rates', 'publish', 'archive', 'manage_topics', 'import_roster'])
   })
 
   it.each(PERMISSIONS)('accepts area id %s', (p) => {

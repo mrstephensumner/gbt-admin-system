@@ -156,6 +156,50 @@ export const operatorGrant = sqliteTable(
   (t) => [primaryKey({ columns: [t.operatorId, t.permission] })],
 )
 
+/** Import staging (spec 003) — discardable; keyed by the old system's id (FR-010). */
+export const importCandidate = sqliteTable(
+  'import_candidate',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    sourceId: text('source_id').notNull(),
+    name: text('name').notNull(),
+    headline: text('headline'),
+    biography: text('biography'),
+    topicsJson: text('topics_json').notNull().default('[]'),
+    dayRatePence: integer('day_rate_pence'),
+    location: text('location'),
+    email: text('email'),
+    phone: text('phone'),
+    photoUrl: text('photo_url'),
+    gapsJson: text('gaps_json').notNull().default('[]'),
+    duplicateOf: text('duplicate_of'),
+    status: text('status').notNull().default('new'),
+    talentReference: text('talent_reference'),
+    firstSeenAt: text('first_seen_at').notNull(),
+    updatedAt: text('updated_at').notNull(),
+    decidedAt: text('decided_at'),
+    decidedBy: text('decided_by'),
+  },
+  (t) => [
+    uniqueIndex('import_candidate_source_idx').on(sql`${t.sourceId} COLLATE NOCASE`),
+    index('import_candidate_status_idx').on(t.status),
+    check('import_candidate_status_check', sql`status IN ('new', 'imported', 'skipped')`),
+  ],
+)
+
+/** One upload (or dry run) — the Recent transfers history (spec 003 FR-004). */
+export const importRun = sqliteTable('import_run', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  fileName: text('file_name').notNull(),
+  operator: text('operator').notNull(),
+  at: text('at').notNull(),
+  rowsFound: integer('rows_found').notNull(),
+  rowsStaged: integer('rows_staged').notNull(),
+  rowsProblem: integer('rows_problem').notNull(),
+  problemsJson: text('problems_json').notNull().default('[]'),
+  dryRun: integer('dry_run', { mode: 'boolean' }).notNull().default(false),
+})
+
 /** Append-only team audit trail (spec 002 FR-010) — no update/delete path exists. */
 export const operatorAudit = sqliteTable(
   'operator_audit',

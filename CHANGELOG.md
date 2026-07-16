@@ -6,6 +6,18 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Spec 003 implementation** under `app/`: browser-side file parsing (CSV via
+  papaparse, XLSX via SheetJS official CDN build 0.20.3 — npm's stale xlsx package and
+  its advisories avoided, JSON native); dry-run validation sharing the staging code
+  path; import_candidate/import_run tables (migration 0002); tolerant column-synonym
+  mapping with visible unmapped-column reporting; conservative GBP parsing (gaps, never
+  guesses); staged review screen (edit/skip/bulk-approve with chunked progress, clear
+  staging); approval through the spec-001 creation rules with import-marked history and
+  approval-time photo fetch into R2; idempotent re-uploads keyed by source talent id;
+  permanent skip memory; new `import_roster` permission area (first exercise of spec
+  002's default-deny extension — Team screen toggle appeared automatically). Suites:
+  79 unit + 85 integration + 15 e2e, all green, e2e verified repeat-safe; Import screen
+  visually verified against the owner's mockup.
 - Implementation plan for spec 003 (`specs/003-roster-import/plan.md`): research R1–R8
   (browser-side parsing, dry-run validation, JSON-detail staging table, approval-time
   photo fetch, new import_roster permission area, tolerant column-synonym mapping,
