@@ -56,7 +56,7 @@
 ## Phase 5: Polish & Rollout
 
 - [X] T013 Full quickstart run; visual pass of the Import screen against the owner's mockup + design system; SC-002 timing sanity (1,300-row fixture); docs sync — README status, CHANGELOG, note in docs/vision.md backlog already done (Principle II)
-- [ ] T014 Production rollout — `npm run db:migrate:remote`, deploy, smoke-test permission gate live; **await the real export file** → drop on Validate, extend synonym map if headers differ, then the owner (or grantee) runs the real import
+- [X] T014 Production rollout — `npm run db:migrate:remote`, deploy, smoke-test permission gate live; **await the real export file** → drop on Validate, extend synonym map if headers differ, then the owner (or grantee) runs the real import — **DEPLOYED 16 Jul 2026: migration 0002 applied remotely, edge + Worker gates verified; live import awaits the real export file**
 
 ---
 
