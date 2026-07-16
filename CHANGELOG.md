@@ -6,6 +6,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Cloudflare Access enabled in production** (16 Jul 2026): Zero Trust application
+  covering greatbritishtalent.online with a Bookings Team allow-list policy; Worker
+  redeployed with `ACCESS_TEAM_DOMAIN`/`ACCESS_AUD` set and verified to 401
+  unauthenticated API requests. `.dev.vars` (gitignored) keeps local dev on the fake
+  identity. Custom-domain binding is the remaining step.
 - **First production deployment** (16 Jul 2026): D1 database `gbt_admin`
   (003ddb66…) and R2 bucket `gbt-photos` created; schema migrated; Great British
   Speakers brand seeded; Worker deployed to

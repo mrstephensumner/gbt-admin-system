@@ -25,9 +25,9 @@
     }
   ],
   "vars": {
-    // Set both to enable real Cloudflare Access JWT verification in production.
-    // Empty in dev: the identity middleware accepts the dev header instead.
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
+    // Cloudflare Access JWT verification (production). For local dev,
+    // .dev.vars overrides these to empty so the dev identity header applies.
+    "ACCESS_TEAM_DOMAIN": "muddy-base-9f72.cloudflareaccess.com",
+    "ACCESS_AUD": "c79142a95dbc829fc2d98cb6c269db4c74dd07fce6a14d30bdd39e0ca87d073b"
   }
 }
