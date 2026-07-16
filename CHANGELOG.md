@@ -6,6 +6,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- Implementation plan for spec 002 (`specs/002-admin-roles/plan.md`) with authorization
+  research R1–R8 (per-request middleware gate, grants-as-rows default-deny, shared
+  permissions module, OWNER_EMAIL bootstrap, field-level day-rate enforcement, zero-
+  grace-window revocation, append-only team audit), data model (operator,
+  operator_grant, operator_audit), team API contract, and quickstart. Constitution Check
+  passes all six gates; no new stack decisions (ADR 0002 stands).
 - Spec 002 — Admin Roles & Operator Management (`specs/002-admin-roles/spec.md`): three
   prioritised user stories (registry gate for signed-in users, Owner-managed team screen,
   per-operator permission grants enforced server-side), 12 functional requirements
