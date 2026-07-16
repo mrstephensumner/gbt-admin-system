@@ -31,9 +31,13 @@
 
 ## Notes
 
-- Validation run 2026-07-16 against the initial draft: all items pass.
-- The load-bearing assumption is the DATA SOURCE: the public greatbritishspeakers.co.uk
-  website (no back-office export assumed). Confirm with the owner before `/speckit-plan`;
-  a CSV/export source would reshape User Story 1.
-- Other recorded defaults: seed-not-sync, Speakers brand only, human review mandatory
-  (no auto-approval), import gated behind a new spec-002 permission area.
+- Validation re-run 2026-07-16 after the source revision: all items pass.
+- Source CONFIRMED by owner: an export FILE from the old back office (CSV/XLSX/JSON) —
+  the spec was rewritten from website-crawl to file upload accordingly. Owner supplied a
+  design mockup (validate-before-import, import modes, recent transfers) as the visual
+  reference; it is not yet in the repo's design-system handoff.
+- Deliberate scope cuts, recorded in Assumptions: add-new-only (no update-existing /
+  replace-all), no Export panel, seed-not-sync, human review mandatory, new spec-002
+  permission area.
+- Open dependency: a sample or real export file is needed before implementation can be
+  verified end-to-end (column mapping).

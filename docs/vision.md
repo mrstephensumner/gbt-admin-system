@@ -39,6 +39,15 @@ The admin system will be served from **greatbritishtalent.online**, which is con
 targets should therefore assume the Cloudflare platform unless a decision record says
 otherwise.
 
+## Mockup-derived backlog (16 Jul 2026)
+
+A newer Claude Design mockup of the admin (shared by the owner; not yet in
+`design-system/`) shows the intended breadth of the platform. Recorded here as backlog,
+in no committed order: Enquiries, Bookings, Clients, Invoices modules; talent
+Availability; Social & News feeds and follower stats; Profile Enrichment; Statistics;
+Site Selector / per-site profiles (multi-brand publication surfaces); fee schedules
+beyond a single day rate; talent data Export; import update-existing mode.
+
 ## Open questions
 
 - ~~Tech stack~~ — decided 16 Jul 2026: Cloudflare-native TypeScript (React SPA + Hono +

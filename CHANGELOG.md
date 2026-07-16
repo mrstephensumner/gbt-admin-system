@@ -6,6 +6,10 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- Spec 003 revised same day: source changed from website crawl to owner-provided export
+  file (CSV/XLSX/JSON) with validate-before-import, per the owner's design mockup;
+  add-new-only mode locked for v1; mockup-revealed future modules recorded in
+  `docs/vision.md` backlog.
 - Spec 003 — Roster Import from Great British Speakers
   (`specs/003-roster-import/spec.md`): staged import of the old site's public speaker
   profiles (candidates → human review/edit → approve into talent records), reconciling
