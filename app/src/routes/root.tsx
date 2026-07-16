@@ -1,13 +1,16 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { useQuery } from '@tanstack/react-query'
-import { Users, Tags } from 'lucide-react'
+import { Users, Tags, ShieldCheck } from 'lucide-react'
 import { NavItem } from '../components'
-import { api } from '../lib/api'
+import { useOperator } from '../lib/operator'
+import { NoAccessScreen } from './no-access'
 
 export function Root() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const me = useQuery({ queryKey: ['me'], queryFn: () => api.get<{ email: string }>('/me') })
+  const { operator, notRegistered, loading } = useOperator()
+
+  if (notRegistered) return <NoAccessScreen />
+  if (loading) return null
 
   return (
     <div className="gb-shell">
@@ -28,6 +31,14 @@ export function Root() {
             active={pathname.startsWith('/topics')}
             onClick={() => navigate('/topics')}
           />
+          {operator?.role === 'owner' && (
+            <NavItem
+              icon={<ShieldCheck size={18} />}
+              label="Team"
+              active={pathname.startsWith('/team')}
+              onClick={() => navigate('/team')}
+            />
+          )}
         </nav>
         <div className="gb-sidebar__footer">GBT Admin — internal</div>
       </aside>
@@ -36,7 +47,7 @@ export function Root() {
           <div className="gb-topbar__title">Talent management</div>
           <div className="gb-topbar__spacer" />
           <div className="gb-topbar__operator" data-testid="operator-email">
-            {me.data?.email ?? ''}
+            {operator ? `${operator.email}${operator.role === 'owner' ? ' · owner' : ''}` : ''}
           </div>
         </header>
         <main className="gb-content">

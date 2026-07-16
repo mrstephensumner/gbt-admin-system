@@ -6,6 +6,7 @@ import { Avatar, Badge, Button, Card, Dialog, IconButton, Select, useToast } fro
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
 import { makeDisplayRendition } from '../lib/image'
+import { useCan } from '../lib/operator'
 import type { ChangeRecordItem, PhotoRef, Talent } from '../lib/types'
 import { TALENT_STATUSES, TALENT_STATUS_LABELS, TALENT_STATUS_TONES } from '@shared/enums'
 import { formatDateTime, formatDayRate } from '@shared/format'
@@ -30,6 +31,9 @@ export function TalentProfileScreen() {
   const toast = useToast()
   const queryClient = useQueryClient()
   const fileInput = useRef<HTMLInputElement>(null)
+  const canPublish = useCan('publish')
+  const canArchive = useCan('archive')
+  const canEditDayRates = useCan('edit_day_rates')
 
   const talentQuery = useQuery({
     queryKey: ['talent', reference],
@@ -158,6 +162,7 @@ export function TalentProfileScreen() {
             </div>
           )}
           {talent.archived ? (
+            canArchive && (
             <Button
               variant="secondary"
               onClick={() =>
@@ -169,10 +174,13 @@ export function TalentProfileScreen() {
             >
               Restore speaker
             </Button>
+            )
           ) : (
-            <Button variant="danger" onClick={() => setArchiveOpen(true)}>
-              Archive speaker
-            </Button>
+            canArchive && (
+              <Button variant="danger" onClick={() => setArchiveOpen(true)}>
+                Archive speaker
+              </Button>
+            )
           )}
         </div>
       </div>
@@ -186,7 +194,7 @@ export function TalentProfileScreen() {
                 void save()
               }}
             >
-              <TalentFields values={values} onChange={setValues} errors={errors} />
+              <TalentFields values={values} onChange={setValues} errors={errors} dayRateReadOnly={!canEditDayRates} />
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
                 <Button variant="secondary" onClick={() => setValues(toFormValues(talent))}>
                   Reset
@@ -294,7 +302,7 @@ export function TalentProfileScreen() {
                         : 'Not published'}
                     </div>
                   </div>
-                  {!talent.archived && (
+                  {!talent.archived && canPublish && (
                     <Button
                       variant={pub.published ? 'secondary' : 'navy'}
                       size="sm"

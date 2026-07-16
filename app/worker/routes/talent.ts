@@ -13,10 +13,10 @@ import { listTalent } from '../services/directory'
 import { archiveTalent, changeStatus, createTalent, getHistory, restoreTalent, updateTalent } from '../services/talent'
 import { publish, unpublish } from '../services/publication'
 import { getTalentRow, serializeTalent } from '../services/serialize'
+import { requirePermission, type AuthzVariables } from '../middleware/authorize'
+import { can } from '../../shared/permissions'
 
-type Variables = { operator: string }
-
-export const talentRoutes = new Hono<{ Bindings: Env; Variables: Variables }>()
+export const talentRoutes = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
 /** Parse+validate a JSON body, converting Zod issues to the 400 envelope (FR-015). */
 async function body<T>(c: { req: { json: () => Promise<unknown> } }, schema: { safeParse: (v: unknown) => { success: boolean; data?: T; error?: { issues: { message: string }[] } } }): Promise<T> {
@@ -59,7 +59,11 @@ talentRoutes.get('/talent/:reference', async (c) => {
 
 talentRoutes.patch('/talent/:reference', async (c) => {
   const input = await body(c, talentUpdateSchema)
-  return c.json(await updateTalent(c.env.DB, c.req.param('reference'), input, c.get('operator')))
+  return c.json(
+    await updateTalent(c.env.DB, c.req.param('reference'), input, c.get('operator'), {
+      canEditDayRates: can(c.get('operatorRecord'), 'edit_day_rates'),
+    }),
+  )
 })
 
 talentRoutes.post('/talent/:reference/status', async (c) => {
@@ -67,24 +71,24 @@ talentRoutes.post('/talent/:reference/status', async (c) => {
   return c.json(await changeStatus(c.env.DB, c.req.param('reference'), input.status, input.version, c.get('operator')))
 })
 
-talentRoutes.post('/talent/:reference/publish', async (c) => {
+talentRoutes.post('/talent/:reference/publish', requirePermission('publish'), async (c) => {
   const input = await body(c, publicationSchema)
-  return c.json(await publish(c.env.DB, c.req.param('reference'), input.brand, input.version, c.get('operator')))
+  return c.json(await publish(c.env.DB, c.req.param('reference')!, input.brand, input.version, c.get('operator')))
 })
 
-talentRoutes.post('/talent/:reference/unpublish', async (c) => {
+talentRoutes.post('/talent/:reference/unpublish', requirePermission('publish'), async (c) => {
   const input = await body(c, publicationSchema)
-  return c.json(await unpublish(c.env.DB, c.req.param('reference'), input.brand, input.version, c.get('operator')))
+  return c.json(await unpublish(c.env.DB, c.req.param('reference')!, input.brand, input.version, c.get('operator')))
 })
 
-talentRoutes.post('/talent/:reference/archive', async (c) => {
+talentRoutes.post('/talent/:reference/archive', requirePermission('archive'), async (c) => {
   const input = await body(c, versionOnlySchema)
-  return c.json(await archiveTalent(c.env.DB, c.req.param('reference'), input.version, c.get('operator')))
+  return c.json(await archiveTalent(c.env.DB, c.req.param('reference')!, input.version, c.get('operator')))
 })
 
-talentRoutes.post('/talent/:reference/restore', async (c) => {
+talentRoutes.post('/talent/:reference/restore', requirePermission('archive'), async (c) => {
   const input = await body(c, versionOnlySchema)
-  return c.json(await restoreTalent(c.env.DB, c.req.param('reference'), input.version, c.get('operator')))
+  return c.json(await restoreTalent(c.env.DB, c.req.param('reference')!, input.version, c.get('operator')))
 })
 
 talentRoutes.get('/talent/:reference/history', async (c) => {

@@ -20,7 +20,8 @@
     "test:integration": "vitest run --config vitest.workers.config.ts",
     "test:e2e": "playwright test",
     "test:e2e:perf": "PERF=1 playwright test tests/e2e/perf-directory.spec.ts",
-    "cf-typegen": "wrangler types --strict-vars=false"
+    "cf-typegen": "wrangler types --strict-vars=false",
+    "seed:brand": "wrangler d1 execute gbt_admin --local --file=./worker/db/seed-brand.sql"
   },
   "dependencies": {
     "@fontsource/archivo": "^5.2.8",

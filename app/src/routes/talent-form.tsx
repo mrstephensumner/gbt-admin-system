@@ -104,10 +104,12 @@ export function TalentFields({
   values,
   onChange,
   errors,
+  dayRateReadOnly = false,
 }: {
   values: TalentFormValues
   onChange: (v: TalentFormValues) => void
   errors: Partial<Record<keyof TalentFormValues, string>>
+  dayRateReadOnly?: boolean
 }) {
   const set = <K extends keyof TalentFormValues>(key: K, value: TalentFormValues[K]) =>
     onChange({ ...values, [key]: value })
@@ -138,7 +140,9 @@ export function TalentFields({
         value={values.dayRatePounds}
         onChange={(e) => set('dayRatePounds', e.target.value)}
         error={errors.dayRatePounds}
-        hint="Leave blank if not agreed — publication needs one"
+        readOnly={dayRateReadOnly}
+        disabled={dayRateReadOnly}
+        hint={dayRateReadOnly ? 'Only operators with day-rate permission can change this' : 'Leave blank if not agreed — publication needs one'}
       />
       <Input label="Location" value={values.location} onChange={(e) => set('location', e.target.value)} />
       <Input label="Email" type="email" value={values.email} onChange={(e) => set('email', e.target.value)} error={errors.email} />

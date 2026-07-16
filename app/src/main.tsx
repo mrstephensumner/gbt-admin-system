@@ -23,6 +23,8 @@ import { DirectoryScreen } from './routes/directory'
 import { TalentNewScreen } from './routes/talent-new'
 import { TalentProfileScreen } from './routes/talent-profile'
 import { TopicsScreen } from './routes/topics'
+import { TeamScreen } from './routes/team'
+import { OperatorProvider } from './lib/operator'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 10_000 } },
@@ -37,6 +39,7 @@ const router = createBrowserRouter([
       { path: 'talent/new', Component: TalentNewScreen },
       { path: 'talent/:reference', Component: TalentProfileScreen },
       { path: 'topics', Component: TopicsScreen },
+      { path: 'team', Component: TeamScreen },
     ],
   },
 ])
@@ -44,9 +47,11 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <RouterProvider router={router} />
-      </ToastProvider>
+      <OperatorProvider>
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
+      </OperatorProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

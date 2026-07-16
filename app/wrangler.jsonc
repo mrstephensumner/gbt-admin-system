@@ -28,6 +28,10 @@
     // Cloudflare Access JWT verification (production). For local dev,
     // .dev.vars overrides these to empty so the dev identity header applies.
     "ACCESS_TEAM_DOMAIN": "muddy-base-9f72.cloudflareaccess.com",
-    "ACCESS_AUD": "c79142a95dbc829fc2d98cb6c269db4c74dd07fce6a14d30bdd39e0ca87d073b"
+    "ACCESS_AUD": "c79142a95dbc829fc2d98cb6c269db4c74dd07fce6a14d30bdd39e0ca87d073b",
+    // Bootstrapped as the registry Owner on first authenticated request when the
+    // registry is empty (spec 002 research R4). MUST exactly match the email
+    // Cloudflare Access reports for the owner — set before deploying spec 002.
+    "OWNER_EMAIL": "hello@localseo.agency"
   }
 }

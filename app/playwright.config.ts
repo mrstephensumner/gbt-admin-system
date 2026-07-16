@@ -11,7 +11,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npm run build && npx wrangler dev --port 8787',
+    command: 'npm run build && npm run db:migrate:local && npm run seed:brand && npx wrangler dev --port 8787',
     url: 'http://localhost:8787',
     reuseExistingServer: true,
     timeout: 120_000,
