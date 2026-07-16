@@ -71,7 +71,7 @@ matrix test (spec SC-001) plus owner-invariant and revocation-immediacy proofs.
 ## Phase 5: Polish & Rollout
 
 - [X] T014 Full local validation per quickstart.md (all suites + manual journeys); visual pass of Team/no-access screens against the design system; docs sync — `docs/deployment.md` OWNER_EMAIL rollout note, README status, CHANGELOG (constitution Principle II)
-- [ ] T015 Production rollout — confirm Stephen's exact Access email (shown at /api/me on the live site), set `OWNER_EMAIL` in `app/wrangler.jsonc`, `npm run db:migrate:remote`, deploy, verify owner bootstrap + a second (unregistered) identity is refused
+- [X] T015 Production rollout — confirm Stephen's exact Access email (shown at /api/me on the live site), set `OWNER_EMAIL` in `app/wrangler.jsonc`, `npm run db:migrate:remote`, deploy, verify owner bootstrap + a second (unregistered) identity is refused — **DONE 16 Jul 2026: deployed with OWNER_EMAIL=hello@localseo.agency; edge + Worker gates verified; owner bootstraps on Stephen's first sign-in**
 
 ---
 

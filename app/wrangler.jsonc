@@ -32,6 +32,6 @@
     // Bootstrapped as the registry Owner on first authenticated request when the
     // registry is empty (spec 002 research R4). MUST exactly match the email
     // Cloudflare Access reports for the owner — set before deploying spec 002.
-    "OWNER_EMAIL": ""
+    "OWNER_EMAIL": "hello@localseo.agency"
   }
 }
