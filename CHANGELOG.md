@@ -6,6 +6,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- Implementation plan for spec 003 (`specs/003-roster-import/plan.md`): research R1–R8
+  (browser-side parsing, dry-run validation, JSON-detail staging table, approval-time
+  photo fetch, new import_roster permission area, tolerant column-synonym mapping,
+  conservative money parsing, chunked bulk approval), data model (import_candidate,
+  import_run), import API contract, quickstart with fixture-file strategy. Constitution
+  Check passes all six gates.
 - Spec 003 revised same day: source changed from website crawl to owner-provided export
   file (CSV/XLSX/JSON) with validate-before-import, per the owner's design mockup;
   add-new-only mode locked for v1; mockup-revealed future modules recorded in
