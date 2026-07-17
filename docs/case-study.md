@@ -198,4 +198,7 @@ specification to verified deployment.
   `.wrangler/` local dev state from git (it had been committed by accident, dragging D1
   SQLite and thousands of R2 photo blobs into every commit) and gitignored it. Full suite:
   264 automated tests (119 unit, 123 integration, 22 end-to-end) green; migrated remote +
-  deployed to production.
+  deployed to production. The eight real syndication sites — Great British Speakers,
+  Comedians, Moderators, Musicians, Presenters, Voices, Business Speakers and Sports
+  Speakers — were then seeded into the live network (idempotent `seed-network.sql`), so the
+  admin now reflects the actual multi-brand estate talent will be published across.

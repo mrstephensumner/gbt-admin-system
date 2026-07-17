@@ -19,6 +19,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
   (brand `url`/`active`/`sort_order`). Suites: 119 unit + 123 integration + 22 e2e green;
   migrated remote + deployed to production. Repo hygiene: `.wrangler/` local dev state
   (D1 SQLite + R2 blobs) removed from version control and gitignored.
+- **Real syndication network seeded** — the eight live Great British Talent brand sites
+  (Speakers, Comedians, Moderators, Musicians, Presenters, Voices, Business Speakers,
+  Sports Speakers) are now in the network, each with its public URL. Idempotent
+  `worker/db/seed-network.sql` (+ `seed:network` / `seed:network:remote` scripts); applied
+  to production and local. Kept separate from the e2e brand seed so count-based tests stay
+  deterministic.
 - **Talent Media Manager (spec 008)** — the Photos tab is now a full media manager:
   categorised **headshots** and **at-event photos**, **showreels** (external video links
   with provider + thumbnail derived from the URL), and an **SEO metadata** sidebar (meta
