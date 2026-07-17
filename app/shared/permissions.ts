@@ -5,7 +5,7 @@
  * stored as rows: absence = denied (default-deny, FR-008). The Owner
  * short-circuits every check.
  */
-export const PERMISSIONS = ['edit_day_rates', 'publish', 'archive', 'manage_topics', 'import_roster'] as const
+export const PERMISSIONS = ['edit_day_rates', 'publish', 'archive', 'manage_topics', 'import_roster', 'network'] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
 
@@ -20,6 +20,7 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   archive: 'Archive and restore',
   manage_topics: 'Manage topics',
   import_roster: 'Import roster files',
+  network: 'Manage the publishing network',
 }
 
 /** Factual refusal messages (FR-012) — used verbatim by the API. */
@@ -29,6 +30,7 @@ export const PERMISSION_REFUSALS: Record<Permission, string> = {
   archive: "You don't have permission to archive speakers — ask the owner",
   manage_topics: "You don't have permission to manage topics — ask the owner",
   import_roster: "You don't have permission to import roster files — ask the owner",
+  network: "You don't have permission to manage the network — ask the owner",
 }
 
 export const NOT_REGISTERED_MESSAGE = "You don't have access yet — ask the owner to add you"

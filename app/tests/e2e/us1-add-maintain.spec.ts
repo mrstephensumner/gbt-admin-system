@@ -35,7 +35,7 @@ test.describe('US1 — add and maintain a talent record', () => {
     await expect(page.getByTestId('history').getByText('dev@greatbritishtalent.online').first()).toBeVisible()
 
     // Money renders in UK format on the profile (FR-013) — Site selector tab
-    await page.getByRole('tab', { name: 'Site selector' }).click()
+    await page.getByRole('tab', { name: 'Network' }).click()
     await expect(page.getByText('£4,000')).toBeVisible()
   })
 

@@ -33,7 +33,7 @@ test.describe('US5 — archive without losing history', () => {
     await page.getByText(name).click()
     await page.getByRole('tab', { name: 'History' }).click()
     await expect(page.getByTestId('history').getByText('Archived').first()).toBeVisible()
-    await page.getByRole('tab', { name: 'Site selector' }).click()
+    await page.getByRole('tab', { name: 'Network' }).click()
     await expect(page.getByRole('button', { name: 'Publish', exact: true })).toHaveCount(0)
     await page.getByRole('button', { name: 'Restore speaker' }).click()
     await expect(page.getByText('Speaker restored')).toBeVisible()

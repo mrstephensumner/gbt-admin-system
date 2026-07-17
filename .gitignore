@@ -7,6 +7,9 @@ build/
 .next/
 out/
 
+# Cloudflare Workers local dev state (D1 SQLite, R2 blobs, bundles)
+.wrangler/
+
 # Environment & secrets
 .env
 .env.*

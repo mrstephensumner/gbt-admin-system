@@ -84,7 +84,7 @@ test.describe('US3 — permission limits in practice', () => {
     await limitedPage.goto(`/talent/${talent.reference}`)
     await expect(limitedPage.getByRole('button', { name: 'Archive speaker' })).toHaveCount(0)
     await expect(limitedPage.getByLabel('Day rate (GBP)')).toBeDisabled()
-    await limitedPage.getByRole('tab', { name: 'Site selector' }).click()
+    await limitedPage.getByRole('tab', { name: 'Network' }).click()
     await expect(limitedPage.getByRole('button', { name: 'Publish', exact: true }).first()).toBeVisible()
 
     // Publishing works with the grant

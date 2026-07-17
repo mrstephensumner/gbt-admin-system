@@ -25,6 +25,7 @@ import { TalentProfileScreen } from './routes/talent-profile'
 import { TopicsScreen } from './routes/topics'
 import { TeamScreen } from './routes/team'
 import { ImportScreen } from './routes/import'
+import { NetworkScreen } from './routes/network'
 import { OperatorProvider } from './lib/operator'
 import { DashboardScreen } from './routes/dashboard'
 import { BookingsPlaceholder, ClientsPlaceholder, EnquiriesPlaceholder, InvoicesPlaceholder } from './routes/modules-upcoming'
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
       { path: 'clients', Component: ClientsPlaceholder },
       { path: 'invoices', Component: InvoicesPlaceholder },
       { path: 'import', Component: ImportScreen },
+      { path: 'network', Component: NetworkScreen },
     ],
   },
 ])

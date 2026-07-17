@@ -41,7 +41,14 @@ export async function serializeTalent(d1: D1Database, row: TalentRow) {
       .prepare('SELECT brand_id, published_at, published_by FROM publication WHERE talent_id = ?')
       .bind(row.id)
       .all<{ brand_id: number; published_at: string; published_by: string }>(),
-    d1.prepare('SELECT id, slug, name FROM brand ORDER BY id').all<{ id: number; slug: string; name: string }>(),
+    d1
+      .prepare(
+        `SELECT b.id, b.slug, b.name FROM brand b
+         WHERE b.active = 1 OR EXISTS (SELECT 1 FROM publication p WHERE p.brand_id = b.id AND p.talent_id = ?)
+         ORDER BY b.sort_order, b.id`,
+      )
+      .bind(row.id)
+      .all<{ id: number; slug: string; name: string }>(),
   ])
 
   const pubByBrand = new Map(pubs.results.map((p) => [p.brand_id, p]))

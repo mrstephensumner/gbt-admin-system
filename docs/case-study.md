@@ -188,3 +188,14 @@ specification to verified deployment.
   SEO metadata, drag reorder, avatar selection) completed and deployed. Multi-site
   content-delivery architecture recorded (ADR 0003). Full suite at this point: ~255
   automated tests (118 unit, 117 integration, 20 end-to-end).
+- **17 Jul 2026** — Spec 009 (Publishing Network) built and deployed: the admin now
+  manages the network of brand sites itself, turning it into the operational backbone for
+  the 7+ external websites the client will run. Owners (and holders of the new `network`
+  permission) can add, edit and deactivate sites; each site carries an immutable slug (the
+  key public sites will read against), an https URL and a live published-talent count.
+  Deactivate-not-delete keeps a retired site's publications intact. The profile "Site
+  selector" tab was renamed "Network" to match. Migration 0007. Also untracked the
+  `.wrangler/` local dev state from git (it had been committed by accident, dragging D1
+  SQLite and thousands of R2 photo blobs into every commit) and gitignored it. Full suite:
+  264 automated tests (119 unit, 123 integration, 22 end-to-end) green; migrated remote +
+  deployed to production.

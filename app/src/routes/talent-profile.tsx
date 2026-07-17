@@ -206,7 +206,7 @@ export function TalentProfileScreen() {
           { value: 'social', label: 'Social & News' },
           { value: 'enrichment', label: 'Profile Enrichment' },
           { value: 'stats', label: 'Statistics' },
-          { value: 'site', label: 'Site selector' },
+          { value: 'site', label: 'Network' },
           { value: 'history', label: 'History' },
         ]}
         value={tab}
@@ -313,7 +313,7 @@ export function TalentProfileScreen() {
         {tab === 'stats' && <StatisticsTab stats={statsQuery.data} />}
 
         {tab === 'site' && (
-          <Card title="Site selector" subtitle="Where this speaker appears — per-brand website presence">
+          <Card title="Network" subtitle="Where this speaker is published across the network of sites">
             <div style={{ display: 'grid', gap: 12 }} data-testid="publication-panel">
               {talent.publications.map((pub) => (
                 <div key={pub.brand} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>

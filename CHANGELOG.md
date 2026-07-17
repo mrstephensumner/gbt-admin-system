@@ -6,6 +6,19 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Publishing Network (spec 009)** — the network of brand sites is now managed in the
+  admin, making it the true backbone for the 7+ external websites. A new **Network**
+  screen (owner + `network` permission) lists every site with its live published-talent
+  count and lets you add sites (immutable slug auto-derived from the name, https URL) and
+  edit/deactivate them — deactivate-not-delete, so an inactive site keeps its
+  publications and public-API integrity. The profile's **Site selector** tab is renamed
+  **Network** and shows where a speaker is published across the whole network; sites the
+  speaker is already published to always appear even if later deactivated. Publishing to
+  one site is fully independent of the others. New `network` permission (owner
+  auto-holds), surfaced automatically in the Team grant grid. Migration 0007
+  (brand `url`/`active`/`sort_order`). Suites: 119 unit + 123 integration + 22 e2e green;
+  migrated remote + deployed to production. Repo hygiene: `.wrangler/` local dev state
+  (D1 SQLite + R2 blobs) removed from version control and gitignored.
 - **Talent Media Manager (spec 008)** — the Photos tab is now a full media manager:
   categorised **headshots** and **at-event photos**, **showreels** (external video links
   with provider + thumbnail derived from the URL), and an **SEO metadata** sidebar (meta
