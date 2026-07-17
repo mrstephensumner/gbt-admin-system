@@ -1,13 +1,12 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Trash2, Upload, ClipboardCheck, CalendarDays, Rss, Sparkles } from 'lucide-react'
+import { ArrowLeft, Trash2, ClipboardCheck, CalendarDays, Sparkles } from 'lucide-react'
 import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Tabs, Textarea, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
-import { makeDisplayRendition } from '../lib/image'
 import { useCan } from '../lib/operator'
-import type { ChangeRecordItem, PhotoRef, Talent } from '../lib/types'
+import type { ChangeRecordItem, Talent } from '../lib/types'
 import { TALENT_STATUSES, TALENT_STATUS_LABELS, TALENT_STATUS_TONES } from '@shared/enums'
 import type { TalentStatus } from '@shared/enums'
 import { formatDate, formatDateTime, formatDayRate } from '@shared/format'
@@ -34,7 +33,6 @@ export function TalentProfileScreen() {
   const navigate = useNavigate()
   const toast = useToast()
   const queryClient = useQueryClient()
-  const fileInput = useRef<HTMLInputElement>(null)
   const canPublish = useCan('publish')
   const canArchive = useCan('archive')
   const canEditDayRates = useCan('edit_day_rates')
@@ -132,21 +130,6 @@ export function TalentProfileScreen() {
       'Changes saved',
     )
     setSaving(false)
-  }
-
-  const uploadPhoto = async (file: File) => {
-    const form = new FormData()
-    form.set('file', file)
-    const rendition = await makeDisplayRendition(file)
-    if (rendition) form.set('display', new File([rendition], 'display.webp', { type: 'image/webp' }))
-    try {
-      await api.upload<PhotoRef>(`/talent/${reference}/photos`, form)
-      await refresh()
-      toast({ tone: 'success', title: 'Photo added' })
-    } catch (err) {
-      const message = err instanceof ApiClientError ? err.message : 'Something went wrong'
-      toast({ tone: 'danger', title: 'Could not upload photo', message })
-    }
   }
 
   const primaryPhoto = talent.photos.find((p) => p.is_primary) ?? talent.photos[0]
@@ -328,6 +311,46 @@ export function TalentProfileScreen() {
           />
         )}
         {tab === 'stats' && <StatisticsTab stats={statsQuery.data} />}
+
+        {tab === 'site' && (
+          <Card title="Site selector" subtitle="Where this speaker appears — per-brand website presence">
+            <div style={{ display: 'grid', gap: 12 }} data-testid="publication-panel">
+              {talent.publications.map((pub) => (
+                <div key={pub.brand} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <div>
+                    <div style={{ color: 'var(--text-body)' }}>{pub.brand_name}</div>
+                    <div className="gb-meta-row">
+                      {pub.published
+                        ? `Published ${formatDateTime(pub.published_at!)} by ${pub.published_by}`
+                        : 'Not published'}
+                    </div>
+                  </div>
+                  {!talent.archived && canPublish && (
+                    <Button
+                      variant={pub.published ? 'secondary' : 'navy'}
+                      size="sm"
+                      onClick={() =>
+                        void mutate(
+                          () =>
+                            api.post<Talent>(`/talent/${reference}/${pub.published ? 'unpublish' : 'publish'}`, {
+                              brand: pub.brand,
+                              version: talent.version,
+                            }),
+                          pub.published ? 'Unpublished' : 'Published',
+                        )
+                      }
+                    >
+                      {pub.published ? 'Unpublish' : 'Publish'}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="gb-meta-row" style={{ marginTop: 12 }}>
+              Day rate: <span className="gb-mono">{formatDayRate(talent.day_rate_pence)}</span>
+            </p>
+          </Card>
+        )}
 
         {tab === 'history' && (
           <Card title="History" subtitle="Every change, attributed">

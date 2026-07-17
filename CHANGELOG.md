@@ -6,6 +6,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Talent Media Manager (spec 008)** — the Photos tab is now a full media manager:
+  categorised **headshots** and **at-event photos**, **showreels** (external video links
+  with provider + thumbnail derived from the URL), and an **SEO metadata** sidebar (meta
+  title, description, focus keyword with live search-snippet length guides). Full
+  editing controls (per owner clarification): choose which headshot is the avatar,
+  caption photos, drag to reorder photos and showreels, edit showreel titles. The avatar
+  is always a headshot, never an event photo. Migrations 0005 + 0006. Suites: 118 unit +
+  117 integration + 20 e2e green; deployed to production. Also restored the Site selector
+  tab (accidentally dropped during an edit) and recorded ADR 0003 (multi-site content
+  delivery) + the living project case-study log (docs/case-study.md).
 - **Social & News (spec 007)** — the placeholder tab is now real: social profiles
   (fixed platform vocabulary, https-validated links, optional handle, follower counts
   with attributed "as of" stamps that restamp on update) with total recorded reach, and

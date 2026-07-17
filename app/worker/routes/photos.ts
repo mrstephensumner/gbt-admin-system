@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
 import type { Env } from '../env'
 import { ApiError } from '../middleware/errors'
 import { nowIso } from '../db'
@@ -11,6 +12,73 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_BYTES = 10 * 1024 * 1024
 
 export const photoRoutes = new Hono<{ Bindings: Env; Variables: Variables }>()
+
+/** Edit a photo: set it as the avatar (headshots only) and/or caption it (spec 008 FR-008/009). */
+photoRoutes.patch('/photos/:id', async (c) => {
+  const raw = await c.req.json().catch(() => {
+    throw new ApiError(400, 'invalid_json', 'Request body must be JSON')
+  })
+  const parsed = z
+    .object({ is_primary: z.literal(true).optional(), caption: z.string().trim().max(300).nullish().optional() })
+    .safeParse(raw)
+  if (!parsed.success) throw new ApiError(400, 'validation', parsed.error.issues[0]?.message ?? 'Invalid request')
+
+  const photo = await c.env.DB.prepare('SELECT id, talent_id, category FROM talent_photo WHERE id = ?')
+    .bind(c.req.param('id'))
+    .first<{ id: string; talent_id: number; category: string }>()
+  if (!photo) throw new ApiError(404, 'not_found', 'No such photo')
+
+  const statements: D1PreparedStatement[] = []
+  if (parsed.data.is_primary) {
+    if (photo.category !== 'headshot')
+      throw new ApiError(422, 'not_headshot', 'Only a headshot can be the profile avatar')
+    statements.push(
+      c.env.DB.prepare("UPDATE talent_photo SET is_primary = 0 WHERE talent_id = ? AND category = 'headshot'").bind(photo.talent_id),
+      c.env.DB.prepare('UPDATE talent_photo SET is_primary = 1 WHERE id = ?').bind(photo.id),
+    )
+  }
+  if (parsed.data.caption !== undefined) {
+    statements.push(c.env.DB.prepare('UPDATE talent_photo SET caption = ? WHERE id = ?').bind(parsed.data.caption ?? null, photo.id))
+  }
+  if (statements.length > 0) await c.env.DB.batch(statements)
+
+  const updated = await c.env.DB.prepare('SELECT id, is_primary, sort_order, category, caption FROM talent_photo WHERE id = ?')
+    .bind(photo.id)
+    .first<{ id: string; is_primary: number; sort_order: number; category: string; caption: string | null }>()
+  return c.json({
+    id: updated!.id,
+    url: `/api/photos/${updated!.id}?size=display`,
+    is_primary: !!updated!.is_primary,
+    sort_order: updated!.sort_order,
+    category: updated!.category,
+    caption: updated!.caption,
+  })
+})
+
+/** Reorder photos within a category (FR-009): sort_order follows the given id order. */
+photoRoutes.put('/talent/:reference/photo-order', async (c) => {
+  const row = await getTalentRow(c.env.DB, c.req.param('reference'))
+  if (!row) throw new ApiError(404, 'not_found', 'No such talent record')
+  const raw = await c.req.json().catch(() => {
+    throw new ApiError(400, 'invalid_json', 'Request body must be JSON')
+  })
+  const parsed = z
+    .object({ category: z.enum(['headshot', 'event']), ids: z.array(z.string()).max(200) })
+    .safeParse(raw)
+  if (!parsed.success) throw new ApiError(400, 'validation', parsed.error.issues[0]?.message ?? 'Invalid request')
+
+  await c.env.DB.batch(
+    parsed.data.ids.map((id, index) =>
+      c.env.DB.prepare('UPDATE talent_photo SET sort_order = ? WHERE id = ? AND talent_id = ? AND category = ?').bind(
+        index,
+        id,
+        row.id,
+        parsed.data.category,
+      ),
+    ),
+  )
+  return c.json({ ok: true })
+})
 
 /**
  * Photos live in R2 and are served through the Worker so authentication

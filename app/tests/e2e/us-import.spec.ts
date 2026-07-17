@@ -1,8 +1,4 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { expect, test } from '@playwright/test'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Spec 003 journey: upload the fixture export through the real UI →

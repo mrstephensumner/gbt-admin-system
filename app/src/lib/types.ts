@@ -23,6 +23,7 @@ export interface PhotoRef {
   is_primary: boolean
   sort_order: number
   category: 'headshot' | 'event'
+  caption: string | null
 }
 
 export interface PublicationState {

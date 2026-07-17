@@ -40,7 +40,7 @@ test.describe('Talent profile workspace (spec 005)', () => {
     await page.locator('.gb-dialog').getByRole('button', { name: 'Add profile' }).click()
     await expect(page.getByText('Profile added').first()).toBeVisible()
     await expect(social.getByText('Total recorded reach: 12.5k')).toBeVisible()
-    await expect(social.getByTestId('social-links').getByText('LinkedIn')).toBeVisible()
+    await expect(social.getByTestId('social-links').getByText('LinkedIn', { exact: true })).toBeVisible()
 
     await page.getByRole('button', { name: 'Add mention' }).click()
     await page.getByLabel('Headline').fill('Speaker of the year')
@@ -79,9 +79,9 @@ test.describe('Talent profile workspace (spec 005)', () => {
     const talent = await apiCreateTalent(request, { name: uniqueName('Media Subject') })
     await page.goto(`/talent/${talent.reference}?tab=photos`)
     const media = page.getByTestId('media-tab')
-    await expect(media.getByText('Headshots')).toBeVisible()
-    await expect(media.getByText('At events')).toBeVisible()
-    await expect(media.getByText('Showreels')).toBeVisible()
+    await expect(media.getByText('Headshots', { exact: true })).toBeVisible()
+    await expect(media.getByText('At events', { exact: true })).toBeVisible()
+    await expect(media.getByText('Showreels', { exact: true })).toBeVisible()
 
     // Add a showreel via the UI — provider + thumbnail derived
     await page.getByRole('button', { name: 'Add showreel' }).click()

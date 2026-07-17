@@ -184,5 +184,7 @@ specification to verified deployment.
   system imported, constitution v1.0.0 ratified. Specs 001–008 specified, built, tested
   and deployed in sequence. Real roster (2,244 WordPress speaker profiles) converted and
   imported to production. Multi-site content-delivery architecture recorded (ADR 0003).
-  *(Spec 008 media manager: implementation complete and unit/integration-tested; final
-  end-to-end verification and deploy in progress.)*
+  Spec 008 (media manager with full editing controls — categorised photos, showreels,
+  SEO metadata, drag reorder, avatar selection) completed and deployed. Multi-site
+  content-delivery architecture recorded (ADR 0003). Full suite at this point: ~255
+  automated tests (118 unit, 117 integration, 20 end-to-end).

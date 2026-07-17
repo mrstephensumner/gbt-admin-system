@@ -34,9 +34,9 @@ export async function serializeTalent(d1: D1Database, row: TalentRow) {
       .bind(row.id)
       .all<{ id: number; name: string }>(),
     d1
-      .prepare('SELECT id, is_primary, sort_order, category FROM talent_photo WHERE talent_id = ? ORDER BY sort_order, id')
+      .prepare('SELECT id, is_primary, sort_order, category, caption FROM talent_photo WHERE talent_id = ? ORDER BY sort_order, id')
       .bind(row.id)
-      .all<{ id: string; is_primary: number; sort_order: number; category: string }>(),
+      .all<{ id: string; is_primary: number; sort_order: number; category: string; caption: string | null }>(),
     d1
       .prepare('SELECT brand_id, published_at, published_by FROM publication WHERE talent_id = ?')
       .bind(row.id)
@@ -65,6 +65,7 @@ export async function serializeTalent(d1: D1Database, row: TalentRow) {
       is_primary: !!p.is_primary,
       sort_order: p.sort_order,
       category: p.category,
+      caption: p.caption,
     })),
     publications: brands.results.map((b) => {
       const pub = pubByBrand.get(b.id)

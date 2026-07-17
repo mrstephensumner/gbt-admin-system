@@ -111,3 +111,64 @@ describe('SEO metadata (US2 FR-005)', () => {
     expect(seo.status).toBe(200)
   })
 })
+
+describe('full media controls (spec 008 FR-008/009)', () => {
+  it('choosing a headshot as avatar unsets the previous; event photos are ineligible', async () => {
+    const talent = await createTalent()
+    const a = await uploadPhoto(talent.reference, 'headshot')
+    const b = await uploadPhoto(talent.reference, 'headshot')
+    const event = await uploadPhoto(talent.reference, 'event')
+    // First headshot (a) is primary by default; make b the avatar
+    const set = await call('PATCH', `/photos/${b.body.id}`, { is_primary: true })
+    expect(set.status).toBe(200)
+    expect((set.body as { is_primary: boolean }).is_primary).toBe(true)
+    const record = await call('GET', `/talent/${talent.reference}`)
+    const photos = record.body.photos as { id: string; is_primary: boolean }[]
+    expect(photos.filter((p) => p.is_primary)).toHaveLength(1)
+    expect(photos.find((p) => p.is_primary)!.id).toBe(b.body.id)
+    // Event photo cannot be the avatar
+    const bad = await call('PATCH', `/photos/${event.body.id}`, { is_primary: true })
+    expect(bad.status).toBe(422)
+    void a
+  })
+
+  it('captions persist on photos', async () => {
+    const talent = await createTalent()
+    const p = await uploadPhoto(talent.reference, 'event')
+    await call('PATCH', `/photos/${p.body.id}`, { caption: 'Keynote at the O2, 2026' })
+    const record = await call('GET', `/talent/${talent.reference}`)
+    expect((record.body.photos as { caption: string | null }[])[0]!.caption).toBe('Keynote at the O2, 2026')
+  })
+
+  it('reorders photos within a category by given id order', async () => {
+    const talent = await createTalent()
+    const a = await uploadPhoto(talent.reference, 'event')
+    const b = await uploadPhoto(talent.reference, 'event')
+    const c = await uploadPhoto(talent.reference, 'event')
+    await call('PUT', `/talent/${talent.reference}/photo-order`, {
+      category: 'event',
+      ids: [c.body.id, a.body.id, b.body.id],
+    })
+    const record = await call('GET', `/talent/${talent.reference}`)
+    const events = (record.body.photos as { id: string; category: string; sort_order: number }[])
+      .filter((p) => p.category === 'event')
+      .sort((x, y) => x.sort_order - y.sort_order)
+      .map((p) => p.id)
+    expect(events).toEqual([c.body.id, a.body.id, b.body.id])
+  })
+
+  it('edits showreel titles and reorders showreels', async () => {
+    const talent = await createTalent()
+    const r1 = await call('POST', `/talent/${talent.reference}/showreels`, { url: 'https://youtu.be/one', title: 'First' })
+    const r2 = await call('POST', `/talent/${talent.reference}/showreels`, { url: 'https://youtu.be/two', title: 'Second' })
+    // Edit title
+    await call('PATCH', `/showreels/${(r1.body as { id: number }).id}`, { title: 'Keynote reel' })
+    // Reorder: r2 before r1
+    await call('PUT', `/talent/${talent.reference}/showreel-order`, {
+      ids: [(r2.body as { id: number }).id, (r1.body as { id: number }).id],
+    })
+    const media = await call('GET', `/talent/${talent.reference}/media`)
+    const reels = media.body.showreels as { id: number; title: string }[]
+    expect(reels.map((r) => r.title)).toEqual(['Second', 'Keynote reel'])
+  })
+})

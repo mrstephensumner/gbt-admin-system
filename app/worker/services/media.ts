@@ -14,7 +14,7 @@ export async function getMedia(d1: D1Database, reference: string) {
   if (!row) throw new ApiError(404, 'not_found', 'No such talent record')
   const [showreels, seo] = await Promise.all([
     d1
-      .prepare('SELECT id, title, url, provider, created_at, created_by FROM talent_showreel WHERE talent_id = ? ORDER BY id DESC')
+      .prepare('SELECT id, title, url, provider, sort_order, created_at, created_by FROM talent_showreel WHERE talent_id = ? ORDER BY sort_order, id')
       .bind(row.id)
       .all(),
     d1
@@ -41,10 +41,14 @@ export async function addShowreel(
   if (!row) throw new ApiError(404, 'not_found', 'No such talent record')
   const provider = videoInfo(input.url).provider
   const now = nowIso()
+  const maxOrder = await d1
+    .prepare('SELECT COALESCE(MAX(sort_order), -1) AS m FROM talent_showreel WHERE talent_id = ?')
+    .bind(row.id)
+    .first<{ m: number }>()
   await d1.batch([
     d1
-      .prepare('INSERT INTO talent_showreel (talent_id, title, url, provider, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?)')
-      .bind(row.id, input.title ?? null, input.url, provider, now, actor),
+      .prepare('INSERT INTO talent_showreel (talent_id, title, url, provider, sort_order, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)')
+      .bind(row.id, input.title ?? null, input.url, provider, (maxOrder?.m ?? -1) + 1, now, actor),
     d1
       .prepare(
         `INSERT INTO change_record (talent_id, actor, action, field, old_value, new_value, at)
@@ -53,7 +57,7 @@ export async function addShowreel(
       .bind(row.id, actor, provider, now),
   ])
   const created = await d1
-    .prepare('SELECT id, title, url, provider, created_at, created_by FROM talent_showreel WHERE talent_id = ? ORDER BY id DESC LIMIT 1')
+    .prepare('SELECT id, title, url, provider, sort_order, created_at, created_by FROM talent_showreel WHERE talent_id = ? ORDER BY id DESC LIMIT 1')
     .bind(row.id)
     .first<{ url: string }>()
   return { ...created, thumbnail: videoInfo(created!.url).thumbnail }
@@ -109,4 +113,23 @@ export async function upsertSeo(
     .prepare('SELECT meta_title, meta_description, focus_keyword, updated_at, updated_by FROM talent_seo WHERE talent_id = ?')
     .bind(row.id)
     .first()
+}
+
+export async function editShowreel(d1: D1Database, id: number, title: string | null) {
+  const s = await d1.prepare('SELECT id, url FROM talent_showreel WHERE id = ?').bind(id).first<{ id: number; url: string }>()
+  if (!s) throw new ApiError(404, 'not_found', 'No such showreel')
+  await d1.prepare('UPDATE talent_showreel SET title = ? WHERE id = ?').bind(title, id).run()
+  const updated = await d1.prepare('SELECT id, title, url, provider, sort_order FROM talent_showreel WHERE id = ?').bind(id).first<{ url: string }>()
+  return { ...updated, thumbnail: videoInfo(updated!.url).thumbnail }
+}
+
+export async function reorderShowreels(d1: D1Database, reference: string, ids: number[]) {
+  const row = await getTalentRow(d1, reference)
+  if (!row) throw new ApiError(404, 'not_found', 'No such talent record')
+  await d1.batch(
+    ids.map((id, index) =>
+      d1.prepare('UPDATE talent_showreel SET sort_order = ? WHERE id = ? AND talent_id = ?').bind(index, id, row.id),
+    ),
+  )
+  return { ok: true }
 }

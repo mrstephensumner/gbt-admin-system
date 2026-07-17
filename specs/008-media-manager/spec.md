@@ -6,6 +6,15 @@
 
 **Status**: Draft
 
+## Clarifications
+
+### Session 2026-07-16 (owner)
+
+- Q: What should the media "full editing suite" cover? → A: Full media controls —
+  reorder photos (drag), choose which headshot is the avatar, edit showreel titles and
+  order, and caption photos. Turns add/delete into full management. (Rich-text bio,
+  inline-edit-everywhere and bulk-edit were considered and deferred to future specs.)
+
 **Input**: Owner annotated the Photos tab: a media manager with **Headshots**, **At-events
 photos**, and **Showreels** sections, plus an **SEO metadata** sidebar.
 
@@ -78,6 +87,10 @@ that a character-count guide reflects search-snippet limits.
   focus keyword) recording last-updated by/at; SEO edits appear in history.
 - **FR-006**: All media and SEO data is internal/administrative in this feature; baseline
   permission (any registered operator).
+- **FR-008**: Operators MUST be able to choose which headshot is the profile avatar
+  (set primary); only headshots are eligible.
+- **FR-009**: Operators MUST be able to caption any photo and reorder photos within a
+  category, and edit showreel titles and reorder showreels; ordering persists.
 - **FR-007**: Raw video upload/hosting is OUT of scope — showreels are links to
   externally-hosted video (a future spec may add Cloudflare Stream upload).
 

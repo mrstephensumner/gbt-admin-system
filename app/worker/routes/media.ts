@@ -4,7 +4,7 @@ import { isHttpsUrl } from '../../shared/social'
 import type { Env } from '../env'
 import { ApiError } from '../middleware/errors'
 import type { AuthzVariables } from '../middleware/authorize'
-import { addShowreel, getMedia, removeShowreel, upsertSeo } from '../services/media'
+import { addShowreel, editShowreel, getMedia, removeShowreel, reorderShowreels, upsertSeo } from '../services/media'
 
 const showreelSchema = z.object({
   title: z.string().trim().max(200).nullish(),
@@ -40,6 +40,16 @@ mediaRoutes.post('/talent/:reference/showreels', async (c) => {
 mediaRoutes.delete('/showreels/:id', async (c) => {
   await removeShowreel(c.env.DB, Number(c.req.param('id')), c.get('operator'))
   return c.json({ ok: true })
+})
+
+mediaRoutes.patch('/showreels/:id', async (c) => {
+  const input = await body(c, z.object({ title: z.string().trim().max(200).nullish() }))
+  return c.json(await editShowreel(c.env.DB, Number(c.req.param('id')), input.title ?? null))
+})
+
+mediaRoutes.put('/talent/:reference/showreel-order', async (c) => {
+  const input = await body(c, z.object({ ids: z.array(z.number().int().positive()).max(100) }))
+  return c.json(await reorderShowreels(c.env.DB, c.req.param('reference'), input.ids))
 })
 
 mediaRoutes.put('/talent/:reference/seo', async (c) => {
