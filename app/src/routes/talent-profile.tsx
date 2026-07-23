@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Trash2, ClipboardCheck, CalendarDays, Sparkles } from 'lucide-react'
+import { ArrowLeft, Trash2, CalendarDays, Sparkles } from 'lucide-react'
 import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Tabs, Textarea, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
@@ -14,6 +14,7 @@ import { SOCIAL_PLATFORMS, SOCIAL_PLATFORM_LABELS, formatFollowers, type SocialP
 import { TalentFields, validateTalentForm, type TalentFormValues } from './talent-form'
 import { ComingSoon } from './coming-soon'
 import { MediaTab } from './media-tab'
+import { OnboardingTab } from './onboarding-tab'
 
 function toFormValues(t: Talent): TalentFormValues {
   return {
@@ -261,16 +262,7 @@ export function TalentProfileScreen() {
         )}
 
         {tab === 'onboarding' && (
-          <ComingSoon
-            icon={<ClipboardCheck size={40} />}
-            title="Onboarding"
-            description="A guided checklist taking a new speaker from first contact to a demo-ready, publishable profile."
-            planned={[
-              'Step-by-step onboarding checklist per speaker',
-              'Document collection: agreements, biogs, riders',
-              'Progress visible on the dashboard',
-            ]}
-          />
+          <OnboardingTab talent={talent} reference={reference} canEditDayRates={canEditDayRates} onChanged={refresh} />
         )}
         {tab === 'availability' && (
           <ComingSoon
@@ -468,6 +460,14 @@ function describeChange(h: ChangeRecordItem): string {
       return `Showreel removed (${h.old_value})`
     case 'seo_updated':
       return 'SEO metadata updated'
+    case 'onboarding_step_completed':
+      return `Onboarding step completed: ${h.new_value}`
+    case 'onboarding_step_reverted':
+      return `Onboarding step reopened: ${h.new_value}`
+    case 'onboarding_step_na':
+      return `Onboarding step marked not applicable: ${h.new_value}`
+    case 'fee_updated':
+      return 'Fee schedule updated'
     default:
       return h.action
   }

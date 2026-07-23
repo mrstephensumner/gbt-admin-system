@@ -73,6 +73,14 @@ function describeActivity(a: DashboardData['activity'][number]): string {
       return 'showreel removed'
     case 'seo_updated':
       return 'SEO metadata updated'
+    case 'onboarding_step_completed':
+      return `onboarding step completed: ${a.new_value}`
+    case 'onboarding_step_reverted':
+      return `onboarding step reopened: ${a.new_value}`
+    case 'onboarding_step_na':
+      return `onboarding step marked not applicable: ${a.new_value}`
+    case 'fee_updated':
+      return 'fee schedule updated'
     default:
       return a.action
   }

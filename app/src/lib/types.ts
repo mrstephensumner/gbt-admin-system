@@ -66,6 +66,35 @@ export interface ChangeRecordItem {
   at: string
 }
 
+export type OnboardingStatus = 'not_started' | 'in_progress' | 'complete' | 'not_applicable'
+
+export interface OnboardingStep {
+  key: string
+  title: string
+  descriptor: string
+  order: number
+  requiredToPublish: boolean
+  status: OnboardingStatus
+  blocksPublish: boolean
+  note?: string | null
+  actor?: string
+  at?: string
+}
+
+export interface FeeSchedule {
+  day_rate_pence: number | null
+  half_day_rate_pence: number | null
+  after_dinner_rate_pence: number | null
+  travel_terms: string | null
+  fees_vary_by_site: boolean
+}
+
+export interface OnboardingData {
+  steps: OnboardingStep[]
+  progress: { complete: number; applicable: number; percent: number }
+  fee: FeeSchedule
+}
+
 export interface DirectoryResponse {
   items: TalentSummary[]
   total: number

@@ -11,6 +11,12 @@ export const talent = sqliteTable(
     headline: text('headline'),
     biography: text('biography'),
     dayRatePence: integer('day_rate_pence'),
+    // Fee schedule (spec 010). Standard day rate is dayRatePence above (single
+    // source, reused not duplicated); these are the additional fee fields.
+    halfDayRatePence: integer('half_day_rate_pence'),
+    afterDinnerRatePence: integer('after_dinner_rate_pence'),
+    travelTerms: text('travel_terms'),
+    feesVaryBySite: integer('fees_vary_by_site', { mode: 'boolean' }).notNull().default(false),
     location: text('location'),
     email: text('email'),
     phone: text('phone'),
@@ -30,6 +36,35 @@ export const talent = sqliteTable(
     index('talent_day_rate_idx').on(t.dayRatePence),
     check('talent_status_check', sql.raw(`status IN (${TALENT_STATUSES.map((s) => `'${s}'`).join(', ')})`)),
     check('talent_day_rate_check', sql`day_rate_pence IS NULL OR day_rate_pence >= 0`),
+    // Non-negativity of half-day/after-dinner rates is enforced at the service/route
+    // layer (422 bad_amount) rather than a CHECK, so this stays an additive
+    // ADD COLUMN migration on the live talent table (no full-table rebuild).
+  ],
+)
+
+/**
+ * Onboarding step state per speaker (spec 010). Sparse — a row exists only when
+ * an ATTESTATION step has been acted on or a step is marked not-applicable.
+ * Derived steps (headshots, biography, fee schedule) compute their status from
+ * the underlying data and store no row here. There is deliberately NO column for
+ * raw PII (passport / bank / DBS numbers) — attestation status only (FR-013).
+ */
+export const talentOnboardingStep = sqliteTable(
+  'talent_onboarding_step',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    stepKey: text('step_key').notNull(),
+    status: text('status').notNull(),
+    note: text('note'),
+    actor: text('actor').notNull(),
+    at: text('at').notNull(),
+  },
+  (t) => [
+    uniqueIndex('onboarding_step_talent_key_idx').on(t.talentId, t.stepKey),
+    index('onboarding_step_talent_idx').on(t.talentId),
   ],
 )
 

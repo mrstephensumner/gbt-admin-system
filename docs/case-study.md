@@ -222,3 +222,18 @@ specification to verified deployment.
   inside spec 010, to land before the first public site serves traffic. A standing rule
   came out of it: telemetry obeys the same publish-safe boundary as everything else —
   logs may carry identifiers and paths, never day rates, contacts or notes.
+- **23 Jul 2026** — Spec 010 (Talent Onboarding System) built and deployed: the Onboarding
+  placeholder became a real per-speaker checklist of seven steps with live progress, built to
+  the client's design mockup. The defining decision was to make the checklist the *legible
+  surface of the existing publish gate* rather than a parallel system — one shared
+  `publishBlockers()` predicate feeds both the publish action and the checklist, so they can
+  never disagree. Clarified live with the owner: only the three existing checks (headshots,
+  biography, fee schedule) block publishing; completion is hybrid (derive from existing data
+  where possible, manual attestation for compliance steps); travel terms are free text.
+  Sensitive steps (identity, bank, safeguarding) store an attestation status with operator and
+  timestamp only — never a raw passport, bank or DBS number — and no onboarding data crosses
+  the publish-safe boundary. The Fee schedule step reuses the single day-rate field as its
+  standard rate and adds half-day/after-dinner/travel-terms behind the day-rate permission.
+  Migration 0008 kept additive (a needless full-table rebuild was avoided by moving the
+  non-negative-rate checks to the service layer). Full suite: 291 automated tests (133 unit,
+  133 integration, 25 end-to-end) green; the tab was visually verified against the mockup.

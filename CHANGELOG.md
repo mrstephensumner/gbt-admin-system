@@ -6,6 +6,25 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Talent Onboarding System (spec 010)** — the Onboarding placeholder is now a real
+  per-speaker checklist of seven fixed steps (representation agreement, identity & right to
+  work, bank & payment details, headshots & showreel, biography & topics, fee schedule,
+  safeguarding & compliance) with a live progress summary and a step-detail panel, built to
+  the design mockup. The checklist is the **legible surface of the existing publish gate** —
+  a single shared `publishBlockers()` feeds both the publish action and the checklist's
+  blocking flags, so they can never disagree (the three publish-required steps map 1:1 to
+  today's day-rate/biography/photo checks; representation agreement is tracked but does not
+  block publishing, per owner clarification). Completion is **hybrid**: headshots, biography
+  and fee schedule derive from existing data; the compliance steps are manual attestations.
+  **Sensitive steps store attestation only** — a verified status with the attesting operator,
+  timestamp and an optional internal note; there is deliberately no field for a raw passport,
+  bank or DBS number, and no onboarding data enters any publish-safe serialization. The Fee
+  schedule step captures standard/half-day/after-dinner rates (standard rate reuses the single
+  existing day-rate field), free-text travel terms and a "fees vary by site" flag, all behind
+  the `edit_day_rates` permission. Steps can be marked not-applicable; every change is
+  attributed and flows into History, the dashboard feed and Statistics. Migration 0008
+  (additive: new `talent_onboarding_step` table + fee columns). Suites: 133 unit + 133
+  integration + 25 e2e green; visually verified against the mockup.
 - **Observability — Layer 0 (ADR 0005)** — native Cloudflare Workers Observability turned
   on (`observability.enabled`, source-map upload), so per-request logs and unhandled
   errors are now captured, retained and queryable in the dashboard with readable

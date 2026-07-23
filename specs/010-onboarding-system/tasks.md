@@ -7,29 +7,29 @@ shared enums/predicates get exhaustive ones). Paths are under `app/`.
 
 ## Phase 1 — Setup
 
-- [ ] T001 Add migration `app/drizzle/0008_onboarding.sql`: create `talent_onboarding_step`
+- [x] T001 Add migration `app/drizzle/0008_onboarding.sql`: create `talent_onboarding_step`
   (id, talent_id, step_key, status, note, actor, at) with unique `(talent_id, step_key)` +
   `talent_id` index; ALTER `talent` add `half_day_rate_pence`, `after_dinner_rate_pence`,
   `travel_terms`, `fees_vary_by_site` (default 0), with `>= 0` checks on the pence columns.
-- [ ] T002 Reflect the new table + columns in `app/worker/db/schema.ts` (Drizzle
+- [x] T002 Reflect the new table + columns in `app/worker/db/schema.ts` (Drizzle
   `talentOnboardingStep` table; add fee columns to the `talent` table definition); apply locally
   (`npm run db:migrate:local`) to confirm the migration is valid.
 
 ## Phase 2 — Foundational (blocking prerequisites)
 
-- [ ] T003 [P] Create `app/shared/onboarding.ts`: the seven fixed step definitions (key, title,
+- [x] T003 [P] Create `app/shared/onboarding.ts`: the seven fixed step definitions (key, title,
   descriptor, order, requiredToPublish, completion kind), the status enum
   (`not_started|in_progress|complete|not_applicable`), and helpers `isAttestationStep`,
   `computeProgress(steps)`.
-- [ ] T004 Extract `publishBlockers(talent, photoCount)` into `app/shared/onboarding.ts`
+- [x] T004 Extract `publishBlockers(talent, photoCount)` into `app/shared/onboarding.ts`
   (returns subset of `['day_rate','biography','photo']`) with the exact current logic; refactor
   `app/worker/services/publication.ts` to call it in place of the inline `missing` array (keep
   `GATE_MESSAGES` and behaviour identical).
-- [ ] T005 [P] Unit tests `app/tests/unit/onboarding.test.ts`: step-definition invariants
+- [x] T005 [P] Unit tests `app/tests/unit/onboarding.test.ts`: step-definition invariants
   (7 steps, stable keys, exactly headshots/biography/fee_schedule required), `computeProgress`
   (including a not-applicable step reducing the applicable total), and `publishBlockers`
   exhaustively (each missing field, all-present, POA day rate).
-- [ ] T006 Create `app/worker/services/onboarding.ts` `getOnboarding(d1, reference)`: read the
+- [x] T006 Create `app/worker/services/onboarding.ts` `getOnboarding(d1, reference)`: read the
   talent row + photo count + `talent_onboarding_step` rows, compute derived statuses, merge
   attestation statuses, build `steps[]` (+`blocksPublish`), `progress`, and `fee` per
   [data-model.md](data-model.md).
@@ -42,22 +42,22 @@ step and save attestation steps as draft/complete.
 **Independent test**: Open a partly-complete speaker → progress + per-step states render; select
 a step → detail shows; attest a step → progress recalculates.
 
-- [ ] T007 [US1] Add `PUT /api/talent/:reference/onboarding/:stepKey` in
+- [x] T007 [US1] Add `PUT /api/talent/:reference/onboarding/:stepKey` in
   `app/worker/routes/onboarding.ts` (attestation steps only; `bad_step` for derived steps;
   `bad_status` for invalid/NA-on-required; optimistic `version` check) → `updateStep` in
   `app/worker/services/onboarding.ts`; wire the route group in `app/worker/index.ts`.
-- [ ] T008 [P] [US1] Add `GET /api/talent/:reference/onboarding` route calling `getOnboarding`.
-- [ ] T009 [P] [US1] Add onboarding + fee types to `app/src/lib/types.ts` (OnboardingStep,
+- [x] T008 [P] [US1] Add `GET /api/talent/:reference/onboarding` route calling `getOnboarding`.
+- [x] T009 [P] [US1] Add onboarding + fee types to `app/src/lib/types.ts` (OnboardingStep,
   OnboardingProgress, FeeSchedule, OnboardingRead).
-- [ ] T010 [US1] Build `app/src/routes/onboarding-tab.tsx`: left checklist rail (progress header
+- [x] T010 [US1] Build `app/src/routes/onboarding-tab.tsx`: left checklist rail (progress header
   "X of N complete" + percentage bar, step rows with status circle, current-step highlight,
   publish-blocking red dot) and right step-detail panel (name, "Step X of 7", required-to-publish
   subtitle, status badge); attestation steps get verify/in-progress controls + optional note +
   Save draft / Save & continue footer; derived steps render read-only with a pointer to the
   owning tab. Design-system tokens/Lucide only.
-- [ ] T011 [US1] Replace the Onboarding `coming-soon` block in
+- [x] T011 [US1] Replace the Onboarding `coming-soon` block in
   `app/src/routes/talent-profile.tsx` with `<OnboardingTab>`; remove the placeholder wiring.
-- [ ] T012 [US1] Integration tests `app/tests/integration/onboarding.test.ts` (part 1): GET
+- [x] T012 [US1] Integration tests `app/tests/integration/onboarding.test.ts` (part 1): GET
   returns correct derived statuses + progress; PUT completes/reverts an attestation step;
   `bad_step` on a derived key; `version_conflict` path.
 
@@ -70,16 +70,16 @@ a step → detail shows; attest a step → progress recalculates.
 **Independent test**: Speaker missing a publish-required step → publish refused naming it +
 checklist flags it; complete it → publish succeeds.
 
-- [ ] T013 [US2] Confirm/adjust `publication.publish()` uses `publishBlockers` (from T004) so
+- [x] T013 [US2] Confirm/adjust `publication.publish()` uses `publishBlockers` (from T004) so
   refusal `missing` and the checklist `blocksPublish` derive identically; surface step-linked
   wording where the gate message is shown.
-- [ ] T014 [US2] In `onboarding-tab.tsx`, render each incomplete publish-required step as
+- [x] T014 [US2] In `onboarding-tab.tsx`, render each incomplete publish-required step as
   visibly blocking, and show a concise "what's blocking publish" summary derived from
   `blocksPublish`.
-- [ ] T015 [US2] Handle revert-on-published (FR-017): when reverting a publish-required step (or
+- [x] T015 [US2] Handle revert-on-published (FR-017): when reverting a publish-required step (or
   clearing the day rate) on a speaker published to ≥1 brand, disclose the consequence to the
   operator (consistent with archive auto-unpublish disclosure).
-- [ ] T016 [P] [US2] Integration tests (part 2): gate parity — for a matrix of missing-field
+- [x] T016 [P] [US2] Integration tests (part 2): gate parity — for a matrix of missing-field
   combinations, the publish refusal `missing` set equals the checklist `blocksPublish` set;
   publish succeeds once all three complete.
 
@@ -92,14 +92,14 @@ checklist flags it; complete it → publish succeeds.
 **Independent test**: With permission → edit four fees + travel terms + toggle, saves, standard
 rate matches record; without permission → read-only + `403`.
 
-- [ ] T017 [US3] Add `PATCH /api/talent/:reference/fee-schedule` (requires `edit_day_rates`;
+- [x] T017 [US3] Add `PATCH /api/talent/:reference/fee-schedule` (requires `edit_day_rates`;
   partial update; `bad_amount` for negatives; optimistic version) → `updateFeeSchedule` in
   `app/worker/services/onboarding.ts`; writes `day_rate_pence` (single source) + new fee columns.
-- [ ] T018 [US3] Fee schedule step UI in `onboarding-tab.tsx`: standard/half-day/after-dinner
+- [x] T018 [US3] Fee schedule step UI in `onboarding-tab.tsx`: standard/half-day/after-dinner
   rate inputs (GBP `£` formatting, "Excludes VAT" note), free-text travel terms, "fees vary by
   site" toggle with helper text; whole form read-only without `edit_day_rates` (use existing
   `useCan`).
-- [ ] T019 [P] [US3] Integration tests (part 3): fee update persists + recomputes fee-step status
+- [x] T019 [P] [US3] Integration tests (part 3): fee update persists + recomputes fee-step status
   and clears the publish blocker; `403` without `edit_day_rates`; `bad_amount` on negative;
   standard day rate is the same field used by publish/serialize (no duplicate).
 
@@ -112,13 +112,13 @@ rate matches record; without permission → read-only + `403`.
 **Independent test**: Attest a sensitive step → status+actor+timestamp(+note) stored, no raw-PII
 field exists; publish-safe shape contains no onboarding/fee-internal data.
 
-- [ ] T020 [US4] Support `not_applicable` in `updateStep` (attestation steps only; reject on
+- [x] T020 [US4] Support `not_applicable` in `updateStep` (attestation steps only; reject on
   publish-required) and exclude NA steps from `computeProgress` applicable total; UI control to
   mark not-applicable with attribution.
-- [ ] T021 [US4] Verify `app/worker/services/serialize.ts` publish-safe fields exclude all
+- [x] T021 [US4] Verify `app/worker/services/serialize.ts` publish-safe fields exclude all
   onboarding + fee-internal fields (half-day/after-dinner/travel-terms/fees-vary + step data);
   adjust if any leak.
-- [ ] T022 [P] [US4] Integration guard test (part 4): assert the publish-safe serialization of a
+- [x] T022 [P] [US4] Integration guard test (part 4): assert the publish-safe serialization of a
   fully-onboarded speaker contains none of the onboarding/fee-internal keys (SC-004/005); assert
   the data model has no raw passport/bank/DBS field.
 
@@ -131,23 +131,23 @@ field exists; publish-safe shape contains no onboarding/fee-internal data.
 **Independent test**: Complete then revert a step → both attributed events appear in History and
 the dashboard feed.
 
-- [ ] T023 [US5] Emit `change_record` rows from `updateStep`/`updateFeeSchedule`:
+- [x] T023 [US5] Emit `change_record` rows from `updateStep`/`updateFeeSchedule`:
   `onboarding_step_completed` / `onboarding_step_reverted` / `onboarding_step_na` / `fee_updated`
   (actor + `field` = step/fee), reusing the existing insert pattern.
-- [ ] T024 [P] [US5] Add human-readable labels for the new actions wherever change actions are
+- [x] T024 [P] [US5] Add human-readable labels for the new actions wherever change actions are
   rendered (History tab, dashboard activity feed) so they read as sentences, not codes.
-- [ ] T025 [P] [US5] Integration test (part 5): each onboarding/fee change writes an attributed
+- [x] T025 [P] [US5] Integration test (part 5): each onboarding/fee change writes an attributed
   change record and appears via the history + dashboard-feed queries.
 
 ## Phase 8 — Polish & cross-cutting
 
-- [ ] T026 [P] e2e `app/tests/e2e/us-onboarding.spec.ts`: tab renders with progress; attest a
+- [x] T026 [P] e2e `app/tests/e2e/us-onboarding.spec.ts`: tab renders with progress; attest a
   step; publish blocked → set day rate → publish passes; fee permission read-only for a
   non-`edit_day_rates` operator; not-applicable excluded from total. (Clean-DB ritual per
   [quickstart.md](quickstart.md); tab selected by exact name.)
-- [ ] T027 [P] Update `CHANGELOG.md` (spec 010 entry) and `docs/case-study.md` (timeline entry);
+- [x] T027 [P] Update `CHANGELOG.md` (spec 010 entry) and `docs/case-study.md` (timeline entry);
   confirm no new ADR needed (operates within ADR 0002/0003).
-- [ ] T028 Full verification on a clean DB: `npm run test:unit && npm run test:integration &&
+- [x] T028 Full verification on a clean DB: `npm run test:unit && npm run test:integration &&
   npx playwright test tests/e2e/us-onboarding.spec.ts && npm run lint && npm run typecheck`;
   then migrate remote (`0008`) + deploy; visual check vs the mockup.
 

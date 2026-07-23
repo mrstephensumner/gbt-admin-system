@@ -8,6 +8,12 @@ export interface TalentRow {
   headline: string | null
   biography: string | null
   day_rate_pence: number | null
+  // Fee schedule (spec 010) — internal-only; deliberately NOT added to
+  // serializeTalent's output (publish-safe boundary, FR-014).
+  half_day_rate_pence: number | null
+  after_dinner_rate_pence: number | null
+  travel_terms: string | null
+  fees_vary_by_site: number
   location: string | null
   email: string | null
   phone: string | null
