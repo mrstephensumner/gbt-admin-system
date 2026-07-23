@@ -25,6 +25,16 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
   `worker/db/seed-network.sql` (+ `seed:network` / `seed:network:remote` scripts); applied
   to production and local. Kept separate from the e2e brand seed so count-based tests stay
   deterministic.
+- **Multi-tenant site engine architecture locked (ADR 0004)** — the delivery mechanism
+  left open in ADR 0003 is now settled: this same Cloudflare Worker will **render every
+  public brand site by hostname** (add a domain + brand row → live, no per-site deploy).
+  Templates are bespoke per site; categories/topics, SEO inputs and a per-site mini-blog
+  are admin-managed and shared; talent→site stays manual curation via the publish action;
+  the publish-safe boundary becomes a request-path invariant. **Great British Influencers**
+  (greatbritishinfluencers.co.uk, added to the network) is the greenfield pilot that
+  proves the engine before the eight WordPress sites are rebuilt onto it. Roadmap: public
+  engine + Influencers pilot → per-site category/SEO manager → per-site blog → Enquiries
+  module → WordPress rebuilds.
 - **Talent Media Manager (spec 008)** — the Photos tab is now a full media manager:
   categorised **headshots** and **at-event photos**, **showreels** (external video links
   with provider + thumbnail derived from the URL), and an **SEO metadata** sidebar (meta

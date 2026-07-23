@@ -1,7 +1,9 @@
 # 0003 — Multi-site content delivery: one database behind 7+ websites
 
 - **Date:** 16 Jul 2026
-- **Status:** Accepted (requirement recorded; delivery mechanism is a future feature)
+- **Status:** Accepted (requirement recorded). Delivery mechanism now settled in
+  [ADR 0004](0004-multi-tenant-site-engine.md) — a multi-tenant Worker that renders every
+  brand site by hostname, rather than only exposing a read-only content API.
 - **Context:** The owner confirmed the admin is intended to be the backbone of **7+
   external brand websites** (Great British Speakers, sister brands, rebuilt sites, and
   new-market sites), all powered off the same database. This makes constitution

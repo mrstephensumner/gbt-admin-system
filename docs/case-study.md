@@ -202,3 +202,15 @@ specification to verified deployment.
   Comedians, Moderators, Musicians, Presenters, Voices, Business Speakers and Sports
   Speakers — were then seeded into the live network (idempotent `seed-network.sql`), so the
   admin now reflects the actual multi-brand estate talent will be published across.
+- **23 Jul 2026** — Big-picture architecture locked with the owner (ADR 0004). The eight
+  brand sites currently run on ageing WordPress; the plan is to rebuild them natively
+  inside this project and have this system render them directly. The decisions: **one
+  multi-tenant Cloudflare Worker renders every public site by hostname** (a new site = a
+  domain + a brand row + a template module, no separate deploy); templates are bespoke per
+  site while categories/topics, SEO inputs and a per-site mini-blog are managed centrally
+  from the admin; which talent appears on a site stays manual curation via the publish
+  action; and the publish-safe field boundary becomes a hard request-path invariant now
+  that the Worker serves public traffic. A brand-new site, **Great British Influencers**
+  (greatbritishinfluencers.co.uk, added to the network as the ninth site), is the
+  greenfield pilot — a full public site with a net-new influencer roster — that proves the
+  engine before the WordPress rebuilds begin.

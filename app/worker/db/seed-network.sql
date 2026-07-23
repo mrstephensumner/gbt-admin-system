@@ -33,3 +33,9 @@ WHERE NOT EXISTS (SELECT 1 FROM brand WHERE slug = 'great-business-speakers');
 INSERT INTO brand (slug, name, url, active, sort_order, created_at)
 SELECT 'great-sports-speakers', 'Great Sports Speakers', 'https://greatsportsspeakers.com/', 1, 7, '2026-07-17T10:30:00Z'
 WHERE NOT EXISTS (SELECT 1 FROM brand WHERE slug = 'great-sports-speakers');
+
+-- New-build pilot: the first site to be built natively inside this system
+-- (greenfield, not a WordPress rebuild). See ADR 0003 / spec 010.
+INSERT INTO brand (slug, name, url, active, sort_order, created_at)
+SELECT 'great-british-influencers', 'Great British Influencers', 'https://greatbritishinfluencers.co.uk/', 1, 8, '2026-07-23T10:00:00Z'
+WHERE NOT EXISTS (SELECT 1 FROM brand WHERE slug = 'great-british-influencers');
