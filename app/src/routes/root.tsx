@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard, Inbox, CalendarCheck, Building2, Receipt, Globe } from 'lucide-react'
+import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard, Inbox, CalendarCheck, Building2, Receipt, Globe, Sparkles } from 'lucide-react'
 import { NavItem } from '../components'
 import { useCan, useOperator } from '../lib/operator'
 import { NoAccessScreen } from './no-access'
@@ -89,6 +89,14 @@ export function Root() {
               label="Team"
               active={pathname.startsWith('/team')}
               onClick={() => navigate('/team')}
+            />
+          )}
+          {operator?.role === 'owner' && (
+            <NavItem
+              icon={<Sparkles size={18} />}
+              label="AI settings"
+              active={pathname.startsWith('/settings/enrichment')}
+              onClick={() => navigate('/settings/enrichment')}
             />
           )}
         </nav>

@@ -95,6 +95,14 @@ function describeActivity(a: DashboardData['activity'][number]): string {
       return `availability removed: ${a.old_value}`
     case 'working_week_changed':
       return 'working week changed'
+    case 'enrichment_generated':
+      return `site bio generated: ${a.new_value}`
+    case 'enrichment_admin_approved':
+      return `site bio admin-approved: ${a.new_value}`
+    case 'enrichment_talent_approved':
+      return `site bio talent-approved: ${a.new_value}`
+    case 'enrichment_published':
+      return `site bio published: ${a.new_value}`
     default:
       return a.action
   }

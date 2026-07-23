@@ -6,6 +6,23 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Profile Enrichment (spec 013)** — the Profile Enrichment placeholder is now a real feature
+  that generates a **different, audience-optimised biography per network site** with Claude, to
+  stop the same speaker's identical bio across the 7+ brand domains from cannibalising each other
+  in search (informed by a cited deep-research pass). An owner-only **AI enrichment settings**
+  screen holds the org's Anthropic API key (stored **AES-GCM-encrypted**, never returned to the
+  browser or logged — only a masked hint is shown), the model, and a banned-words list. Each
+  **network site carries an editorial brief** (audience, tone, word-count band, include/exclude)
+  set in the Network screen; generation grounds strictly on the speaker's real facts (master bio,
+  headline, topics, optional source material) and is instructed to invent nothing. Every draft
+  shows a **trigram-similarity score vs the master bio** and flags any banned words, as reviewer
+  signals (not a hard gate). A bio goes live only through a **dual approval gate — admin then
+  talent** (a legal review-right, given publisher liability for AI text), then Publish. **Only
+  published bios are publish-safe** — the system's first publish-safe content; drafts, settings and
+  the key never leave the admin. British English is enforced; no AI-disclosure label (not legally
+  required). Migration 0011; ADR 0007 (encrypted secret storage + isolated LLM call). The single
+  Anthropic call is isolated behind one function and stubbed in every automated test, so the suite
+  runs offline. Suites: 163 unit + 155 integration + 31 e2e green; visually verified.
 - **Talent Availability (spec 012)** — the Availability placeholder is now a real per-speaker
   **month calendar**, built to the design mockup. Days are coloured and labelled by one of four
   fixed states — **available** (green), **pencilled** (yellow), **confirmed** (blue), **blocked**

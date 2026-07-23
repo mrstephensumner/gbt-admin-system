@@ -260,3 +260,17 @@ specification to verified deployment.
   vocabulary, and Google Calendar sync was deferred to its own feature (the connect control is a
   marked "coming soon" signpost). Migration 0010 additive. Full suite: 322 automated tests (148
   unit, 147 integration, 27 end-to-end) green; the calendar was visually verified against the mockup.
+- **23 Jul 2026** — Spec 013 (Profile Enrichment) built and deployed — the largest feature to date,
+  and the first to introduce AI generation and the first publish-safe content. It solves a real SEO
+  problem: the same speaker's identical biography across 7+ separate brand domains cannibalises the
+  network in search. The build was preceded by a **cited, adversarially-verified deep-research pass**
+  (108 sub-agents) into cross-domain duplicate content, Google's scaled-content-abuse line, GEO/AI
+  citation, and UK publisher liability for AI text — findings that shaped the design (grounding as a
+  hard requirement, similarity as a reviewer flag not a %-gate, dual admin+talent approval). The
+  feature generates an audience-optimised bio per network site with Claude, grounded strictly on the
+  speaker's real facts and steered by a per-site editorial brief; the org's Anthropic key is stored
+  AES-GCM-encrypted (a Worker-held KEK) and never returned; only published bios are publish-safe.
+  Two engineering calls of note: migration 0011 kept additive, and the LLM call uses a direct
+  `fetch` (not the SDK, whose webhook dependency breaks the workerd test runtime) isolated behind one
+  stubbable function so the whole suite runs offline. Full suite: 349 automated tests (163 unit, 155
+  integration, 31 end-to-end) green; both new surfaces visually verified.

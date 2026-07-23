@@ -24,12 +24,8 @@ test.describe('Talent profile workspace (spec 005)', () => {
     await expect(notesList.getByText('dev@greatbritishtalent.online')).toBeVisible()
     await expect(page.getByRole('tab', { name: /Notes/ }).locator('.gb-tab__count')).toHaveText('1')
 
-    // Placeholder tabs are unmistakably roadmap items, never dead controls
-    await page.getByRole('tab', { name: 'Profile Enrichment' }).click()
-    const placeholder = page.getByTestId('coming-soon')
-    await expect(placeholder.getByText('In development')).toBeVisible()
-    await expect(placeholder.getByText('Planned')).toBeVisible()
-    await expect(placeholder.getByRole('button')).toHaveCount(0)
+    // Every profile tab is now a built feature (roadmap placeholders remain only in
+    // the sidebar modules — verified in the roadmap-modules test below).
 
     // Social & News: add a profile with reach and a press mention (spec 007)
     await page.getByRole('tab', { name: 'Social & News' }).click()

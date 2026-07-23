@@ -19,6 +19,8 @@ export const talent = sqliteTable(
     feesVaryBySite: integer('fees_vary_by_site', { mode: 'boolean' }).notNull().default(false),
     // Availability default working week (spec 012): mon_fri | mon_sat | all (null → mon_fri).
     workingWeek: text('working_week'),
+    // Optional extra grounding facts for AI enrichment (spec 013) — achievements, testimonials.
+    sourceMaterial: text('source_material'),
     location: text('location'),
     email: text('email'),
     phone: text('phone'),
@@ -123,6 +125,13 @@ export const brand = sqliteTable(
     url: text('url'),
     active: integer('active', { mode: 'boolean' }).notNull().default(true),
     sortOrder: integer('sort_order').notNull().default(0),
+    // Editorial brief for AI enrichment (spec 013) — steers per-site bio generation.
+    briefAudience: text('brief_audience'),
+    briefTone: text('brief_tone'),
+    briefWordmin: integer('brief_wordmin'),
+    briefWordmax: integer('brief_wordmax'),
+    briefInclude: text('brief_include'),
+    briefExclude: text('brief_exclude'),
     createdAt: text('created_at').notNull(),
   },
   (t) => [uniqueIndex('brand_slug_idx').on(t.slug)],
@@ -227,6 +236,59 @@ export const talentAvailability = sqliteTable(
   (t) => [
     index('availability_talent_idx').on(t.talentId),
     index('availability_range_idx').on(t.talentId, t.startDate, t.endDate),
+  ],
+)
+
+/**
+ * Org-level AI enrichment settings (spec 013 / ADR 0007). Single row (id=1).
+ * The Anthropic key is stored AES-GCM-encrypted (ciphertext + iv); the raw key
+ * is NEVER stored or returned in plaintext — reads expose only a masked hint.
+ */
+export const enrichmentSettings = sqliteTable('enrichment_settings', {
+  id: integer('id').primaryKey(),
+  keyCiphertext: text('key_ciphertext'),
+  keyIv: text('key_iv'),
+  keyHint: text('key_hint'),
+  model: text('model').notNull(),
+  bannedWords: text('banned_words').notNull().default('[]'),
+  houseStyle: text('house_style'),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: text('updated_at').notNull(),
+})
+
+/**
+ * Per-(talent × site) AI biography (spec 013). One working row per pair; a
+ * published row's body is the site's public biography. Only `published` rows
+ * are publish-safe; everything else is internal.
+ */
+export const talentSiteBio = sqliteTable(
+  'talent_site_bio',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    brandId: integer('brand_id')
+      .notNull()
+      .references(() => brand.id),
+    body: text('body').notNull(),
+    state: text('state').notNull(),
+    wordCount: integer('word_count').notNull(),
+    similarity: integer('similarity').notNull(),
+    model: text('model'),
+    generatedBy: text('generated_by'),
+    generatedAt: text('generated_at'),
+    adminApprovedBy: text('admin_approved_by'),
+    adminApprovedAt: text('admin_approved_at'),
+    talentApprovedBy: text('talent_approved_by'),
+    talentApprovedAt: text('talent_approved_at'),
+    publishedAt: text('published_at'),
+    updatedBy: text('updated_by').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => [
+    uniqueIndex('site_bio_talent_brand_idx').on(t.talentId, t.brandId),
+    index('site_bio_talent_idx').on(t.talentId),
   ],
 )
 

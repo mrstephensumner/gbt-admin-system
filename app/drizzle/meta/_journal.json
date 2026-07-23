@@ -78,6 +78,13 @@
 			"when": 1784799155074,
 			"tag": "0010_availability",
 			"breakpoints": true
+		},
+		{
+			"idx": 11,
+			"version": "6",
+			"when": 1784829182538,
+			"tag": "0011_enrichment",
+			"breakpoints": true
 		}
 	]
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Trash2, Sparkles } from 'lucide-react'
+import { ArrowLeft, Trash2 } from 'lucide-react'
 import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Tabs, Textarea, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
@@ -12,7 +12,7 @@ import type { TalentStatus } from '@shared/enums'
 import { formatDate, formatDateTime, formatDayRate } from '@shared/format'
 import { SOCIAL_PLATFORMS, SOCIAL_PLATFORM_LABELS, formatFollowers, type SocialPlatform } from '@shared/social'
 import { TalentFields, validateTalentForm, type TalentFormValues } from './talent-form'
-import { ComingSoon } from './coming-soon'
+import { EnrichmentTab } from './enrichment-tab'
 import { MediaTab } from './media-tab'
 import { OnboardingTab } from './onboarding-tab'
 import { DocumentsPanel } from './documents-panel'
@@ -285,18 +285,7 @@ export function TalentProfileScreen() {
             toast={toast}
           />
         )}
-        {tab === 'enrichment' && (
-          <ComingSoon
-            icon={<Sparkles size={40} />}
-            title="Profile Enrichment"
-            description="Assisted profile improvement — drafting sharper biographies and filling gaps from approved sources, always with operator review."
-            planned={[
-              'Suggested biography and headline improvements',
-              'Gap-filling suggestions with source references',
-              'One-click apply after human review',
-            ]}
-          />
-        )}
+        {tab === 'enrichment' && <EnrichmentTab talent={talent} reference={reference} onChanged={refresh} />}
         {tab === 'stats' && <StatisticsTab stats={statsQuery.data} />}
 
         {tab === 'site' && (
@@ -477,6 +466,16 @@ function describeChange(h: ChangeRecordItem): string {
       return `Availability removed: ${h.old_value}`
     case 'working_week_changed':
       return 'Working week changed'
+    case 'enrichment_generated':
+      return `Site bio generated: ${h.new_value}`
+    case 'enrichment_edited':
+      return `Site bio edited: ${h.new_value}`
+    case 'enrichment_admin_approved':
+      return `Site bio admin-approved: ${h.new_value}`
+    case 'enrichment_talent_approved':
+      return `Site bio talent-approved: ${h.new_value}`
+    case 'enrichment_published':
+      return `Site bio published: ${h.new_value}`
     default:
       return h.action
   }

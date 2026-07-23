@@ -17,6 +17,7 @@ import { mediaRoutes } from './routes/media'
 import { onboardingRoutes } from './routes/onboarding'
 import { documentRoutes } from './routes/documents'
 import { availabilityRoutes } from './routes/availability'
+import { enrichmentRoutes } from './routes/enrichment'
 
 const app = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
@@ -38,6 +39,7 @@ app.route('/api', mediaRoutes)
 app.route('/api', onboardingRoutes)
 app.route('/api', documentRoutes)
 app.route('/api', availabilityRoutes)
+app.route('/api', enrichmentRoutes)
 
 app.notFound((c) =>
   c.req.path.startsWith('/api')

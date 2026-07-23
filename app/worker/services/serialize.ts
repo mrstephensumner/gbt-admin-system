@@ -16,6 +16,8 @@ export interface TalentRow {
   fees_vary_by_site: number
   // Availability working week (spec 012) — internal-only; not in serializeTalent output.
   working_week: string | null
+  // Enrichment grounding material (spec 013) — internal-only.
+  source_material: string | null
   location: string | null
   email: string | null
   phone: string | null

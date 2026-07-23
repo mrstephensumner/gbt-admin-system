@@ -10,10 +10,11 @@ export async function listSites(d1: D1Database) {
   const rows = await d1
     .prepare(
       `SELECT b.id, b.slug, b.name, b.url, b.active, b.sort_order,
+              b.brief_audience, b.brief_tone, b.brief_wordmin, b.brief_wordmax, b.brief_include, b.brief_exclude,
               (SELECT COUNT(*) FROM publication p WHERE p.brand_id = b.id) AS published_count
        FROM brand b ORDER BY b.sort_order, b.id`,
     )
-    .all<{ id: number; slug: string; name: string; url: string | null; active: number; sort_order: number; published_count: number }>()
+    .all<{ id: number; slug: string; name: string; url: string | null; active: number; sort_order: number; published_count: number; brief_audience: string | null; brief_tone: string | null; brief_wordmin: number | null; brief_wordmax: number | null; brief_include: string | null; brief_exclude: string | null }>()
   return {
     items: rows.results.map((r) => ({
       id: r.id,
@@ -22,6 +23,12 @@ export async function listSites(d1: D1Database) {
       url: r.url,
       active: !!r.active,
       published_count: r.published_count,
+      brief_audience: r.brief_audience,
+      brief_tone: r.brief_tone,
+      brief_wordmin: r.brief_wordmin,
+      brief_wordmax: r.brief_wordmax,
+      brief_include: r.brief_include,
+      brief_exclude: r.brief_exclude,
     })),
   }
 }
@@ -50,7 +57,18 @@ export async function createSite(
 export async function updateSite(
   d1: D1Database,
   id: number,
-  input: { name?: string; url?: string | null; active?: boolean },
+  input: {
+    name?: string
+    url?: string | null
+    active?: boolean
+    // Editorial brief for AI enrichment (spec 013).
+    brief_audience?: string | null
+    brief_tone?: string | null
+    brief_wordmin?: number | null
+    brief_wordmax?: number | null
+    brief_include?: string | null
+    brief_exclude?: string | null
+  },
 ) {
   const site = await d1.prepare('SELECT id FROM brand WHERE id = ?').bind(id).first()
   if (!site) throw new ApiError(404, 'not_found', 'No such site')
@@ -67,6 +85,12 @@ export async function updateSite(
   if (input.active !== undefined) {
     sets.push('active = ?')
     vals.push(input.active ? 1 : 0)
+  }
+  for (const f of ['brief_audience', 'brief_tone', 'brief_wordmin', 'brief_wordmax', 'brief_include', 'brief_exclude'] as const) {
+    if (input[f] !== undefined) {
+      sets.push(`${f} = ?`)
+      vals.push(input[f] ?? null)
+    }
   }
   if (sets.length === 0) return { ok: true }
   await d1.prepare(`UPDATE brand SET ${sets.join(', ')} WHERE id = ?`).bind(...vals, id).run()

@@ -8,7 +8,7 @@ import type { Context } from 'hono'
  */
 export class ApiError extends Error {
   constructor(
-    public status: 400 | 401 | 403 | 404 | 409 | 422 | 500,
+    public status: 400 | 401 | 403 | 404 | 409 | 422 | 500 | 502,
     public code: string,
     message: string,
     public extras: Record<string, unknown> = {},

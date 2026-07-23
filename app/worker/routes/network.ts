@@ -16,6 +16,13 @@ const updateSchema = z.object({
   name: z.string().trim().min(1).max(120).optional(),
   url: z.string().trim().refine(isHttpsUrl, 'Site address must start with https://').nullish().or(z.literal('').transform(() => null)).optional(),
   active: z.boolean().optional(),
+  // Editorial brief for AI enrichment (spec 013).
+  brief_audience: z.string().trim().max(500).nullish(),
+  brief_tone: z.string().trim().max(200).nullish(),
+  brief_wordmin: z.number().int().min(0).max(2000).nullish(),
+  brief_wordmax: z.number().int().min(0).max(2000).nullish(),
+  brief_include: z.string().trim().max(500).nullish(),
+  brief_exclude: z.string().trim().max(500).nullish(),
 })
 
 async function body<T>(c: { req: { json: () => Promise<unknown> } }, schema: z.ZodType<T>): Promise<T> {
