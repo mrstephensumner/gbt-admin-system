@@ -118,6 +118,23 @@ export interface DocumentsData {
   documents: TalentDocument[]
 }
 
+export interface AvailabilityEntry {
+  id: number
+  state: 'available' | 'pencilled' | 'confirmed' | 'blocked'
+  title: string
+  detail: string | null
+  location: string | null
+  start_date: string
+  end_date: string
+  updated_by?: string
+  updated_at?: string
+}
+
+export interface AvailabilityData {
+  entries: AvailabilityEntry[]
+  working_week: string
+}
+
 export interface DirectoryResponse {
   items: TalentSummary[]
   total: number

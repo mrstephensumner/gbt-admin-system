@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Trash2, CalendarDays, Sparkles } from 'lucide-react'
+import { ArrowLeft, Trash2, Sparkles } from 'lucide-react'
 import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Tabs, Textarea, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
@@ -16,6 +16,7 @@ import { ComingSoon } from './coming-soon'
 import { MediaTab } from './media-tab'
 import { OnboardingTab } from './onboarding-tab'
 import { DocumentsPanel } from './documents-panel'
+import { AvailabilityTab } from './availability-tab'
 
 function toFormValues(t: Talent): TalentFormValues {
   return {
@@ -269,18 +270,7 @@ export function TalentProfileScreen() {
         {tab === 'documents' && (
           <DocumentsPanel reference={reference} title="Documents" subtitle="Agreements, riders and other files held for this speaker — internal only" />
         )}
-        {tab === 'availability' && (
-          <ComingSoon
-            icon={<CalendarDays size={40} />}
-            title="Availability"
-            description="A live calendar of when this speaker can be offered — holds, engagements and blackout dates in one view."
-            planned={[
-              'Calendar of holds and confirmed engagements',
-              'Blackout dates the speaker sets in advance',
-              'Availability powering the bookings module',
-            ]}
-          />
-        )}
+        {tab === 'availability' && <AvailabilityTab reference={reference} />}
         {tab === 'social' && (
           <SocialTab
             data={socialQuery.data}
@@ -479,6 +469,14 @@ function describeChange(h: ChangeRecordItem): string {
       return `New document version: ${h.new_value}`
     case 'document_deleted':
       return `Document deleted: ${h.old_value}`
+    case 'availability_added':
+      return `Availability added: ${h.new_value}`
+    case 'availability_updated':
+      return `Availability updated: ${h.new_value}`
+    case 'availability_removed':
+      return `Availability removed: ${h.old_value}`
+    case 'working_week_changed':
+      return 'Working week changed'
     default:
       return h.action
   }

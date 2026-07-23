@@ -14,6 +14,8 @@ export interface TalentRow {
   after_dinner_rate_pence: number | null
   travel_terms: string | null
   fees_vary_by_site: number
+  // Availability working week (spec 012) — internal-only; not in serializeTalent output.
+  working_week: string | null
   location: string | null
   email: string | null
   phone: string | null

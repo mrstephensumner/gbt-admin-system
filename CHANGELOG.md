@@ -6,6 +6,20 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Talent Availability (spec 012)** — the Availability placeholder is now a real per-speaker
+  **month calendar**, built to the design mockup. Days are coloured and labelled by one of four
+  fixed states — **available** (green), **pencilled** (yellow), **confirmed** (blue), **blocked**
+  (red) — with a legend; Prev/Next pages through months. Operators can **add, edit and remove**
+  entries (state, title, optional detail/location, all-day date range), with a quick **Block
+  dates** action; a **This month** panel lists the visible month's entries with state badges;
+  and a **default working week** setting (Mon–Fri / Mon–Sat / every day) de-emphasises non-working
+  days. When several entries fall on one day the cell shows the dominant state (confirmed > blocked
+  > pencilled > available) while the list shows them all. Every change is attributed into History,
+  the dashboard feed and Statistics. Availability is **internal-only** — never in any publish-safe
+  output — and **independent of the speaker's overall status**. **Google Calendar sync is deferred**
+  to its own future feature; the connect control is present but marked "coming soon" (as social-API
+  sync was deferred in spec 007). Migration 0010 (additive: `talent_availability` table +
+  `working_week` column). Suites: 148 unit + 147 integration + 27 e2e green; visually verified.
 - **Talent Documents (spec 011)** — a per-speaker document store. Files can be filed freely
   to a speaker or attached to an onboarding attestation step (e.g. the signed representation
   agreement on its step), and are gathered in one place on a new **Documents** profile tab. Each

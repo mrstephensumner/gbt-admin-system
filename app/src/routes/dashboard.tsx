@@ -87,6 +87,14 @@ function describeActivity(a: DashboardData['activity'][number]): string {
       return `new document version: ${a.new_value}`
     case 'document_deleted':
       return `document deleted: ${a.old_value}`
+    case 'availability_added':
+      return `availability added: ${a.new_value}`
+    case 'availability_updated':
+      return `availability updated: ${a.new_value}`
+    case 'availability_removed':
+      return `availability removed: ${a.old_value}`
+    case 'working_week_changed':
+      return 'working week changed'
     default:
       return a.action
   }

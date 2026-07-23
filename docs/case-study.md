@@ -248,3 +248,15 @@ specification to verified deployment.
   a delete path for erasure and store-then-record ordering to avoid orphans. Derived steps offer
   no upload. Migration 0009 additive. Full suite: 306 automated tests (139 unit, 140 integration,
   27 end-to-end) green; the Documents tab and step panel were visually verified.
+- **23 Jul 2026** — Spec 012 (Talent Availability) built and deployed: the Availability placeholder
+  became a real per-speaker month calendar, built to the client's mockup. Four fixed states
+  (available/pencilled/confirmed/blocked) shown as coloured, labelled day cells with a legend;
+  add/edit/remove entries with a quick "Block dates" action; a "This month" list; and a
+  default-working-week setting that de-emphasises non-working days. The month-grid and date-overlap
+  logic was written as pure, exhaustively unit-tested functions in a shared module (timezone-safe
+  string dates, Monday-first weeks, cell-precedence when a day has several entries). Availability is
+  internal-only (never published) and independent of the speaker's overall status. Two judgment
+  calls, agreed in the summary: the mockup's casual cell synonyms were standardised to the legend
+  vocabulary, and Google Calendar sync was deferred to its own feature (the connect control is a
+  marked "coming soon" signpost). Migration 0010 additive. Full suite: 322 automated tests (148
+  unit, 147 integration, 27 end-to-end) green; the calendar was visually verified against the mockup.

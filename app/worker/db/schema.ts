@@ -17,6 +17,8 @@ export const talent = sqliteTable(
     afterDinnerRatePence: integer('after_dinner_rate_pence'),
     travelTerms: text('travel_terms'),
     feesVaryBySite: integer('fees_vary_by_site', { mode: 'boolean' }).notNull().default(false),
+    // Availability default working week (spec 012): mon_fri | mon_sat | all (null → mon_fri).
+    workingWeek: text('working_week'),
     location: text('location'),
     email: text('email'),
     phone: text('phone'),
@@ -197,6 +199,35 @@ export const talentDocumentVersion = sqliteTable(
     uploadedAt: text('uploaded_at').notNull(),
   },
   (t) => [index('document_version_doc_idx').on(t.documentId)],
+)
+
+/**
+ * Talent availability (spec 012). All-day dated entries in a fixed state
+ * vocabulary (available|pencilled|confirmed|blocked). Internal-only — never
+ * published. The month view queries entries overlapping the visible month.
+ */
+export const talentAvailability = sqliteTable(
+  'talent_availability',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    state: text('state').notNull(),
+    title: text('title').notNull(),
+    detail: text('detail'),
+    location: text('location'),
+    startDate: text('start_date').notNull(),
+    endDate: text('end_date').notNull(),
+    createdBy: text('created_by').notNull(),
+    createdAt: text('created_at').notNull(),
+    updatedBy: text('updated_by').notNull(),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => [
+    index('availability_talent_idx').on(t.talentId),
+    index('availability_range_idx').on(t.talentId, t.startDate, t.endDate),
+  ],
 )
 
 /** Single-row transactional counter for TAL-NNNN references (research R6). */

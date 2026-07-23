@@ -25,7 +25,7 @@ test.describe('Talent profile workspace (spec 005)', () => {
     await expect(page.getByRole('tab', { name: /Notes/ }).locator('.gb-tab__count')).toHaveText('1')
 
     // Placeholder tabs are unmistakably roadmap items, never dead controls
-    await page.getByRole('tab', { name: 'Availability' }).click()
+    await page.getByRole('tab', { name: 'Profile Enrichment' }).click()
     const placeholder = page.getByTestId('coming-soon')
     await expect(placeholder.getByText('In development')).toBeVisible()
     await expect(placeholder.getByText('Planned')).toBeVisible()
