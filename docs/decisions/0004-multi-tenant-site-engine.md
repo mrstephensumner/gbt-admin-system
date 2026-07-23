@@ -73,6 +73,15 @@
      time, each as its own template module, retiring the WordPress instance per site.
 - **Infra per site:** each domain must be bound to the Worker in Cloudflare (custom
   hostname routing) and its DNS pointed in. `greatbritishinfluencers.co.uk` is first.
+  All nine domains are already in the owner's Cloudflare account, so binding a site is a
+  routing-config step per hostname — not an external dependency or blocker.
+- **Per-site design comes as a handoff, rebuilt not imported.** Each site's bespoke
+  template module is built from a design handoff (Claude Design or Manus) the owner
+  uploads when that site is ready to build — following the existing `design-system/`
+  convention: the handoff is the verbatim UI source of truth, rebuilt into the engine's
+  stack (React in the Worker), not imported as-is. So a new/rebuilt site's build begins
+  when its handoff files land; the engine work (routing, config, publish-safe rendering,
+  enquiries) is handoff-independent and can proceed first.
 - **Site config lives on the `brand` row / adjacent tables**, not in code: domain(s),
   theme tokens, navigation, homepage composition, contact details, SEO defaults. New
   sites are configured, not coded (templates aside).
