@@ -6,6 +6,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Changed
+- **Network is now an expandable sidebar section.** In preparation for per-site admin once the
+  network sites are built, the sidebar's Network item became a collapsible group: **Sites** (the
+  existing brand-site manager) and **Topics** (relocated here from the top level) nest beneath it,
+  with per-site admin to follow. The section auto-opens when you navigate into it and can be
+  collapsed manually. New reusable `NavGroup` component. Topics remains visible to everyone; only
+  the Sites child is gated by the `network` permission (unchanged access).
 - **Documents tab now shows a count badge**, matching the Notes tab — the number of documents held
   for the speaker appears against the tab label in the profile workspace. Reuses the shared
   `['documents', reference]` query cache (no extra fetch) and the existing `Tabs` `count` support.

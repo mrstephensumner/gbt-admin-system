@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard, Inbox, CalendarCheck, Building2, Receipt, Globe, Sparkles } from 'lucide-react'
-import { NavItem } from '../components'
+import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard, Inbox, CalendarCheck, Building2, Receipt, Globe, LayoutGrid, Sparkles } from 'lucide-react'
+import { NavItem, NavGroup } from '../components'
 import { useCan, useOperator } from '../lib/operator'
 import { NoAccessScreen } from './no-access'
 
@@ -10,6 +11,16 @@ export function Root() {
   const { operator, notRegistered, loading } = useOperator()
   const canImport = useCan('import_roster')
   const canNetwork = useCan('network')
+  // Network is an expandable section (Sites + Topics, and per-site admin as we build them).
+  const networkActive = pathname.startsWith('/network') || pathname.startsWith('/topics')
+  const [networkOpen, setNetworkOpen] = useState(true)
+  // Auto-open the section when navigating into it, while still letting the operator collapse it
+  // manually — the "adjust state during render" pattern, keyed on the section becoming active.
+  const [wasNetworkActive, setWasNetworkActive] = useState(networkActive)
+  if (networkActive !== wasNetworkActive) {
+    setWasNetworkActive(networkActive)
+    if (networkActive) setNetworkOpen(true)
+  }
 
   if (notRegistered) return <NoAccessScreen />
   if (loading) return null
@@ -33,20 +44,27 @@ export function Root() {
             active={pathname.startsWith('/speakers') || pathname.startsWith('/talent')}
             onClick={() => navigate('/speakers')}
           />
-          <NavItem
-            icon={<Tags size={18} />}
-            label="Topics"
-            active={pathname.startsWith('/topics')}
-            onClick={() => navigate('/topics')}
-          />
-          {canNetwork && (
+          <NavGroup
+            icon={<Globe size={18} />}
+            label="Network"
+            open={networkOpen}
+            onToggle={() => setNetworkOpen((o) => !o)}
+          >
+            {canNetwork && (
+              <NavItem
+                icon={<LayoutGrid size={16} />}
+                label="Sites"
+                active={pathname.startsWith('/network')}
+                onClick={() => navigate('/network')}
+              />
+            )}
             <NavItem
-              icon={<Globe size={18} />}
-              label="Network"
-              active={pathname.startsWith('/network')}
-              onClick={() => navigate('/network')}
+              icon={<Tags size={16} />}
+              label="Topics"
+              active={pathname.startsWith('/topics')}
+              onClick={() => navigate('/topics')}
             />
-          )}
+          </NavGroup>
           <NavItem
             icon={<Inbox size={18} />}
             label="Enquiries"
