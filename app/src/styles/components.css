@@ -269,6 +269,21 @@
 .gb-navitem__badge { margin-left: auto; background: var(--ink-500); color: var(--grey-200); border-radius: var(--radius-pill); font-size: var(--fs-2xs); padding: 1px 7px; }
 .gb-navitem--collapsed { justify-content: center; }
 
+/* Expandable sidebar section (Network group) */
+.gb-navgroup { display: flex; flex-direction: column; gap: 2px; }
+.gb-navgroup__chevron {
+  margin-left: auto; color: var(--text-faint);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.gb-navgroup__chevron--open { transform: rotate(180deg); }
+.gb-navgroup__children { position: relative; display: flex; flex-direction: column; gap: 2px; }
+/* Guide line connecting the nested items, aligned under the parent icon */
+.gb-navgroup__children::before {
+  content: ''; position: absolute; top: 2px; bottom: 2px; left: 23px;
+  width: 1px; background: var(--border);
+}
+.gb-navgroup__children .gb-navitem { padding-left: 44px; font-size: var(--fs-sm); }
+
 /* --- Pagination ------------------------------------------------ */
 .gb-pagination { display: inline-flex; align-items: center; gap: 4px; }
 .gb-pagination__btn {

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 export interface TabItem {
   value: string
@@ -59,6 +60,42 @@ export function NavItem({ icon, label, active, badge, collapsed, onClick }: NavI
       {!collapsed && label}
       {!collapsed && badge != null && <span className="gb-navitem__badge">{badge}</span>}
     </button>
+  )
+}
+
+export interface NavGroupProps {
+  icon?: ReactNode
+  label: string
+  /** Expanded state — children render only when open. */
+  open?: boolean
+  onToggle?: () => void
+  children: ReactNode
+}
+
+/** An expandable sidebar section: a parent row that toggles a set of nested NavItems. */
+export function NavGroup({ icon, label, open, onToggle, children }: NavGroupProps) {
+  return (
+    <div className="gb-navgroup">
+      <button
+        type="button"
+        className="gb-navitem gb-navgroup__parent"
+        onClick={onToggle}
+        aria-expanded={open}
+      >
+        {icon && <span className="gb-navitem__icon">{icon}</span>}
+        {label}
+        <ChevronDown
+          size={16}
+          className={`gb-navgroup__chevron${open ? ' gb-navgroup__chevron--open' : ''}`}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div className="gb-navgroup__children" role="group" aria-label={label}>
+          {children}
+        </div>
+      )}
+    </div>
   )
 }
 
