@@ -13,6 +13,8 @@ beforeEach(async () => {
     env.DB.prepare('DELETE FROM talent_press_mention'),
     env.DB.prepare('DELETE FROM talent_note'),
     env.DB.prepare('DELETE FROM talent_onboarding_step'),
+    env.DB.prepare('DELETE FROM talent_document_version'),
+    env.DB.prepare('DELETE FROM talent_document'),
     env.DB.prepare('DELETE FROM import_candidate'),
     env.DB.prepare('DELETE FROM import_run'),
     env.DB.prepare('DELETE FROM operator_grant'),

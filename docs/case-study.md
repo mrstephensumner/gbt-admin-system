@@ -237,3 +237,14 @@ specification to verified deployment.
   Migration 0008 kept additive (a needless full-table rebuild was avoided by moving the
   non-negative-rate checks to the service layer). Full suite: 291 automated tests (133 unit,
   133 integration, 25 end-to-end) green; the tab was visually verified against the mockup.
+- **23 Jul 2026** — Spec 011 (Talent Documents) built and deployed: a per-speaker document store
+  so the signed representation agreement (and any other file) can be uploaded on its onboarding
+  step and gathered in a new Documents tab, with version history and delete-for-erasure. The
+  request touched a deliberate spec-010 decision (attestation only, no stored PII), so the scope
+  was agreed with the owner first: a general locker, files accessible on the step and in a
+  Documents section, versions kept. Because the locker can hold special-category data, the
+  security posture was made structural (ADR 0006): documents live in their own R2 bucket, served
+  only through the authenticated Worker — never a public URL, never in publish-safe output — with
+  a delete path for erasure and store-then-record ordering to avoid orphans. Derived steps offer
+  no upload. Migration 0009 additive. Full suite: 306 automated tests (139 unit, 140 integration,
+  27 end-to-end) green; the Documents tab and step panel were visually verified.

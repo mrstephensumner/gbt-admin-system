@@ -15,6 +15,7 @@ import { TalentFields, validateTalentForm, type TalentFormValues } from './talen
 import { ComingSoon } from './coming-soon'
 import { MediaTab } from './media-tab'
 import { OnboardingTab } from './onboarding-tab'
+import { DocumentsPanel } from './documents-panel'
 
 function toFormValues(t: Talent): TalentFormValues {
   return {
@@ -203,6 +204,7 @@ export function TalentProfileScreen() {
           { value: 'photos', label: 'Photos' },
           { value: 'notes', label: 'Notes', count: notesQuery.data?.total },
           { value: 'onboarding', label: 'Onboarding' },
+          { value: 'documents', label: 'Documents' },
           { value: 'availability', label: 'Availability' },
           { value: 'social', label: 'Social & News' },
           { value: 'enrichment', label: 'Profile Enrichment' },
@@ -263,6 +265,9 @@ export function TalentProfileScreen() {
 
         {tab === 'onboarding' && (
           <OnboardingTab talent={talent} reference={reference} canEditDayRates={canEditDayRates} onChanged={refresh} />
+        )}
+        {tab === 'documents' && (
+          <DocumentsPanel reference={reference} title="Documents" subtitle="Agreements, riders and other files held for this speaker — internal only" />
         )}
         {tab === 'availability' && (
           <ComingSoon
@@ -468,6 +473,12 @@ function describeChange(h: ChangeRecordItem): string {
       return `Onboarding step marked not applicable: ${h.new_value}`
     case 'fee_updated':
       return 'Fee schedule updated'
+    case 'document_uploaded':
+      return `Document uploaded: ${h.new_value}`
+    case 'document_version_added':
+      return `New document version: ${h.new_value}`
+    case 'document_deleted':
+      return `Document deleted: ${h.old_value}`
     default:
       return h.action
   }

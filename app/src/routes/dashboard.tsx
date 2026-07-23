@@ -81,6 +81,12 @@ function describeActivity(a: DashboardData['activity'][number]): string {
       return `onboarding step marked not applicable: ${a.new_value}`
     case 'fee_updated':
       return 'fee schedule updated'
+    case 'document_uploaded':
+      return `document uploaded: ${a.new_value}`
+    case 'document_version_added':
+      return `new document version: ${a.new_value}`
+    case 'document_deleted':
+      return `document deleted: ${a.old_value}`
     default:
       return a.action
   }

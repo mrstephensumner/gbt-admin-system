@@ -95,6 +95,29 @@ export interface OnboardingData {
   fee: FeeSchedule
 }
 
+export interface DocumentVersion {
+  versionId: number
+  version_no: number
+  filename: string
+  content_type: string
+  size_bytes: number
+  uploaded_by: string
+  uploaded_at: string
+}
+
+export interface TalentDocument {
+  id: number
+  step_key: string | null
+  step_label: string | null
+  title: string
+  versionCount: number
+  current: DocumentVersion
+}
+
+export interface DocumentsData {
+  documents: TalentDocument[]
+}
+
 export interface DirectoryResponse {
   items: TalentSummary[]
   total: number

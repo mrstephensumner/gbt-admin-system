@@ -6,6 +6,7 @@ import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
 import type { OnboardingData, OnboardingStatus, Talent } from '../lib/types'
 import { formatDateTime } from '@shared/format'
+import { DocumentsPanel } from './documents-panel'
 
 const STATUS_TONE: Record<OnboardingStatus, 'success' | 'warning' | 'neutral'> = {
   complete: 'success',
@@ -116,6 +117,7 @@ export function OnboardingTab({
   const publishedSomewhere = talent.publications.some((p) => p.published)
 
   return (
+    <div style={{ display: 'grid', gap: 20 }}>
     <div data-testid="onboarding-tab" style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 340px) 1fr', gap: 20, alignItems: 'start' }}>
       {/* Checklist rail */}
       <Card title="Onboarding checklist" subtitle={`${data.progress.complete} of ${data.progress.applicable} complete`}>
@@ -263,6 +265,15 @@ export function OnboardingTab({
           </p>
         )}
       </Card>
+    </div>
+    {isAttestation && (
+      <DocumentsPanel
+        reference={reference}
+        stepKey={selected.key}
+        title="Documents"
+        subtitle={`Files attached to ${selected.title.toLowerCase()}`}
+      />
+    )}
     </div>
   )
 }

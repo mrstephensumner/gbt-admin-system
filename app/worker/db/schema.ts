@@ -160,6 +160,45 @@ export const changeRecord = sqliteTable(
   (t) => [index('change_talent_idx').on(t.talentId, t.id)],
 )
 
+/**
+ * Talent documents (spec 011 / ADR 0006). A logical document belonging to a
+ * speaker, filed generally (step_key NULL) or against an onboarding attestation
+ * step. Files live in the separate `gbt-documents` R2 bucket, never public.
+ */
+export const talentDocument = sqliteTable(
+  'talent_document',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    stepKey: text('step_key'),
+    title: text('title').notNull(),
+    createdBy: text('created_by').notNull(),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [index('document_talent_idx').on(t.talentId)],
+)
+
+/** One uploaded file of a document. Current version = highest version_no. */
+export const talentDocumentVersion = sqliteTable(
+  'talent_document_version',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    documentId: integer('document_id')
+      .notNull()
+      .references(() => talentDocument.id),
+    versionNo: integer('version_no').notNull(),
+    r2Key: text('r2_key').notNull(),
+    filename: text('filename').notNull(),
+    contentType: text('content_type').notNull(),
+    sizeBytes: integer('size_bytes').notNull(),
+    uploadedBy: text('uploaded_by').notNull(),
+    uploadedAt: text('uploaded_at').notNull(),
+  },
+  (t) => [index('document_version_doc_idx').on(t.documentId)],
+)
+
 /** Single-row transactional counter for TAL-NNNN references (research R6). */
 export const refCounter = sqliteTable('ref_counter', {
   id: integer('id').primaryKey(),

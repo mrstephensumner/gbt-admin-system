@@ -33,6 +33,13 @@
     {
       "binding": "PHOTOS",
       "bucket_name": "gbt-photos"
+    },
+    {
+      // Talent documents (spec 011 / ADR 0006) — kept separate from photos so
+      // they never share a path the future public site engine could expose.
+      // Served only through the authenticated Worker; never public.
+      "binding": "DOCUMENTS",
+      "bucket_name": "gbt-documents"
     }
   ],
   "vars": {

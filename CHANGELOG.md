@@ -6,6 +6,20 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Talent Documents (spec 011)** — a per-speaker document store. Files can be filed freely
+  to a speaker or attached to an onboarding attestation step (e.g. the signed representation
+  agreement on its step), and are gathered in one place on a new **Documents** profile tab. Each
+  document keeps a **version history** — uploading a newer copy makes it current while previous
+  versions stay downloadable, each with its own uploader and date — and a whole document can be
+  **deleted** (all versions and stored files removed) for data erasure. Uploads are validated
+  (PDF, Word, text, JPEG/PNG; 25 MB max). Every upload, version and deletion is attributed into
+  History, the dashboard feed and Statistics. **Security (ADR 0006):** files live in a **separate
+  R2 bucket** (`gbt-documents`), served only through the authenticated Worker — never a public
+  URL — and no document data ever appears in any publish-safe/public output; store-then-record
+  ordering prevents orphaned files or records. Derived onboarding steps (headshots, biography,
+  fee schedule) offer no upload — they are data-driven. Migration 0009 (additive:
+  `talent_document` + `talent_document_version`). Suites: 139 unit + 140 integration + 27 e2e
+  green; visually verified.
 - **Talent Onboarding System (spec 010)** — the Onboarding placeholder is now a real
   per-speaker checklist of seven fixed steps (representation agreement, identity & right to
   work, bank & payment details, headshots & showreel, biography & topics, fee schedule,

@@ -8,10 +8,10 @@ test.describe('Talent profile workspace (spec 005)', () => {
     await apiUploadPhoto(request, talent.reference)
     await request.post(`/api/talent/${talent.reference}/status`, { data: { status: 'on_hold', version: 1 } })
 
-    // Default tab is Profile; six real tabs + four marked placeholders (FR-005 revised)
+    // Default tab is Profile; seven real tabs (incl. Documents, spec 011) + four placeholders
     await page.goto(`/talent/${talent.reference}`)
     const tabs = page.getByRole('tab')
-    await expect(tabs).toHaveCount(10)
+    await expect(tabs).toHaveCount(11)
     await expect(page.getByLabel('Full name')).toBeVisible()
 
     // Notes: add one, see attribution + count on the tab (spec 006)

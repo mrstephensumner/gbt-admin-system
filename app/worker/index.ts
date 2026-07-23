@@ -15,6 +15,7 @@ import { socialRoutes } from './routes/social'
 import { networkRoutes } from './routes/network'
 import { mediaRoutes } from './routes/media'
 import { onboardingRoutes } from './routes/onboarding'
+import { documentRoutes } from './routes/documents'
 
 const app = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
@@ -34,6 +35,7 @@ app.route('/api', socialRoutes)
 app.route('/api', networkRoutes)
 app.route('/api', mediaRoutes)
 app.route('/api', onboardingRoutes)
+app.route('/api', documentRoutes)
 
 app.notFound((c) =>
   c.req.path.startsWith('/api')
