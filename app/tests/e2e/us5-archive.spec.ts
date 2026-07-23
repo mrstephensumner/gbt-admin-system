@@ -11,7 +11,7 @@ test.describe('US5 — archive without losing history', () => {
     await apiUploadPhoto(request, talent.reference)
 
     // Publish first so archiving must disclose auto-unpublication
-    await page.goto(`/talent/${talent.reference}`)
+    await page.goto(`/talent/${talent.reference}?tab=site`)
     await page.getByRole('button', { name: 'Publish', exact: true }).first().click()
     await expect(page.getByTestId('publication-panel').getByText(/^Published/).first()).toBeVisible()
 
@@ -23,7 +23,7 @@ test.describe('US5 — archive without losing history', () => {
     await expect(page.getByText('Speaker archived')).toBeVisible()
 
     // Gone from the active directory, present under Archived (US5-S2)
-    await page.goto('/')
+    await page.goto('/speakers')
     await page.getByLabel('Search speakers').fill(name)
     await expect(page.getByText('No speakers match your search.')).toBeVisible()
     await page.getByRole('tab', { name: 'Archived' }).click()
@@ -31,7 +31,9 @@ test.describe('US5 — archive without losing history', () => {
 
     // Open the archived record: history intact, no publish actions, then restore (US5-S3)
     await page.getByText(name).click()
+    await page.getByRole('tab', { name: 'History' }).click()
     await expect(page.getByTestId('history').getByText('Archived').first()).toBeVisible()
+    await page.getByRole('tab', { name: 'Network' }).click()
     await expect(page.getByRole('button', { name: 'Publish', exact: true })).toHaveCount(0)
     await page.getByRole('button', { name: 'Restore speaker' }).click()
     await expect(page.getByText('Speaker restored')).toBeVisible()

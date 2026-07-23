@@ -57,7 +57,7 @@ export function TalentNewScreen() {
         >
           <TalentFields values={values} onChange={setValues} errors={errors} />
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
-            <Button variant="secondary" onClick={() => navigate('/')}>
+            <Button variant="secondary" onClick={() => navigate('/speakers')}>
               Cancel
             </Button>
             <Button type="submit" disabled={saving}>

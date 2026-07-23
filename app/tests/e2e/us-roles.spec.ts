@@ -22,7 +22,7 @@ test.describe('US1 — registry gate', () => {
       extraHTTPHeaders: { [IDENTITY_HEADER]: `stranger-${Date.now()}@example.com` },
     })
     const page = await context.newPage()
-    await page.goto('/')
+    await page.goto('/speakers')
     await expect(page.getByText("You don't have access yet")).toBeVisible()
     await expect(page.getByText('ask the owner', { exact: false }).first()).toBeVisible()
     // No sidebar, no roster
@@ -64,7 +64,6 @@ test.describe('US2 — owner manages the team', () => {
 
 test.describe('US3 — permission limits in practice', () => {
   test('publish-only operator: UI hides ungranted controls, API enforces, revocation is immediate', async ({
-    page,
     browser,
     request,
   }) => {
@@ -77,15 +76,16 @@ test.describe('US3 — permission limits in practice', () => {
     const limitedPage = await context.newPage()
 
     // Team nav hidden for non-owners
-    await limitedPage.goto('/')
+    await limitedPage.goto('/speakers')
     await expect(limitedPage.getByText('Speakers').first()).toBeVisible()
     await expect(limitedPage.locator('.gb-sidebar').getByText('Team')).toHaveCount(0)
 
     // Profile: publish offered; archive hidden; day rate read-only
     await limitedPage.goto(`/talent/${talent.reference}`)
-    await expect(limitedPage.getByRole('button', { name: 'Publish', exact: true }).first()).toBeVisible()
     await expect(limitedPage.getByRole('button', { name: 'Archive speaker' })).toHaveCount(0)
     await expect(limitedPage.getByLabel('Day rate (GBP)')).toBeDisabled()
+    await limitedPage.getByRole('tab', { name: 'Network' }).click()
+    await expect(limitedPage.getByRole('button', { name: 'Publish', exact: true }).first()).toBeVisible()
 
     // Publishing works with the grant
     await limitedPage.getByRole('button', { name: 'Publish', exact: true }).first().click()

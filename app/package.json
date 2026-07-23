@@ -21,7 +21,9 @@
     "test:e2e": "playwright test",
     "test:e2e:perf": "PERF=1 playwright test tests/e2e/perf-directory.spec.ts",
     "cf-typegen": "wrangler types --strict-vars=false",
-    "seed:brand": "wrangler d1 execute gbt_admin --local --file=./worker/db/seed-brand.sql"
+    "seed:brand": "wrangler d1 execute gbt_admin --local --file=./worker/db/seed-brand.sql",
+    "seed:network": "wrangler d1 execute gbt_admin --local --file=./worker/db/seed-network.sql",
+    "seed:network:remote": "wrangler d1 execute gbt_admin --remote --file=./worker/db/seed-network.sql"
   },
   "dependencies": {
     "@fontsource/archivo": "^5.2.8",
@@ -33,9 +35,11 @@
     "jose": "^6.2.3",
     "lucide-react": "^1.24.0",
     "nanoid": "^5.1.16",
+    "papaparse": "^5.5.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router": "^8.2.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -43,6 +47,7 @@
     "@cloudflare/workers-types": "^5.20260716.1",
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",

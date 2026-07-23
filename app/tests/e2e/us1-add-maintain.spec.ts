@@ -29,11 +29,13 @@ test.describe('US1 — add and maintain a talent record', () => {
     await page.getByRole('button', { name: 'Save changes' }).click()
     await expect(page.getByText('Changes saved')).toBeVisible()
 
-    // History shows the attributed change (FR-004)
+    // History shows the attributed change (FR-004) — History tab
+    await page.getByRole('tab', { name: 'History' }).click()
     await expect(page.getByTestId('history').getByText('Day rate changed')).toBeVisible()
     await expect(page.getByTestId('history').getByText('dev@greatbritishtalent.online').first()).toBeVisible()
 
-    // Money renders in UK format on the profile (FR-013)
+    // Money renders in UK format on the profile (FR-013) — Site selector tab
+    await page.getByRole('tab', { name: 'Network' }).click()
     await expect(page.getByText('£4,000')).toBeVisible()
   })
 

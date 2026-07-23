@@ -8,6 +8,16 @@ export interface TalentRow {
   headline: string | null
   biography: string | null
   day_rate_pence: number | null
+  // Fee schedule (spec 010) — internal-only; deliberately NOT added to
+  // serializeTalent's output (publish-safe boundary, FR-014).
+  half_day_rate_pence: number | null
+  after_dinner_rate_pence: number | null
+  travel_terms: string | null
+  fees_vary_by_site: number
+  // Availability working week (spec 012) — internal-only; not in serializeTalent output.
+  working_week: string | null
+  // Enrichment grounding material (spec 013) — internal-only.
+  source_material: string | null
   location: string | null
   email: string | null
   phone: string | null
@@ -34,14 +44,21 @@ export async function serializeTalent(d1: D1Database, row: TalentRow) {
       .bind(row.id)
       .all<{ id: number; name: string }>(),
     d1
-      .prepare('SELECT id, is_primary, sort_order FROM talent_photo WHERE talent_id = ? ORDER BY sort_order, id')
+      .prepare('SELECT id, is_primary, sort_order, category, caption FROM talent_photo WHERE talent_id = ? ORDER BY sort_order, id')
       .bind(row.id)
-      .all<{ id: string; is_primary: number; sort_order: number }>(),
+      .all<{ id: string; is_primary: number; sort_order: number; category: string; caption: string | null }>(),
     d1
       .prepare('SELECT brand_id, published_at, published_by FROM publication WHERE talent_id = ?')
       .bind(row.id)
       .all<{ brand_id: number; published_at: string; published_by: string }>(),
-    d1.prepare('SELECT id, slug, name FROM brand ORDER BY id').all<{ id: number; slug: string; name: string }>(),
+    d1
+      .prepare(
+        `SELECT b.id, b.slug, b.name FROM brand b
+         WHERE b.active = 1 OR EXISTS (SELECT 1 FROM publication p WHERE p.brand_id = b.id AND p.talent_id = ?)
+         ORDER BY b.sort_order, b.id`,
+      )
+      .bind(row.id)
+      .all<{ id: number; slug: string; name: string }>(),
   ])
 
   const pubByBrand = new Map(pubs.results.map((p) => [p.brand_id, p]))
@@ -64,6 +81,8 @@ export async function serializeTalent(d1: D1Database, row: TalentRow) {
       url: `/api/photos/${p.id}?size=display`,
       is_primary: !!p.is_primary,
       sort_order: p.sort_order,
+      category: p.category,
+      caption: p.caption,
     })),
     publications: brands.results.map((b) => {
       const pub = pubByBrand.get(b.id)

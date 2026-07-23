@@ -19,11 +19,12 @@ test.describe('US3 — track availability status', () => {
     await expect(page.getByText('Status updated')).toBeVisible()
     await expect(page.locator('.gb-badge--warning', { hasText: 'On hold' })).toBeVisible()
 
-    // History attributes the change (US3-S2)
+    // History attributes the change (US3-S2) — History tab
+    await page.getByRole('tab', { name: 'History' }).click()
     await expect(page.getByTestId('history').getByText('Status: Available → On hold')).toBeVisible()
 
     // Directory row shows the same badge and the status filter finds it (US3-S3)
-    await page.goto('/')
+    await page.goto('/speakers')
     await page.getByLabel('Search speakers').fill(name)
     await expect(page.locator('.gb-badge--warning', { hasText: 'On hold' })).toBeVisible()
     await page.getByLabel('Filter by status').selectOption('on_hold')

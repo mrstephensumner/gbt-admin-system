@@ -9,6 +9,15 @@ import { photoRoutes } from './routes/photos'
 import { topicRoutes } from './routes/topics'
 import { brandRoutes } from './routes/brands'
 import { teamRoutes } from './routes/team'
+import { importRoutes } from './routes/importing'
+import { dashboardRoutes } from './routes/dashboard'
+import { socialRoutes } from './routes/social'
+import { networkRoutes } from './routes/network'
+import { mediaRoutes } from './routes/media'
+import { onboardingRoutes } from './routes/onboarding'
+import { documentRoutes } from './routes/documents'
+import { availabilityRoutes } from './routes/availability'
+import { enrichmentRoutes } from './routes/enrichment'
 
 const app = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
@@ -22,6 +31,15 @@ app.route('/api', photoRoutes)
 app.route('/api', topicRoutes)
 app.route('/api', brandRoutes)
 app.route('/api', teamRoutes)
+app.route('/api', importRoutes)
+app.route('/api', dashboardRoutes)
+app.route('/api', socialRoutes)
+app.route('/api', networkRoutes)
+app.route('/api', mediaRoutes)
+app.route('/api', onboardingRoutes)
+app.route('/api', documentRoutes)
+app.route('/api', availabilityRoutes)
+app.route('/api', enrichmentRoutes)
 
 app.notFound((c) =>
   c.req.path.startsWith('/api')

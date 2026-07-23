@@ -1,0 +1,9 @@
+Talent ID,Full Name,Headline,Bio,Topics,Day Rate (GBP),Location,Email,Phone,Photo URL
+SPK-0481,Dr Jane Smith,Leadership & change speaker,"Dr Smith has advised FTSE boards for two decades on leadership through change.",Leadership & Change; After-Dinner,"£4,000","Manchester, UK",jane@example.com,+44 7700 900100,https://example.com/photos/jane.jpg
+SPK-0102,Renée Dubois-O'Connor,Économiste et présentatrice,"Renée — an economist with accents, curly quotes (""smart"") and a £ sign in her bio — speaks on markets.",Finance; Broadcasting,4000,"London, UK",renee@example.com,,
+SPK-0203,Tom Okafor,Polar expedition leader,"Tom has led four polar expeditions.",Adventure,POA,"Bristol, UK",,,https://example.com/photos/tom.jpg
+SPK-0304,Amelia Clarke,AI researcher,"Amelia leads a university AI lab.","AI, Technology","4,000.00","Cambridge, UK",amelia@example.com,+44 7700 900304,
+,Missing Idson,No talent id on this row,"This row must land in problems.",Testing,£500,"Leeds, UK",,,
+SPK-0506,No Topics Provided,Awkward row,"This candidate has no topics — approval must demand one.",,£950,"York, UK",,,
+SPK-0481,Duplicate Idson,Second use of SPK-0481,"Duplicate identifier within the file — problem row.",Testing,£800,"Hull, UK",,,
+SPK-0707,Marcus Webb,Olympic rower,"Two-time Olympic medallist on teamwork.",Sport; Leadership & Change,"£9,500","Henley, UK",marcus@example.com,,https://example.com/photos/marcus.jpg

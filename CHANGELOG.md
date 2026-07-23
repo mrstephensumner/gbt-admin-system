@@ -5,6 +5,204 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+### Changed
+- **Documents tab now shows a count badge**, matching the Notes tab — the number of documents held
+  for the speaker appears against the tab label in the profile workspace. Reuses the shared
+  `['documents', reference]` query cache (no extra fetch) and the existing `Tabs` `count` support.
+
+### Added
+- **Profile Enrichment (spec 013)** — the Profile Enrichment placeholder is now a real feature
+  that generates a **different, audience-optimised biography per network site** with Claude, to
+  stop the same speaker's identical bio across the 7+ brand domains from cannibalising each other
+  in search (informed by a cited deep-research pass). An owner-only **AI enrichment settings**
+  screen holds the org's Anthropic API key (stored **AES-GCM-encrypted**, never returned to the
+  browser or logged — only a masked hint is shown), the model, and a banned-words list. Each
+  **network site carries an editorial brief** (audience, tone, word-count band, include/exclude)
+  set in the Network screen; generation grounds strictly on the speaker's real facts (master bio,
+  headline, topics, optional source material) and is instructed to invent nothing. Every draft
+  shows a **trigram-similarity score vs the master bio** and flags any banned words, as reviewer
+  signals (not a hard gate). A bio goes live only through a **dual approval gate — admin then
+  talent** (a legal review-right, given publisher liability for AI text), then Publish. **Only
+  published bios are publish-safe** — the system's first publish-safe content; drafts, settings and
+  the key never leave the admin. British English is enforced; no AI-disclosure label (not legally
+  required). Migration 0011; ADR 0007 (encrypted secret storage + isolated LLM call). The single
+  Anthropic call is isolated behind one function and stubbed in every automated test, so the suite
+  runs offline. Suites: 163 unit + 155 integration + 31 e2e green; visually verified.
+- **Talent Availability (spec 012)** — the Availability placeholder is now a real per-speaker
+  **month calendar**, built to the design mockup. Days are coloured and labelled by one of four
+  fixed states — **available** (green), **pencilled** (yellow), **confirmed** (blue), **blocked**
+  (red) — with a legend; Prev/Next pages through months. Operators can **add, edit and remove**
+  entries (state, title, optional detail/location, all-day date range), with a quick **Block
+  dates** action; a **This month** panel lists the visible month's entries with state badges;
+  and a **default working week** setting (Mon–Fri / Mon–Sat / every day) de-emphasises non-working
+  days. When several entries fall on one day the cell shows the dominant state (confirmed > blocked
+  > pencilled > available) while the list shows them all. Every change is attributed into History,
+  the dashboard feed and Statistics. Availability is **internal-only** — never in any publish-safe
+  output — and **independent of the speaker's overall status**. **Google Calendar sync is deferred**
+  to its own future feature; the connect control is present but marked "coming soon" (as social-API
+  sync was deferred in spec 007). Migration 0010 (additive: `talent_availability` table +
+  `working_week` column). Suites: 148 unit + 147 integration + 27 e2e green; visually verified.
+- **Talent Documents (spec 011)** — a per-speaker document store. Files can be filed freely
+  to a speaker or attached to an onboarding attestation step (e.g. the signed representation
+  agreement on its step), and are gathered in one place on a new **Documents** profile tab. Each
+  document keeps a **version history** — uploading a newer copy makes it current while previous
+  versions stay downloadable, each with its own uploader and date — and a whole document can be
+  **deleted** (all versions and stored files removed) for data erasure. Uploads are validated
+  (PDF, Word, text, JPEG/PNG; 25 MB max). Every upload, version and deletion is attributed into
+  History, the dashboard feed and Statistics. **Security (ADR 0006):** files live in a **separate
+  R2 bucket** (`gbt-documents`), served only through the authenticated Worker — never a public
+  URL — and no document data ever appears in any publish-safe/public output; store-then-record
+  ordering prevents orphaned files or records. Derived onboarding steps (headshots, biography,
+  fee schedule) offer no upload — they are data-driven. Migration 0009 (additive:
+  `talent_document` + `talent_document_version`). Suites: 139 unit + 140 integration + 27 e2e
+  green; visually verified.
+- **Talent Onboarding System (spec 010)** — the Onboarding placeholder is now a real
+  per-speaker checklist of seven fixed steps (representation agreement, identity & right to
+  work, bank & payment details, headshots & showreel, biography & topics, fee schedule,
+  safeguarding & compliance) with a live progress summary and a step-detail panel, built to
+  the design mockup. The checklist is the **legible surface of the existing publish gate** —
+  a single shared `publishBlockers()` feeds both the publish action and the checklist's
+  blocking flags, so they can never disagree (the three publish-required steps map 1:1 to
+  today's day-rate/biography/photo checks; representation agreement is tracked but does not
+  block publishing, per owner clarification). Completion is **hybrid**: headshots, biography
+  and fee schedule derive from existing data; the compliance steps are manual attestations.
+  **Sensitive steps store attestation only** — a verified status with the attesting operator,
+  timestamp and an optional internal note; there is deliberately no field for a raw passport,
+  bank or DBS number, and no onboarding data enters any publish-safe serialization. The Fee
+  schedule step captures standard/half-day/after-dinner rates (standard rate reuses the single
+  existing day-rate field), free-text travel terms and a "fees vary by site" flag, all behind
+  the `edit_day_rates` permission. Steps can be marked not-applicable; every change is
+  attributed and flows into History, the dashboard feed and Statistics. Migration 0008
+  (additive: new `talent_onboarding_step` table + fee columns). Suites: 133 unit + 133
+  integration + 25 e2e green; visually verified against the mockup.
+- **Observability — Layer 0 (ADR 0005)** — native Cloudflare Workers Observability turned
+  on (`observability.enabled`, source-map upload), so per-request logs and unhandled
+  errors are now captured, retained and queryable in the dashboard with readable
+  TypeScript stack traces — previously they hit a `console.error` with no persistent sink.
+  The error chokepoint now logs request method + path for triage (never the body, to hold
+  the publish-safe boundary). Zero new vendors, no data leaves Cloudflare. Sentry (server +
+  React, with a publish-safe scrubber) is scheduled as Layer 1 inside spec 010, before the
+  first public site goes live. Deployed.
+- **Publishing Network (spec 009)** — the network of brand sites is now managed in the
+  admin, making it the true backbone for the 7+ external websites. A new **Network**
+  screen (owner + `network` permission) lists every site with its live published-talent
+  count and lets you add sites (immutable slug auto-derived from the name, https URL) and
+  edit/deactivate them — deactivate-not-delete, so an inactive site keeps its
+  publications and public-API integrity. The profile's **Site selector** tab is renamed
+  **Network** and shows where a speaker is published across the whole network; sites the
+  speaker is already published to always appear even if later deactivated. Publishing to
+  one site is fully independent of the others. New `network` permission (owner
+  auto-holds), surfaced automatically in the Team grant grid. Migration 0007
+  (brand `url`/`active`/`sort_order`). Suites: 119 unit + 123 integration + 22 e2e green;
+  migrated remote + deployed to production. Repo hygiene: `.wrangler/` local dev state
+  (D1 SQLite + R2 blobs) removed from version control and gitignored.
+- **Real syndication network seeded** — the eight live Great British Talent brand sites
+  (Speakers, Comedians, Moderators, Musicians, Presenters, Voices, Business Speakers,
+  Sports Speakers) are now in the network, each with its public URL. Idempotent
+  `worker/db/seed-network.sql` (+ `seed:network` / `seed:network:remote` scripts); applied
+  to production and local. Kept separate from the e2e brand seed so count-based tests stay
+  deterministic.
+- **Multi-tenant site engine architecture locked (ADR 0004)** — the delivery mechanism
+  left open in ADR 0003 is now settled: this same Cloudflare Worker will **render every
+  public brand site by hostname** (add a domain + brand row → live, no per-site deploy).
+  Templates are bespoke per site; categories/topics, SEO inputs and a per-site mini-blog
+  are admin-managed and shared; talent→site stays manual curation via the publish action;
+  the publish-safe boundary becomes a request-path invariant. **Great British Influencers**
+  (greatbritishinfluencers.co.uk, added to the network) is the greenfield pilot that
+  proves the engine before the eight WordPress sites are rebuilt onto it. Roadmap: public
+  engine + Influencers pilot → per-site category/SEO manager → per-site blog → Enquiries
+  module → WordPress rebuilds.
+- **Talent Media Manager (spec 008)** — the Photos tab is now a full media manager:
+  categorised **headshots** and **at-event photos**, **showreels** (external video links
+  with provider + thumbnail derived from the URL), and an **SEO metadata** sidebar (meta
+  title, description, focus keyword with live search-snippet length guides). Full
+  editing controls (per owner clarification): choose which headshot is the avatar,
+  caption photos, drag to reorder photos and showreels, edit showreel titles. The avatar
+  is always a headshot, never an event photo. Migrations 0005 + 0006. Suites: 118 unit +
+  117 integration + 20 e2e green; deployed to production. Also restored the Site selector
+  tab (accidentally dropped during an edit) and recorded ADR 0003 (multi-site content
+  delivery) + the living project case-study log (docs/case-study.md).
+- **Social & News (spec 007)** — the placeholder tab is now real: social profiles
+  (fixed platform vocabulary, https-validated links, optional handle, follower counts
+  with attributed "as of" stamps that restamp on update) with total recorded reach, and
+  a press/news mentions log ordered newest-first by publication date. Add/remove of
+  links and mentions flow into History, the dashboard feed, and Statistics; follower
+  updates are attributed on the row. Migration 0004; new shared `social` module.
+  Automated follower sync and news discovery deliberately deferred (FR-007 — need
+  platform API integrations; these structures are their landing place). Suites 107 unit
+  + 107 integration + 18 e2e green; deployed to production. Three of the four
+  profile-tab placeholders now built (Onboarding remains).
+- **Internal talent notes (spec 006)** — a Notes tab on every speaker workspace (live
+  count on the tab): plain-text notes with permanent author + day-month-year timestamp,
+  newest-first, paginated, append-only, allowed on archived records, internal-only.
+  Each note also writes a `note_added` change record, so History, the dashboard
+  activity feed, and Statistics count it. Migration 0003. Suites 79 unit +
+  100 integration + 18 e2e green; deployed to production.
+- **Roadmap placeholders** (spec 005 clarification — owner decision for the client
+  demo): the four unbuilt profile tabs (Onboarding, Availability, Social & News,
+  Profile Enrichment) and four future modules (Enquiries, Bookings, Clients, Invoices —
+  sidebar entries marked "Soon") now render as designed "In development" panels with a
+  factual purpose and planned-capabilities list, no interactive controls. Each remains
+  a future spec. e2e asserts placeholders are marked and control-free. Deployed.
+- **Talent Profile Workspace (spec 005)** — the profile is now the mockup's tabbed
+  workspace: Profile · Photos · Site selector (the per-brand publication engine,
+  renamed per the mockup) · Statistics · History, deep-linkable via ?tab=. New
+  Statistics tab computed entirely from existing records: publication + extended
+  completeness checklists (shared gate definition), exact activity counts (all-time /
+  last 30 days, by kind), and profile facts (created/updated/attribution, status with
+  since-date, topics/photos/brand counts). Mockup tabs without underlying features
+  (Onboarding, Availability, Social & News, Profile Enrichment) deliberately not
+  rendered — each awaits its own spec (vision backlog). Suites 79 unit + 95 integration
+  + 18 e2e green; deployed to production.
+- **Real-roster readiness** (evening before the client demo): WordPress WXR converter
+  (`scripts/convert-wp-export.py`) turning the greatbritishtalent.com export (2,244
+  published profiles under the `news` post type, with about_speaker bios, categories as
+  topics, and thumbnail photo URLs) into an Import-ready CSV — verified end-to-end
+  locally: 2,244/2,244 rows validate clean, staging in 0.3 s, sample approvals fetch
+  real photos from the live site. Fixed a scale bug found by the real data (duplicate-
+  name flagging ran one query per row — would exceed request limits at roster size; now
+  a single upfront query). Added an "Approve all new" button with a self-terminating
+  loop (failed candidates excluded and left for review) so a 2,244-record approval is
+  one click. Suites 79/91/17 green; deployed to production.
+- **Operations Dashboard (spec 004)** — new landing screen: live KPI tiles (active
+  speakers, per-status, published per brand, topics) deep-linking to the filtered
+  directory; Ready-to-publish and Blocked-from-publishing attention lists sharing the
+  publication gate's completeness definition; attributed recent-activity feed over the
+  existing change history; purposeful empty state pointing to Add speaker / Import.
+  Directory moved to /speakers. 6 new integration tests (KPI ↔ directory count
+  equality) + 2 e2e journeys; suites now 79 unit + 91 integration + 17 e2e, all green.
+  Deployed to production 16 Jul 2026.
+- **Spec 003 implementation** under `app/`: browser-side file parsing (CSV via
+  papaparse, XLSX via SheetJS official CDN build 0.20.3 — npm's stale xlsx package and
+  its advisories avoided, JSON native); dry-run validation sharing the staging code
+  path; import_candidate/import_run tables (migration 0002); tolerant column-synonym
+  mapping with visible unmapped-column reporting; conservative GBP parsing (gaps, never
+  guesses); staged review screen (edit/skip/bulk-approve with chunked progress, clear
+  staging); approval through the spec-001 creation rules with import-marked history and
+  approval-time photo fetch into R2; idempotent re-uploads keyed by source talent id;
+  permanent skip memory; new `import_roster` permission area (first exercise of spec
+  002's default-deny extension — Team screen toggle appeared automatically). Suites:
+  79 unit + 85 integration + 15 e2e, all green, e2e verified repeat-safe; Import screen
+  visually verified against the owner's mockup. Deployed to production 16 Jul 2026
+  (migration 0002 applied remotely; gates verified). The live import run awaits the
+  real back-office export file.
+- Implementation plan for spec 003 (`specs/003-roster-import/plan.md`): research R1–R8
+  (browser-side parsing, dry-run validation, JSON-detail staging table, approval-time
+  photo fetch, new import_roster permission area, tolerant column-synonym mapping,
+  conservative money parsing, chunked bulk approval), data model (import_candidate,
+  import_run), import API contract, quickstart with fixture-file strategy. Constitution
+  Check passes all six gates.
+- Spec 003 revised same day: source changed from website crawl to owner-provided export
+  file (CSV/XLSX/JSON) with validate-before-import, per the owner's design mockup;
+  add-new-only mode locked for v1; mockup-revealed future modules recorded in
+  `docs/vision.md` backlog.
+- Spec 003 — Roster Import from Great British Speakers
+  (`specs/003-roster-import/spec.md`): staged import of the old site's public speaker
+  profiles (candidates → human review/edit → approve into talent records), reconciling
+  run summaries, idempotent re-runs keyed by source page, duplicate flagging,
+  seed-not-sync guarantee, and a new import permission area. Quality checklist passes
+  in full.
+
 ## 16 Jul 2026 — Admin Roles & Operator Management (spec 002) · v0.2.0
 
 ### Added

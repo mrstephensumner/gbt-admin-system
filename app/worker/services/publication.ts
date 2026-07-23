@@ -1,5 +1,6 @@
 import { nowIso } from '../db'
 import { ApiError } from '../middleware/errors'
+import { publishBlockers } from '../../shared/onboarding'
 import { getTalentRow, serializeTalent } from './serialize'
 
 /**
@@ -35,10 +36,9 @@ export async function publish(d1: D1Database, reference: string, brandSlug: stri
     .bind(current.id)
     .first<{ n: number }>()
 
-  const missing: string[] = []
-  if (!current.day_rate_pence || current.day_rate_pence <= 0) missing.push('day_rate')
-  if (!current.biography || current.biography.trim() === '') missing.push('biography')
-  if ((photoCount?.n ?? 0) === 0) missing.push('photo')
+  // Single source of truth for the gate (FR-006): the onboarding checklist reads
+  // the same predicate, so the two never disagree.
+  const missing = publishBlockers(current, photoCount?.n ?? 0)
   if (missing.length > 0) {
     throw new ApiError(422, 'incomplete_for_publication', GATE_MESSAGES[missing[0]!]!, { missing })
   }

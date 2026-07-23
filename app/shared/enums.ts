@@ -45,6 +45,14 @@ export const CHANGE_ACTIONS = [
   'photo_added',
   'photo_removed',
   'topic_merged',
+  'note_added',
+  'social_link_added',
+  'social_link_removed',
+  'press_mention_added',
+  'press_mention_removed',
+  'showreel_added',
+  'showreel_removed',
+  'seo_updated',
 ] as const
 
 export type ChangeAction = (typeof CHANGE_ACTIONS)[number]

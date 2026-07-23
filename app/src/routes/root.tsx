@@ -1,13 +1,15 @@
 import { Outlet, useLocation, useNavigate } from 'react-router'
-import { Users, Tags, ShieldCheck } from 'lucide-react'
+import { Users, Tags, ShieldCheck, FileUp, LayoutDashboard, Inbox, CalendarCheck, Building2, Receipt, Globe, Sparkles } from 'lucide-react'
 import { NavItem } from '../components'
-import { useOperator } from '../lib/operator'
+import { useCan, useOperator } from '../lib/operator'
 import { NoAccessScreen } from './no-access'
 
 export function Root() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { operator, notRegistered, loading } = useOperator()
+  const canImport = useCan('import_roster')
+  const canNetwork = useCan('network')
 
   if (notRegistered) return <NoAccessScreen />
   if (loading) return null
@@ -20,10 +22,16 @@ export function Root() {
         </div>
         <nav className="gb-sidebar__nav">
           <NavItem
+            icon={<LayoutDashboard size={18} />}
+            label="Dashboard"
+            active={pathname === '/'}
+            onClick={() => navigate('/')}
+          />
+          <NavItem
             icon={<Users size={18} />}
             label="Speakers"
-            active={pathname === '/' || pathname.startsWith('/talent')}
-            onClick={() => navigate('/')}
+            active={pathname.startsWith('/speakers') || pathname.startsWith('/talent')}
+            onClick={() => navigate('/speakers')}
           />
           <NavItem
             icon={<Tags size={18} />}
@@ -31,12 +39,64 @@ export function Root() {
             active={pathname.startsWith('/topics')}
             onClick={() => navigate('/topics')}
           />
+          {canNetwork && (
+            <NavItem
+              icon={<Globe size={18} />}
+              label="Network"
+              active={pathname.startsWith('/network')}
+              onClick={() => navigate('/network')}
+            />
+          )}
+          <NavItem
+            icon={<Inbox size={18} />}
+            label="Enquiries"
+            badge="Soon"
+            active={pathname.startsWith('/enquiries')}
+            onClick={() => navigate('/enquiries')}
+          />
+          <NavItem
+            icon={<CalendarCheck size={18} />}
+            label="Bookings"
+            badge="Soon"
+            active={pathname.startsWith('/bookings')}
+            onClick={() => navigate('/bookings')}
+          />
+          <NavItem
+            icon={<Building2 size={18} />}
+            label="Clients"
+            badge="Soon"
+            active={pathname.startsWith('/clients')}
+            onClick={() => navigate('/clients')}
+          />
+          <NavItem
+            icon={<Receipt size={18} />}
+            label="Invoices"
+            badge="Soon"
+            active={pathname.startsWith('/invoices')}
+            onClick={() => navigate('/invoices')}
+          />
+          {canImport && (
+            <NavItem
+              icon={<FileUp size={18} />}
+              label="Import"
+              active={pathname.startsWith('/import')}
+              onClick={() => navigate('/import')}
+            />
+          )}
           {operator?.role === 'owner' && (
             <NavItem
               icon={<ShieldCheck size={18} />}
               label="Team"
               active={pathname.startsWith('/team')}
               onClick={() => navigate('/team')}
+            />
+          )}
+          {operator?.role === 'owner' && (
+            <NavItem
+              icon={<Sparkles size={18} />}
+              label="AI settings"
+              active={pathname.startsWith('/settings/enrichment')}
+              onClick={() => navigate('/settings/enrichment')}
             />
           )}
         </nav>

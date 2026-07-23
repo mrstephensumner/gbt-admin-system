@@ -1,11 +1,18 @@
 # Dependencies
 node_modules/
 
+# macOS iCloud/Finder duplicate artifacts ("name 2.ext")
+* 2.*
+* 3.*
+
 # Build output
 dist/
 build/
 .next/
 out/
+
+# Cloudflare Workers local dev state (D1 SQLite, R2 blobs, bundles)
+.wrangler/
 
 # Environment & secrets
 .env

@@ -24,7 +24,12 @@ import { TalentNewScreen } from './routes/talent-new'
 import { TalentProfileScreen } from './routes/talent-profile'
 import { TopicsScreen } from './routes/topics'
 import { TeamScreen } from './routes/team'
+import { ImportScreen } from './routes/import'
+import { NetworkScreen } from './routes/network'
+import { EnrichmentSettingsScreen } from './routes/enrichment-settings'
 import { OperatorProvider } from './lib/operator'
+import { DashboardScreen } from './routes/dashboard'
+import { BookingsPlaceholder, ClientsPlaceholder, EnquiriesPlaceholder, InvoicesPlaceholder } from './routes/modules-upcoming'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 10_000 } },
@@ -35,11 +40,19 @@ const router = createBrowserRouter([
     path: '/',
     Component: Root,
     children: [
-      { index: true, Component: DirectoryScreen },
+      { index: true, Component: DashboardScreen },
+      { path: 'speakers', Component: DirectoryScreen },
       { path: 'talent/new', Component: TalentNewScreen },
       { path: 'talent/:reference', Component: TalentProfileScreen },
       { path: 'topics', Component: TopicsScreen },
       { path: 'team', Component: TeamScreen },
+      { path: 'enquiries', Component: EnquiriesPlaceholder },
+      { path: 'bookings', Component: BookingsPlaceholder },
+      { path: 'clients', Component: ClientsPlaceholder },
+      { path: 'invoices', Component: InvoicesPlaceholder },
+      { path: 'import', Component: ImportScreen },
+      { path: 'network', Component: NetworkScreen },
+      { path: 'settings/enrichment', Component: EnrichmentSettingsScreen },
     ],
   },
 ])

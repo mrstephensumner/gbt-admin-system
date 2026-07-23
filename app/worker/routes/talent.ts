@@ -9,12 +9,23 @@ import {
   talentUpdateSchema,
   versionOnlySchema,
 } from '../../shared/schemas'
+import { z } from 'zod'
 import { listTalent } from '../services/directory'
 import { archiveTalent, changeStatus, createTalent, getHistory, restoreTalent, updateTalent } from '../services/talent'
 import { publish, unpublish } from '../services/publication'
 import { getTalentRow, serializeTalent } from '../services/serialize'
+import { talentStats } from '../services/stats'
+import { addNote, listNotes } from '../services/notes'
 import { requirePermission, type AuthzVariables } from '../middleware/authorize'
 import { can } from '../../shared/permissions'
+
+const noteSchema = z.object({
+  body: z
+    .string({ error: 'Write a note before saving' })
+    .trim()
+    .min(1, 'Write a note before saving')
+    .max(4000, 'Notes must be 4,000 characters or fewer'),
+})
 
 export const talentRoutes = new Hono<{ Bindings: Env; Variables: AuthzVariables }>()
 
@@ -89,6 +100,22 @@ talentRoutes.post('/talent/:reference/archive', requirePermission('archive'), as
 talentRoutes.post('/talent/:reference/restore', requirePermission('archive'), async (c) => {
   const input = await body(c, versionOnlySchema)
   return c.json(await restoreTalent(c.env.DB, c.req.param('reference')!, input.version, c.get('operator')))
+})
+
+talentRoutes.get('/talent/:reference/stats', async (c) => {
+  return c.json(await talentStats(c.env.DB, c.req.param('reference')))
+})
+
+talentRoutes.get('/talent/:reference/notes', async (c) => {
+  const page = Math.max(1, Number(c.req.query('page') ?? 1))
+  const perPage = Math.min(100, Math.max(1, Number(c.req.query('per_page') ?? 25)))
+  return c.json(await listNotes(c.env.DB, c.req.param('reference'), page, perPage))
+})
+
+talentRoutes.post('/talent/:reference/notes', async (c) => {
+  const input = await body(c, noteSchema)
+  const note = await addNote(c.env.DB, c.req.param('reference')!, input.body, c.get('operator'))
+  return c.json(note, 201)
 })
 
 talentRoutes.get('/talent/:reference/history', async (c) => {

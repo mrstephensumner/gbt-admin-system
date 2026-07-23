@@ -4,6 +4,17 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Observability (ADR 0005): native Workers Logs — every request's logs +
+  // unhandled errors (funnelled through app.onError) are captured, retained and
+  // queryable in the Cloudflare dashboard. head_sampling_rate 1 = keep everything
+  // (fine at current volume; dial down if public traffic makes it noisy).
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  // Upload source maps on deploy so stack traces in Workers Logs are readable
+  // against the original TypeScript, not the minified bundle.
+  "upload_source_maps": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -22,6 +33,13 @@
     {
       "binding": "PHOTOS",
       "bucket_name": "gbt-photos"
+    },
+    {
+      // Talent documents (spec 011 / ADR 0006) — kept separate from photos so
+      // they never share a path the future public site engine could expose.
+      // Served only through the authenticated Worker; never public.
+      "binding": "DOCUMENTS",
+      "bucket_name": "gbt-documents"
     }
   ],
   "vars": {

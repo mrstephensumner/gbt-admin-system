@@ -10,6 +10,8 @@ declare global {
   namespace Cloudflare {
     interface Env {
       TEST_MIGRATIONS?: import('@cloudflare/vitest-pool-workers').D1Migration[]
+      /** Key-encryption key (base64, 32 bytes) for AES-GCM secret storage (spec 013 / ADR 0007). */
+      ENRICHMENT_KEK?: string
     }
   }
 }
