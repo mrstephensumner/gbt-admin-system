@@ -5,6 +5,11 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 
 ## [Unreleased]
 
+### Changed
+- **Documents tab now shows a count badge**, matching the Notes tab — the number of documents held
+  for the speaker appears against the tab label in the profile workspace. Reuses the shared
+  `['documents', reference]` query cache (no extra fetch) and the existing `Tabs` `count` support.
+
 ### Added
 - **Profile Enrichment (spec 013)** — the Profile Enrichment placeholder is now a real feature
   that generates a **different, audience-optimised biography per network site** with Claude, to

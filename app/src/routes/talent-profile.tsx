@@ -6,7 +6,7 @@ import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Tabs, T
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
 import { useCan } from '../lib/operator'
-import type { ChangeRecordItem, Talent } from '../lib/types'
+import type { ChangeRecordItem, DocumentsData, Talent } from '../lib/types'
 import { TALENT_STATUSES, TALENT_STATUS_LABELS, TALENT_STATUS_TONES } from '@shared/enums'
 import type { TalentStatus } from '@shared/enums'
 import { formatDate, formatDateTime, formatDayRate } from '@shared/format'
@@ -70,6 +70,10 @@ export function TalentProfileScreen() {
   const notesQuery = useQuery({
     queryKey: ['notes', reference],
     queryFn: () => api.get<{ items: TalentNote[]; total: number }>(`/talent/${reference}/notes?per_page=50`),
+  })
+  const documentsQuery = useQuery({
+    queryKey: ['documents', reference],
+    queryFn: () => api.get<DocumentsData>(`/talent/${reference}/documents`),
   })
 
   const talent = talentQuery.data
@@ -205,7 +209,7 @@ export function TalentProfileScreen() {
           { value: 'photos', label: 'Photos' },
           { value: 'notes', label: 'Notes', count: notesQuery.data?.total },
           { value: 'onboarding', label: 'Onboarding' },
-          { value: 'documents', label: 'Documents' },
+          { value: 'documents', label: 'Documents', count: documentsQuery.data?.documents.length },
           { value: 'availability', label: 'Availability' },
           { value: 'social', label: 'Social & News' },
           { value: 'enrichment', label: 'Profile Enrichment' },
