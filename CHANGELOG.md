@@ -6,6 +6,14 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
 ## [Unreleased]
 
 ### Added
+- **Observability — Layer 0 (ADR 0005)** — native Cloudflare Workers Observability turned
+  on (`observability.enabled`, source-map upload), so per-request logs and unhandled
+  errors are now captured, retained and queryable in the dashboard with readable
+  TypeScript stack traces — previously they hit a `console.error` with no persistent sink.
+  The error chokepoint now logs request method + path for triage (never the body, to hold
+  the publish-safe boundary). Zero new vendors, no data leaves Cloudflare. Sentry (server +
+  React, with a publish-safe scrubber) is scheduled as Layer 1 inside spec 010, before the
+  first public site goes live. Deployed.
 - **Publishing Network (spec 009)** — the network of brand sites is now managed in the
   admin, making it the true backbone for the 7+ external websites. A new **Network**
   screen (owner + `network` permission) lists every site with its live published-talent

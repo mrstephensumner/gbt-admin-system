@@ -214,3 +214,11 @@ specification to verified deployment.
   (greatbritishinfluencers.co.uk, added to the network as the ninth site), is the
   greenfield pilot — a full public site with a net-new influencer roster — that proves the
   engine before the WordPress rebuilds begin.
+- **23 Jul 2026** — Observability strategy adopted (ADR 0005), staged to the risk curve.
+  Layer 0 (native, implemented same day): Cloudflare Workers Observability + source-map
+  upload, so production errors are now captured with readable stack traces instead of
+  vanishing into an un-sinked `console.error` — zero vendors, nothing leaving Cloudflare.
+  Layer 1 (Sentry, server + React, with a mandatory publish-safe scrubber) is scheduled
+  inside spec 010, to land before the first public site serves traffic. A standing rule
+  came out of it: telemetry obeys the same publish-safe boundary as everything else —
+  logs may carry identifiers and paths, never day rates, contacts or notes.
