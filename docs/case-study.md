@@ -274,3 +274,22 @@ specification to verified deployment.
   `fetch` (not the SDK, whose webhook dependency breaks the workerd test runtime) isolated behind one
   stubbable function so the whole suite runs offline. Full suite: 349 automated tests (163 unit, 155
   integration, 31 end-to-end) green; both new surfaces visually verified.
+- **23 Jul 2026** — A small talent-management refinement: the **Documents tab gained a count badge**
+  matching the Notes tab, so operators can see at a glance whether a speaker has files without
+  opening the tab. It reuses the shared documents query cache (no extra request) and the tab
+  component's existing count support — a one-file change, visually verified on production.
+- **23 Jul 2026** — Spec 014 (Social & News visibility) built and deployed. Where spec 007 recorded
+  a speaker's social profiles and press one profile at a time, this spec answered the team's ask to
+  see *what's being published across the whole roster*. The Dashboard gained a **"Roster in the
+  news"** feed merging recent press mentions and notable posts across every speaker (one UNION-ALL
+  query — constant-cost at any roster size), each row deep-linking to that speaker. **Notable posts**
+  became a new content type for high-traction posts (manual entry now; automatic detection of
+  "significant" is a later spec). Crucially, the spec established the **publish-safe boundary** the
+  multi-tenant public engine (ADR 0004) will need: each social/press/post item carries a "show on
+  public sites" toggle, and a `publishSafeSocial` read returns only cleared items and only their
+  public fields — never internal attribution. It's the first structured publish-safe read for
+  talent-authored content. A disabled "connect" control marks the deferred automatic follower-sync,
+  which was carved out as its own future spec because it depends on per-platform OAuth and paid API
+  keys (LinkedIn has no public follower API for personal profiles at all) — an honest scoping call
+  rather than a half-built integration. Migration 0012 additive. Full suite: 355 automated tests
+  (163 unit, 159 integration, 33 end-to-end) green; both surfaces visually verified.

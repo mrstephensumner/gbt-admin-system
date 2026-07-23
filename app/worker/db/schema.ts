@@ -401,6 +401,8 @@ export const talentSocialLink = sqliteTable(
     followers: integer('followers'),
     followersSetAt: text('followers_set_at'),
     followersSetBy: text('followers_set_by'),
+    // Publish-safe flag (spec 014): cleared for the public brand sites when 1.
+    public: integer('public').notNull().default(1),
     createdAt: text('created_at').notNull(),
     createdBy: text('created_by').notNull(),
   },
@@ -419,10 +421,33 @@ export const talentPressMention = sqliteTable(
     outlet: text('outlet').notNull(),
     url: text('url').notNull(),
     publishedOn: text('published_on').notNull(),
+    // Publish-safe flag (spec 014): cleared for the public brand sites when 1.
+    public: integer('public').notNull().default(1),
     addedAt: text('added_at').notNull(),
     addedBy: text('added_by').notNull(),
   },
   (t) => [index('press_mention_talent_idx').on(t.talentId, t.publishedOn)],
+)
+
+/** Notable social posts (spec 014) — high-traction posts, manual-entry now; auto-detection is future. */
+export const talentNotablePost = sqliteTable(
+  'talent_notable_post',
+  {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    talentId: integer('talent_id')
+      .notNull()
+      .references(() => talent.id),
+    platform: text('platform').notNull(),
+    url: text('url').notNull(),
+    caption: text('caption'),
+    interactions: integer('interactions').notNull().default(0),
+    postedOn: text('posted_on').notNull(),
+    // Publish-safe flag (spec 014): cleared for the public brand sites when 1.
+    public: integer('public').notNull().default(1),
+    createdAt: text('created_at').notNull(),
+    createdBy: text('created_by').notNull(),
+  },
+  (t) => [index('notable_post_talent_idx').on(t.talentId, t.postedOn)],
 )
 
 /** Showreel video links (spec 008) — externally hosted (FR-007). */

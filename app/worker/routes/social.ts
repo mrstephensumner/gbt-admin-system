@@ -5,11 +5,14 @@ import type { Env } from '../env'
 import { ApiError } from '../middleware/errors'
 import type { AuthzVariables } from '../middleware/authorize'
 import {
+  addNotablePost,
   addPressMention,
   addSocialLink,
   getSocial,
+  removeNotablePost,
   removePressMention,
   removeSocialLink,
+  setPublic,
   updateSocialLink,
 } from '../services/social'
 
@@ -39,6 +42,17 @@ const mentionSchema = z.object({
   url: httpsUrl,
   published_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Give the publication date'),
 })
+
+const postSchema = z.object({
+  platform: z.enum(SOCIAL_PLATFORMS, { error: 'Choose a platform from the list' }),
+  url: httpsUrl,
+  caption: z.string().trim().max(300).nullish(),
+  interactions: z.number().int('Interactions are a whole number').min(0, 'Interactions cannot be negative'),
+  posted_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Give the post date'),
+})
+
+const publicSchema = z.object({ public: z.boolean() })
+const PUBLIC_KINDS = ['links', 'mentions', 'posts'] as const
 
 async function body<T>(c: { req: { json: () => Promise<unknown> } }, schema: z.ZodType<T>): Promise<T> {
   const raw = await c.req.json().catch(() => {
@@ -78,4 +92,21 @@ socialRoutes.post('/talent/:reference/social/mentions', async (c) => {
 socialRoutes.delete('/social/mentions/:id', async (c) => {
   await removePressMention(c.env.DB, Number(c.req.param('id')), c.get('operator'))
   return c.json({ ok: true })
+})
+
+socialRoutes.post('/talent/:reference/social/posts', async (c) => {
+  const input = await body(c, postSchema)
+  return c.json(await addNotablePost(c.env.DB, c.req.param('reference'), input, c.get('operator')), 201)
+})
+
+socialRoutes.delete('/social/posts/:id', async (c) => {
+  await removeNotablePost(c.env.DB, Number(c.req.param('id')), c.get('operator'))
+  return c.json({ ok: true })
+})
+
+socialRoutes.patch('/social/:kind/:id/public', async (c) => {
+  const kind = c.req.param('kind')
+  if (!(PUBLIC_KINDS as readonly string[]).includes(kind)) throw new ApiError(404, 'not_found', 'Unknown item kind')
+  const input = await body(c, publicSchema)
+  return c.json(await setPublic(c.env.DB, kind, Number(c.req.param('id')), input.public, c.get('operator')))
 })

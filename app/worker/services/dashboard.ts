@@ -14,7 +14,7 @@ const COMPLETE_SQL = `
 `
 
 export async function dashboardData(d1: D1Database) {
-  const [statusRows, brandRows, topicCount, ready, readyCount, blocked, blockedCount, activity] =
+  const [statusRows, brandRows, topicCount, ready, readyCount, blocked, blockedCount, activity, coverage] =
     await Promise.all([
       d1
         .prepare('SELECT status, COUNT(*) AS n FROM talent WHERE archived_at IS NULL GROUP BY status')
@@ -76,6 +76,33 @@ export async function dashboardData(d1: D1Database) {
           new_value: string | null
           at: string
         }>(),
+      // "Roster in the news" (spec 014): press mentions + notable posts across the whole roster,
+      // newest-first by the item's own date. One UNION-ALL query — constant cost at any roster size.
+      d1
+        .prepare(
+          `SELECT * FROM (
+             SELECT 'press' AS kind, t.reference, t.name, m.title AS title, m.outlet AS detail,
+                    m.url AS url, m.published_on AS on_date, NULL AS interactions
+             FROM talent_press_mention m JOIN talent t ON t.id = m.talent_id
+             WHERE t.archived_at IS NULL
+             UNION ALL
+             SELECT 'post' AS kind, t.reference, t.name, p.caption AS title, p.platform AS detail,
+                    p.url AS url, p.posted_on AS on_date, p.interactions AS interactions
+             FROM talent_notable_post p JOIN talent t ON t.id = p.talent_id
+             WHERE t.archived_at IS NULL
+           )
+           ORDER BY on_date DESC, kind LIMIT 12`,
+        )
+        .all<{
+          kind: 'press' | 'post'
+          reference: string
+          name: string
+          title: string | null
+          detail: string
+          url: string
+          on_date: string
+          interactions: number | null
+        }>(),
     ])
 
   const byStatus = Object.fromEntries(TALENT_STATUSES.map((s) => [s, 0])) as Record<string, number>
@@ -108,5 +135,6 @@ export async function dashboardData(d1: D1Database) {
       },
     },
     activity: activity.results,
+    coverage: coverage.results,
   }
 }
