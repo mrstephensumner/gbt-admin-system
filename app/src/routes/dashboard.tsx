@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
-import { CheckCircle2, FileUp, Plus, Users } from 'lucide-react'
+import { CheckCircle2, FileUp, Newspaper, Plus, Users } from 'lucide-react'
 import { Badge, Button, Card, StatCard } from '../components'
 import { api } from '../lib/api'
 import { TALENT_STATUSES, TALENT_STATUS_LABELS, type TalentStatus } from '@shared/enums'
-import { formatDateTime, formatExactCount } from '@shared/format'
+import { formatDate, formatDateTime, formatExactCount } from '@shared/format'
+import { formatFollowers } from '@shared/social'
 
 interface DashboardData {
   counts: {
@@ -26,6 +27,16 @@ interface DashboardData {
     old_value: string | null
     new_value: string | null
     at: string
+  }[]
+  coverage: {
+    kind: 'press' | 'post'
+    reference: string
+    name: string
+    title: string | null
+    detail: string
+    url: string
+    on_date: string
+    interactions: number | null
   }[]
 }
 
@@ -103,6 +114,14 @@ function describeActivity(a: DashboardData['activity'][number]): string {
       return `site bio talent-approved: ${a.new_value}`
     case 'enrichment_published':
       return `site bio published: ${a.new_value}`
+    case 'notable_post_added':
+      return `notable post added: ${a.new_value}`
+    case 'notable_post_removed':
+      return `notable post removed: ${a.old_value}`
+    case 'visibility_changed': {
+      const noun = a.field === 'links' ? 'social profile' : a.field === 'mentions' ? 'press mention' : 'notable post'
+      return a.new_value === 'public' ? `${noun} shown on public sites` : `${noun} hidden from public sites`
+    }
     default:
       return a.action
   }
@@ -226,6 +245,36 @@ export function DashboardScreen() {
               </div>
             </Card>
           </div>
+
+          <Card
+            title="Roster in the news"
+            subtitle="Recent coverage and notable posts across the whole roster"
+          >
+            <div style={{ display: 'grid', gap: 12 }} data-testid="coverage-feed">
+              {data.coverage.map((c, i) => (
+                <div key={i} className="gb-meta-row" style={{ justifyContent: 'space-between', gap: 12 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 8 }}>
+                    <Badge tone={c.kind === 'press' ? 'info' : 'success'}>{c.kind === 'press' ? 'Press' : 'Post'}</Badge>
+                    <span>
+                      <Link to={`/talent/${c.reference}?tab=social`} style={{ fontWeight: 500 }}>{c.name}</Link>{' '}
+                      <span style={{ color: 'var(--text-strong)' }}>
+                        <a href={c.url} target="_blank" rel="noreferrer">{c.title || c.detail}</a>
+                      </span>{' '}
+                      <span>
+                        · {c.kind === 'press' ? c.detail : `${formatFollowers(c.interactions)} interactions`}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="gb-mono">{formatDate(c.on_date)}</span>
+                </div>
+              ))}
+              {data.coverage.length === 0 && (
+                <div className="gb-meta-row" style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  <Newspaper size={16} /> No coverage logged yet — press mentions and notable posts appear here.
+                </div>
+              )}
+            </div>
+          </Card>
 
           <Card title="Recent activity" subtitle="Across the whole roster, attributed">
             <div style={{ display: 'grid', gap: 10 }} data-testid="activity-feed">

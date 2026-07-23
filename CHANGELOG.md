@@ -11,6 +11,22 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/); dates ar
   `['documents', reference]` query cache (no extra fetch) and the existing `Tabs` `count` support.
 
 ### Added
+- **Social & News visibility (spec 014)** — the Social & News tab and Dashboard gain roster-wide
+  visibility and a public-ready boundary. **Notable posts** are a new content type on the tab: an
+  individual social post that earned significant traction (platform, https link, caption,
+  interaction count, date), entered manually for now. The Dashboard gains a **"Roster in the news"**
+  section that merges recent press mentions and notable posts across the *whole* roster, newest-first
+  by their own date, each deep-linking to that speaker's Social & News tab — one UNION-ALL query, so
+  it stays constant-cost at any roster size. Each social profile, press mention, and notable post
+  carries a **"Show on public sites" toggle** (default on); a new publish-safe boundary read,
+  `publishSafeSocial`, exposes only toggled-on items and only their public fields — never internal
+  attribution (who set a follower count, added-by, timestamps) — for the future multi-tenant public
+  engine (ADR 0004). This is the first structured publish-safe read for talent-authored content. A
+  disabled **"Connect · coming soon"** control sits on each profile, marking the deferred automatic
+  follower-sync integration (its own future spec, given per-platform OAuth/API-key dependencies).
+  Every add, remove, and visibility toggle is attributed in History and the Dashboard activity feed.
+  Migration 0012 (additive: `talent_notable_post` table + `public` flag on the two existing social
+  tables). Suites: 163 unit + 159 integration + 33 e2e green; visually verified.
 - **Profile Enrichment (spec 013)** — the Profile Enrichment placeholder is now a real feature
   that generates a **different, audience-optimised biography per network site** with Claude, to
   stop the same speaker's identical bio across the 7+ brand domains from cannibalising each other

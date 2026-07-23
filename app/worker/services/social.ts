@@ -18,16 +18,22 @@ export interface SocialLinkInput {
 export async function getSocial(d1: D1Database, reference: string) {
   const row = await getTalentRow(d1, reference)
   if (!row) throw new ApiError(404, 'not_found', 'No such talent record')
-  const [links, mentions, total] = await Promise.all([
+  const [links, mentions, posts, total] = await Promise.all([
     d1
       .prepare(
-        'SELECT id, platform, url, handle, followers, followers_set_at, followers_set_by, created_at, created_by FROM talent_social_link WHERE talent_id = ? ORDER BY id',
+        'SELECT id, platform, url, handle, followers, followers_set_at, followers_set_by, public, created_at, created_by FROM talent_social_link WHERE talent_id = ? ORDER BY id',
       )
       .bind(row.id)
       .all(),
     d1
       .prepare(
-        'SELECT id, title, outlet, url, published_on, added_at, added_by FROM talent_press_mention WHERE talent_id = ? ORDER BY published_on DESC, id DESC',
+        'SELECT id, title, outlet, url, published_on, public, added_at, added_by FROM talent_press_mention WHERE talent_id = ? ORDER BY published_on DESC, id DESC',
+      )
+      .bind(row.id)
+      .all(),
+    d1
+      .prepare(
+        'SELECT id, platform, url, caption, interactions, posted_on, public, created_at, created_by FROM talent_notable_post WHERE talent_id = ? ORDER BY posted_on DESC, id DESC',
       )
       .bind(row.id)
       .all(),
@@ -36,7 +42,31 @@ export async function getSocial(d1: D1Database, reference: string) {
       .bind(row.id)
       .first<{ n: number }>(),
   ])
-  return { links: links.results, mentions: mentions.results, total_followers: total?.n ?? 0 }
+  return {
+    links: links.results,
+    mentions: mentions.results,
+    posts: posts.results,
+    total_followers: total?.n ?? 0,
+  }
+}
+
+/** The publish-safe boundary (spec 014 FR-004): only `public = 1` rows, only safe fields. */
+export async function publishSafeSocial(d1: D1Database, talentId: number) {
+  const [links, mentions, posts] = await Promise.all([
+    d1
+      .prepare('SELECT platform, url, handle, followers FROM talent_social_link WHERE talent_id = ? AND public = 1 ORDER BY id')
+      .bind(talentId)
+      .all(),
+    d1
+      .prepare('SELECT title, outlet, url, published_on FROM talent_press_mention WHERE talent_id = ? AND public = 1 ORDER BY published_on DESC, id DESC')
+      .bind(talentId)
+      .all(),
+    d1
+      .prepare('SELECT platform, url, caption, interactions, posted_on FROM talent_notable_post WHERE talent_id = ? AND public = 1 ORDER BY posted_on DESC, id DESC')
+      .bind(talentId)
+      .all(),
+  ])
+  return { profiles: links.results, mentions: mentions.results, posts: posts.results }
 }
 
 export async function addSocialLink(d1: D1Database, reference: string, input: SocialLinkInput, actor: string) {
@@ -166,4 +196,75 @@ export async function removePressMention(d1: D1Database, id: number, actor: stri
       )
       .bind(mention.talent_id, actor, mention.outlet, nowIso()),
   ])
+}
+
+export interface NotablePostInput {
+  platform: string
+  url: string
+  caption?: string | null
+  interactions: number
+  posted_on: string
+}
+
+export async function addNotablePost(d1: D1Database, reference: string, input: NotablePostInput, actor: string) {
+  const row = await getTalentRow(d1, reference)
+  if (!row) throw new ApiError(404, 'not_found', 'No such talent record')
+  const now = nowIso()
+  await d1.batch([
+    d1
+      .prepare(
+        `INSERT INTO talent_notable_post (talent_id, platform, url, caption, interactions, posted_on, created_at, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(row.id, input.platform, input.url, input.caption ?? null, input.interactions, input.posted_on, now, actor),
+    d1
+      .prepare(
+        `INSERT INTO change_record (talent_id, actor, action, field, old_value, new_value, at)
+         VALUES (?, ?, 'notable_post_added', 'social', NULL, ?, ?)`,
+      )
+      .bind(row.id, actor, input.platform, now),
+  ])
+  return d1.prepare('SELECT * FROM talent_notable_post WHERE talent_id = ? ORDER BY id DESC LIMIT 1').bind(row.id).first()
+}
+
+export async function removeNotablePost(d1: D1Database, id: number, actor: string) {
+  const post = await d1
+    .prepare('SELECT id, talent_id, platform FROM talent_notable_post WHERE id = ?')
+    .bind(id)
+    .first<{ id: number; talent_id: number; platform: string }>()
+  if (!post) throw new ApiError(404, 'not_found', 'No such notable post')
+  await d1.batch([
+    d1.prepare('DELETE FROM talent_notable_post WHERE id = ?').bind(id),
+    d1
+      .prepare(
+        `INSERT INTO change_record (talent_id, actor, action, field, old_value, new_value, at)
+         VALUES (?, ?, 'notable_post_removed', 'social', ?, NULL, ?)`,
+      )
+      .bind(post.talent_id, actor, post.platform, nowIso()),
+  ])
+}
+
+const PUBLIC_TABLES: Record<string, string> = {
+  links: 'talent_social_link',
+  mentions: 'talent_press_mention',
+  posts: 'talent_notable_post',
+}
+
+/** Toggle an item's publish-safe flag (spec 014 FR-003); attributed in History. */
+export async function setPublic(d1: D1Database, kind: string, id: number, value: boolean, actor: string) {
+  const table = PUBLIC_TABLES[kind]
+  if (!table) throw new ApiError(400, 'validation', 'Unknown item kind')
+  const item = await d1.prepare(`SELECT id, talent_id FROM ${table} WHERE id = ?`).bind(id).first<{ id: number; talent_id: number }>()
+  if (!item) throw new ApiError(404, 'not_found', 'No such item')
+  const next = value ? 1 : 0
+  await d1.batch([
+    d1.prepare(`UPDATE ${table} SET public = ? WHERE id = ?`).bind(next, id),
+    d1
+      .prepare(
+        `INSERT INTO change_record (talent_id, actor, action, field, old_value, new_value, at)
+         VALUES (?, ?, 'visibility_changed', ?, NULL, ?, ?)`,
+      )
+      .bind(item.talent_id, actor, kind, value ? 'public' : 'internal', nowIso()),
+  ])
+  return d1.prepare(`SELECT * FROM ${table} WHERE id = ?`).bind(id).first()
 }

@@ -1,90 +1,97 @@
 {
-	"version": "7",
-	"dialect": "sqlite",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "6",
-			"when": 1784192041589,
-			"tag": "0000_init",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "6",
-			"when": 1784205410356,
-			"tag": "0001_operators",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "6",
-			"when": 1784208447379,
-			"tag": "0002_import",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "6",
-			"when": 1784230823238,
-			"tag": "0003_notes",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "6",
-			"when": 1784231389351,
-			"tag": "0004_social",
-			"breakpoints": true
-		},
-		{
-			"idx": 5,
-			"version": "6",
-			"when": 1784233198329,
-			"tag": "0005_media",
-			"breakpoints": true
-		},
-		{
-			"idx": 6,
-			"version": "6",
-			"when": 1784235582175,
-			"tag": "0006_media_edit",
-			"breakpoints": true
-		},
-		{
-			"idx": 7,
-			"version": "6",
-			"when": 1784273520135,
-			"tag": "0007_network",
-			"breakpoints": true
-		},
-		{
-			"idx": 8,
-			"version": "6",
-			"when": 1784794326557,
-			"tag": "0008_onboarding",
-			"breakpoints": true
-		},
-		{
-			"idx": 9,
-			"version": "6",
-			"when": 1784796809191,
-			"tag": "0009_documents",
-			"breakpoints": true
-		},
-		{
-			"idx": 10,
-			"version": "6",
-			"when": 1784799155074,
-			"tag": "0010_availability",
-			"breakpoints": true
-		},
-		{
-			"idx": 11,
-			"version": "6",
-			"when": 1784829182538,
-			"tag": "0011_enrichment",
-			"breakpoints": true
-		}
-	]
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1784192041589,
+      "tag": "0000_init",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1784205410356,
+      "tag": "0001_operators",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1784208447379,
+      "tag": "0002_import",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1784230823238,
+      "tag": "0003_notes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1784231389351,
+      "tag": "0004_social",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1784233198329,
+      "tag": "0005_media",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1784235582175,
+      "tag": "0006_media_edit",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1784273520135,
+      "tag": "0007_network",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1784794326557,
+      "tag": "0008_onboarding",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1784796809191,
+      "tag": "0009_documents",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1784799155074,
+      "tag": "0010_availability",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1784829182538,
+      "tag": "0011_enrichment",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1784838810234,
+      "tag": "0012_social_visibility",
+      "breakpoints": true
+    }
+  ]
 }

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Trash2 } from 'lucide-react'
-import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Tabs, Textarea, useToast } from '../components'
+import { ArrowLeft, Link2, Trash2 } from 'lucide-react'
+import { Avatar, Badge, Button, Card, Dialog, IconButton, Input, Select, Switch, Tabs, Textarea, useToast } from '../components'
 import { api, ApiClientError } from '../lib/api'
 import { penceToPounds, poundsToPence } from '../lib/hooks'
 import { useCan } from '../lib/operator'
@@ -480,6 +480,14 @@ function describeChange(h: ChangeRecordItem): string {
       return `Site bio talent-approved: ${h.new_value}`
     case 'enrichment_published':
       return `Site bio published: ${h.new_value}`
+    case 'notable_post_added':
+      return `Notable post added (${h.new_value})`
+    case 'notable_post_removed':
+      return `Notable post removed (${h.old_value})`
+    case 'visibility_changed': {
+      const noun = h.field === 'links' ? 'Social profile' : h.field === 'mentions' ? 'Press mention' : 'Notable post'
+      return h.new_value === 'public' ? `${noun} shown on public sites` : `${noun} hidden from public sites`
+    }
     default:
       return h.action
   }
@@ -693,6 +701,7 @@ interface SocialLink {
   followers: number | null
   followers_set_at: string | null
   followers_set_by: string | null
+  public: number
 }
 interface PressMention {
   id: number
@@ -700,10 +709,21 @@ interface PressMention {
   outlet: string
   url: string
   published_on: string
+  public: number
+}
+interface NotablePost {
+  id: number
+  platform: SocialPlatform
+  url: string
+  caption: string | null
+  interactions: number
+  posted_on: string
+  public: number
 }
 interface SocialData {
   links: SocialLink[]
   mentions: PressMention[]
+  posts: NotablePost[]
   total_followers: number
 }
 
@@ -722,6 +742,8 @@ function SocialTab({
   const [linkForm, setLinkForm] = useState({ platform: 'linkedin', url: '', handle: '', followers: '' })
   const [addMention, setAddMention] = useState(false)
   const [mentionForm, setMentionForm] = useState({ title: '', outlet: '', url: '', published_on: '' })
+  const [addPost, setAddPost] = useState(false)
+  const [postForm, setPostForm] = useState({ platform: 'instagram', url: '', caption: '', interactions: '', posted_on: '' })
   const [editingFollowers, setEditingFollowers] = useState<{ id: number; value: string } | null>(null)
 
   const run = async (fn: () => Promise<unknown>, ok: string) => {
@@ -758,6 +780,12 @@ function SocialTab({
                   {l.handle ? <span className="gb-meta-row"> · {l.handle}</span> : null}
                 </div>
                 <a href={l.url} target="_blank" rel="noreferrer" className="gb-meta-row">{l.url}</a>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
+                  <Switch label="Show on public sites" checked={l.public === 1} onChange={(v) => void run(() => api.patch(`/social/links/${l.id}/public`, { public: v }), v ? 'Now on public sites' : 'Hidden from public sites')} />
+                  <span className="gb-meta-row" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-2xs)', opacity: 0.55 }} title="Automatic follower sync is coming soon">
+                    <Link2 size={12} /> Connect · coming soon
+                  </span>
+                </div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 {editingFollowers?.id === l.id ? (
@@ -795,6 +823,38 @@ function SocialTab({
       </Card>
 
       <Card
+        title="Notable posts"
+        subtitle="Posts that earned significant traction, newest first"
+        actions={
+          <Button size="sm" onClick={() => { setPostForm({ platform: 'instagram', url: '', caption: '', interactions: '', posted_on: '' }); setAddPost(true) }}>
+            Add post
+          </Button>
+        }
+      >
+        <div style={{ display: 'grid', gap: 12 }} data-testid="notable-posts">
+          {data.posts.map((p) => (
+            <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+              <div>
+                <a href={p.url} target="_blank" rel="noreferrer" style={{ color: 'var(--text-strong)', fontWeight: 500 }}>
+                  {p.caption || SOCIAL_PLATFORM_LABELS[p.platform]}
+                </a>
+                <div className="gb-meta-row">
+                  {SOCIAL_PLATFORM_LABELS[p.platform]} · <span className="gb-mono">{formatFollowers(p.interactions)}</span> interactions · {formatDate(p.posted_on)}
+                </div>
+                <div style={{ marginTop: 6 }}>
+                  <Switch label="Show on public sites" checked={p.public === 1} onChange={(v) => void run(() => api.patch(`/social/posts/${p.id}/public`, { public: v }), v ? 'Now on public sites' : 'Hidden from public sites')} />
+                </div>
+              </div>
+              <IconButton label="Remove post" size="sm" variant="ghost" onClick={() => void run(() => api.delete(`/social/posts/${p.id}`), 'Post removed')}>
+                <Trash2 size={14} />
+              </IconButton>
+            </div>
+          ))}
+          {data.posts.length === 0 && <p className="gb-meta-row">No notable posts recorded yet.</p>}
+        </div>
+      </Card>
+
+      <Card
         title="Press & news"
         subtitle="Recent coverage, newest first"
         actions={
@@ -809,6 +869,9 @@ function SocialTab({
               <div>
                 <a href={m.url} target="_blank" rel="noreferrer" style={{ color: 'var(--text-strong)', fontWeight: 500 }}>{m.title}</a>
                 <div className="gb-meta-row">{m.outlet} · {formatDate(m.published_on)}</div>
+                <div style={{ marginTop: 6 }}>
+                  <Switch label="Show on public sites" checked={m.public === 1} onChange={(v) => void run(() => api.patch(`/social/mentions/${m.id}/public`, { public: v }), v ? 'Now on public sites' : 'Hidden from public sites')} />
+                </div>
               </div>
               <IconButton label="Remove mention" size="sm" variant="ghost" onClick={() => void run(() => api.delete(`/social/mentions/${m.id}`), 'Mention removed')}>
                 <Trash2 size={14} />
@@ -869,6 +932,35 @@ function SocialTab({
           <Input label="Outlet" value={mentionForm.outlet} onChange={(e) => setMentionForm({ ...mentionForm, outlet: e.target.value })} placeholder="e.g. BBC News" />
           <Input label="Link (https)" value={mentionForm.url} onChange={(e) => setMentionForm({ ...mentionForm, url: e.target.value })} placeholder="https://…" />
           <Input label="Published on" type="date" value={mentionForm.published_on} onChange={(e) => setMentionForm({ ...mentionForm, published_on: e.target.value })} />
+        </div>
+      </Dialog>
+
+      <Dialog
+        open={addPost}
+        title="Add notable post"
+        onClose={() => setAddPost(false)}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setAddPost(false)}>Cancel</Button>
+            <Button onClick={() =>
+              void run(() => api.post(`/talent/${reference}/social/posts`, {
+                platform: postForm.platform,
+                url: postForm.url.trim(),
+                caption: postForm.caption.trim() || null,
+                interactions: postForm.interactions.trim() === '' ? 0 : Number(postForm.interactions.replace(/[,\s]/g, '')),
+                posted_on: postForm.posted_on,
+              }), 'Post added').then((ok) => ok && setAddPost(false))
+            }>Add post</Button>
+          </>
+        }
+      >
+        <div style={{ display: 'grid', gap: 12 }}>
+          <Select label="Platform" value={postForm.platform} onChange={(e) => setPostForm({ ...postForm, platform: e.target.value })}
+            options={SOCIAL_PLATFORMS.map((p) => ({ value: p, label: SOCIAL_PLATFORM_LABELS[p] }))} />
+          <Input label="Link (https)" value={postForm.url} onChange={(e) => setPostForm({ ...postForm, url: e.target.value })} placeholder="https://…" />
+          <Input label="Caption (optional)" value={postForm.caption} onChange={(e) => setPostForm({ ...postForm, caption: e.target.value })} placeholder="What the post was about" />
+          <Input label="Interactions" inputMode="numeric" value={postForm.interactions} onChange={(e) => setPostForm({ ...postForm, interactions: e.target.value })} placeholder="e.g. 12500" />
+          <Input label="Posted on" type="date" value={postForm.posted_on} onChange={(e) => setPostForm({ ...postForm, posted_on: e.target.value })} />
         </div>
       </Dialog>
     </div>
